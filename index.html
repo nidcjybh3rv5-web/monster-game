@@ -19,7 +19,7 @@ body{
     background:#1e3a8a;
     padding:20px;
     text-align:center;
-    font-size:48px;
+    font-size:40px;
     font-weight:bold;
 }
 
@@ -29,24 +29,24 @@ body{
 
 .info{
     display:flex;
-    justify-content:space-between;
-    margin-bottom:20px;
     gap:20px;
+    justify-content:space-between;
+    flex-wrap:wrap;
 }
 
 .card{
     background:#fef3c7;
     color:black;
-    border-radius:25px;
+    border-radius:20px;
     padding:20px;
-    width:320px;
-    font-size:32px;
+    width:300px;
+    font-size:24px;
     font-weight:bold;
 }
 
 .hpbar{
     width:100%;
-    height:25px;
+    height:20px;
     background:#444;
     border-radius:20px;
     overflow:hidden;
@@ -66,11 +66,11 @@ body{
 }
 
 .battle{
+    margin-top:20px;
+    height:300px;
     background:linear-gradient(#60a5fa,#4ade80);
-    height:420px;
-    border-radius:30px;
+    border-radius:20px;
     position:relative;
-    overflow:hidden;
 }
 
 .enemy{
@@ -78,7 +78,7 @@ body{
     left:50%;
     top:50%;
     transform:translate(-50%,-50%);
-    font-size:180px;
+    font-size:120px;
     transition:0.2s;
 }
 
@@ -90,9 +90,9 @@ body{
     margin-top:20px;
     background:#fef3c7;
     color:black;
-    border-radius:20px;
-    padding:20px;
-    font-size:32px;
+    padding:15px;
+    border-radius:15px;
+    font-size:20px;
     font-weight:bold;
 }
 
@@ -100,28 +100,27 @@ body{
     margin-top:20px;
     display:grid;
     grid-template-columns:1fr 1fr;
-    gap:20px;
+    gap:15px;
 }
 
 button{
     border:none;
-    border-radius:25px;
-    padding:30px;
-    font-size:36px;
+    border-radius:15px;
+    padding:20px;
+    font-size:24px;
     font-weight:bold;
     cursor:pointer;
     color:white;
-    transition:0.15s;
-}
-
-button:active{
-    transform:scale(0.92);
 }
 
 .attack{ background:#dc2626; }
 .skill{ background:#2563eb; }
 .rest{ background:#16a34a; }
 .save{ background:#d97706; }
+
+button:active{
+    transform:scale(0.95);
+}
 
 </style>
 </head>
@@ -138,37 +137,24 @@ XXX 好玩生物 遊戲 Beta 1.1.0
 
 <div class="card">
 👾 史萊姆 Lv.1
-
-<div style="margin-top:15px;">
-HP
 <div class="hpbar">
 <div class="hpfill" id="enemyBar" style="width:100%"></div>
 </div>
-</div>
-
 <div id="enemyHpText">35 / 35</div>
-
 </div>
 
 <div class="card">
 🧑 玩家 Lv.<span id="level">1</span>
 
-<div style="margin-top:15px;">
-HP
 <div class="hpbar">
 <div class="hpfill" id="playerBar" style="width:100%"></div>
 </div>
-</div>
-
 <div id="playerHpText">100 / 100</div>
 
-<div style="margin-top:15px;">
-EXP
+<div style="margin-top:10px;">EXP</div>
 <div class="hpbar">
 <div class="expfill" id="expBar" style="width:0%"></div>
 </div>
-</div>
-
 <div id="expText">0 / 50</div>
 
 </div>
@@ -194,158 +180,118 @@ EXP
 
 <script>
 
-let playerHp = 100;
-let maxHp = 100;
-
-let enemyHp = 35;
-let enemyMaxHp = 35;
-
-let level = 1;
-let exp = 0;
-
-let canClick = true;
+let playerHp=100,maxHp=100;
+let enemyHp=35,enemyMaxHp=35;
+let level=1,exp=0;
+let canClick=true;
 
 function enemyHitEffect(){
-    let enemy = document.querySelector(".enemy");
-    enemy.classList.add("hit");
-    setTimeout(()=> enemy.classList.remove("hit"),200);
+let e=document.querySelector(".enemy");
+e.classList.add("hit");
+setTimeout(()=>e.classList.remove("hit"),200);
 }
 
 function updateUI(){
+document.getElementById("playerHpText").innerText=
+playerHp+" / "+maxHp;
 
-document.getElementById("playerHpText").innerText =
-playerHp + " / " + maxHp;
+document.getElementById("enemyHpText").innerText=
+enemyHp+" / "+enemyMaxHp;
 
-document.getElementById("enemyHpText").innerText =
-enemyHp + " / " + enemyMaxHp;
+document.getElementById("level").innerText=level;
 
-document.getElementById("level").innerText = level;
+document.getElementById("expText").innerText=
+exp+" / 50";
 
-document.getElementById("expText").innerText =
-exp + " / 50";
+document.getElementById("playerBar").style.width=
+(playerHp/maxHp*100)+"%";
 
-document.getElementById("playerBar").style.width =
-(playerHp/maxHp*100) + "%";
+document.getElementById("enemyBar").style.width=
+(enemyHp/enemyMaxHp*100)+"%";
 
-document.getElementById("enemyBar").style.width =
-(enemyHp/enemyMaxHp*100) + "%";
-
-document.getElementById("expBar").style.width =
-(exp/50*100) + "%";
-
+document.getElementById("expBar").style.width=
+(exp/50*100)+"%";
 }
 
 function attack(){
-
-if(!canClick) return;
-canClick = false;
+if(!canClick)return;
+canClick=false;
 
 enemyHitEffect();
 
-let dmg = Math.floor(Math.random()*15)+5;
-enemyHp -= dmg;
+let dmg=Math.floor(Math.random()*15)+5;
+enemyHp-=dmg;
 
-document.getElementById("log").innerText =
-"⚔️ 你造成了 "+dmg+" 傷害！";
+document.getElementById("log").innerText="⚔️ 造成 "+dmg+" 傷害";
 
 setTimeout(()=>{
 
-if(enemyHp <= 0){
+if(enemyHp<=0){
+enemyHp=0;
+exp+=10;
+document.getElementById("log").innerText="🎉 擊敗史萊姆";
 
-enemyHp = 0;
-exp += 10;
+enemyHp=enemyMaxHp;
 
-document.getElementById("log").innerText =
-"🎉 打敗史萊姆！";
-
-enemyHp = enemyMaxHp;
-
-if(exp >= 50){
+if(exp>=50){
 level++;
-exp = 0;
-maxHp += 20;
-playerHp = maxHp;
-alert("✨ 升級！");
+exp=0;
+maxHp+=20;
+playerHp=maxHp;
+alert("升級！");
 }
-
 }else{
+let d=Math.floor(Math.random()*10)+3;
+playerHp-=d;
+document.getElementById("log").innerText+=" / 反擊 "+d;
 
-let enemyDmg = Math.floor(Math.random()*10)+3;
-playerHp -= enemyDmg;
-
-document.getElementById("log").innerText +=
-" 史萊姆反擊 "+enemyDmg+" 傷害！";
-
-if(playerHp <= 0){
-alert("💀 遊戲結束");
-playerHp = maxHp;
-enemyHp = enemyMaxHp;
-exp = 0;
-level = 1;
+if(playerHp<=0){
+alert("遊戲結束");
+playerHp=maxHp;
+enemyHp=enemyMaxHp;
+exp=0;
+level=1;
 }
-
 }
 
 updateUI();
-canClick = true;
+canClick=true;
 
 },400);
 
 updateUI();
-
 }
 
 function skill(){
-
-if(!canClick) return;
-canClick = false;
+if(!canClick)return;
+canClick=false;
 
 enemyHitEffect();
 
-let dmg = Math.floor(Math.random()*25)+15;
-enemyHp -= dmg;
+let dmg=Math.floor(Math.random()*25)+15;
+enemyHp-=dmg;
 
-document.getElementById("log").innerText =
-"🔥 技能 "+dmg+" 傷害！";
+document.getElementById("log").innerText="🔥 技能 "+dmg;
 
 setTimeout(()=>{
-canClick = true;
+canClick=true;
 updateUI();
 },300);
 
 updateUI();
-
 }
 
 function rest(){
-
-if(!canClick) return;
-
-playerHp += 20;
-if(playerHp > maxHp) playerHp = maxHp;
-
-document.getElementById("log").innerText =
-"😴 回復 20 HP";
-
+playerHp+=20;
+if(playerHp>maxHp)playerHp=maxHp;
+document.getElementById("log").innerText="😴 回復HP";
 updateUI();
-
 }
 
 function saveGame(){
-
-let saveData = {
-hp:playerHp,
-maxHp:maxHp,
-enemyHp:enemyHp,
-level:level,
-exp:exp
-};
-
-localStorage.setItem("save", JSON.stringify(saveData));
-
-document.getElementById("log").innerText =
-"💾 已儲存";
-
+let data={playerHp,maxHp,enemyHp,level,exp};
+localStorage.setItem("save",JSON.stringify(data));
+document.getElementById("log").innerText="💾 已儲存";
 }
 
 updateUI();
