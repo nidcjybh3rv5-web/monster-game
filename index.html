@@ -4,172 +4,54 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>XXX 好玩生物 遊戲 Beta 1.1.0</title>
+<title>Monster Game</title>
 
 <style>
 body{
     margin:0;
     background:#0f172a;
-    font-family:Arial;
     color:white;
-}
-
-.topbar{
-    background:#1e3a8a;
-    padding:20px;
+    font-family:Arial;
     text-align:center;
-    font-size:40px;
-    font-weight:bold;
-}
-
-.game{ padding:20px; }
-
-.card{
-    background:#fef3c7;
-    color:black;
-    padding:20px;
-    border-radius:20px;
-    margin-bottom:20px;
-    font-weight:bold;
-}
-
-.hpbar{
-    width:100%;
-    height:20px;
-    background:#444;
-    border-radius:20px;
-    overflow:hidden;
-}
-
-.hpfill{
-    height:100%;
-    background:red;
-    width:100%;
-}
-
-.battle{
-    height:250px;
-    background:linear-gradient(#60a5fa,#4ade80);
-    border-radius:20px;
-    position:relative;
-}
-
-.enemy{
-    position:absolute;
-    left:50%;
-    top:50%;
-    transform:translate(-50%,-50%);
-    font-size:100px;
-}
-
-.log{
-    background:#fef3c7;
-    color:black;
-    padding:15px;
-    border-radius:15px;
-    margin-top:20px;
 }
 
 button{
-    width:48%;
     padding:20px;
     font-size:20px;
-    margin-top:10px;
+    margin:10px;
     border:none;
-    border-radius:15px;
-    color:white;
-    font-weight:bold;
+    border-radius:10px;
+    cursor:pointer;
 }
 
-.attack{background:#dc2626;}
-.skill{background:#2563eb;}
-.rest{background:#16a34a;}
-.save{background:#d97706;}
-
+.attack{background:red;color:white;}
 </style>
 </head>
 
 <body>
 
-<div class="topbar">XXX 好玩生物 Beta 1.1.0</div>
+<h1>🎮 Monster Game Beta</h1>
 
-<div class="game">
-
-<div class="card">
-玩家 HP：<span id="hp">100</span>
-<div class="hpbar"><div class="hpfill" id="hpbar"></div></div>
-</div>
-
-<div class="card">
-史萊姆 HP：<span id="ehp">35</span>
-<div class="hpbar"><div class="hpfill" id="ehpbar"></div></div>
-</div>
-
-<div class="battle">
-<div class="enemy">🟣</div>
-</div>
-
-<div class="log" id="log">遇到史萊姆！</div>
+<h2 id="log">遇到怪物！</h2>
 
 <button class="attack" onclick="attack()">攻擊</button>
-<button class="skill" onclick="skill()">技能</button>
-<button class="rest" onclick="rest()">休息</button>
-<button class="save" onclick="save()">儲存</button>
-
-</div>
 
 <script>
 
-let hp=100;
-let ehp=35;
-
-function update(){
-document.getElementById("hp").innerText=hp;
-document.getElementById("ehp").innerText=ehp;
-
-document.getElementById("hpbar").style.width=hp+"%";
-document.getElementById("ehpbar").style.width=ehp+"%";
-}
+let hp = 30;
 
 function attack(){
-let dmg=Math.floor(Math.random()*10)+5;
-ehp-=dmg;
-document.getElementById("log").innerText="造成 "+dmg+" 傷害";
+    let dmg = Math.floor(Math.random()*10)+5;
+    hp -= dmg;
 
-if(ehp<=0){
-ehp=35;
-document.getElementById("log").innerText="勝利！重生怪物";
+    document.getElementById("log").innerText =
+    "造成 "+dmg+" 傷害，怪物HP："+hp;
+
+    if(hp <= 0){
+        document.getElementById("log").innerText = "勝利！怪物重生";
+        hp = 30;
+    }
 }
-
-update();
-}
-
-function skill(){
-let dmg=Math.floor(Math.random()*20)+10;
-ehp-=dmg;
-document.getElementById("log").innerText="技能 "+dmg+" 傷害";
-
-if(ehp<=0){
-ehp=35;
-document.getElementById("log").innerText="技能擊敗怪物";
-}
-
-update();
-}
-
-function rest(){
-hp+=20;
-if(hp>100)hp=100;
-document.getElementById("log").innerText="回復 HP";
-update();
-}
-
-function save(){
-localStorage.setItem("hp",hp);
-document.getElementById("log").innerText="已儲存";
-}
-
-update();
 
 </script>
 
