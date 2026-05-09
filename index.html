@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Monster Game</title>
+<title>Monster Game Beta 1.3</title>
 
 <style>
 body{
@@ -15,43 +15,169 @@ body{
     text-align:center;
 }
 
-button{
-    padding:20px;
-    font-size:20px;
-    margin:10px;
-    border:none;
-    border-radius:10px;
-    cursor:pointer;
+.topbar{
+    background:#1e3a8a;
+    padding:15px;
+    font-size:26px;
+    font-weight:bold;
 }
 
-.attack{background:red;color:white;}
+.card{
+    background:#fef3c7;
+    color:black;
+    margin:10px;
+    padding:15px;
+    border-radius:15px;
+    font-weight:bold;
+}
+
+button{
+    padding:15px;
+    margin:6px;
+    border:none;
+    border-radius:10px;
+    font-size:18px;
+    cursor:pointer;
+    color:white;
+}
+
+.attack{background:#dc2626;}
+.skill{background:#2563eb;}
+.rest{background:#16a34a;}
+.shop{background:#f59e0b;color:black;}
+.save{background:#9333ea;}
+
+.battle{
+    margin:10px;
+    padding:20px;
+    background:linear-gradient(#60a5fa,#4ade80);
+    border-radius:15px;
+}
+
+.log{
+    background:#fef3c7;
+    color:black;
+    margin:10px;
+    padding:10px;
+    border-radius:10px;
+}
 </style>
 </head>
 
 <body>
 
-<h1>🎮 Monster Game Beta</h1>
+<div class="topbar">🎮 Monster Game Beta 1.3（存檔版）</div>
 
-<h2 id="log">遇到怪物！</h2>
+<div class="card">
+❤️ HP：<span id="hp">100</span>  
+🪙 金幣：<span id="coin">0</span>  
+⚔️ 攻擊力：<span id="atk">10</span>
+</div>
 
-<button class="attack" onclick="attack()">攻擊</button>
+<div class="battle">
+👾 史萊姆 HP：<span id="ehp">35</span>
+</div>
+
+<div class="log" id="log">遊戲開始！</div>
+
+<button class="attack" onclick="attack()">⚔️ 攻擊</button>
+<button class="skill" onclick="skill()">🔥 技能</button>
+<button class="rest" onclick="rest()">😴 休息</button>
+<button class="shop" onclick="shop()">🛒 商店</button>
+<button class="save" onclick="saveGame()">💾 存檔</button>
 
 <script>
 
-let hp = 30;
+let hp=100;
+let ehp=35;
+let atk=10;
+let coin=0;
+
+function update(){
+document.getElementById("hp").innerText=hp;
+document.getElementById("ehp").innerText=ehp;
+document.getElementById("coin").innerText=coin;
+document.getElementById("atk").innerText=atk;
+}
 
 function attack(){
-    let dmg = Math.floor(Math.random()*10)+5;
-    hp -= dmg;
+let dmg=Math.floor(Math.random()*atk)+5;
+ehp-=dmg;
+document.getElementById("log").innerText="⚔️ 攻擊 "+dmg;
 
-    document.getElementById("log").innerText =
-    "造成 "+dmg+" 傷害，怪物HP："+hp;
-
-    if(hp <= 0){
-        document.getElementById("log").innerText = "勝利！怪物重生";
-        hp = 30;
-    }
+if(ehp<=0){
+ehp=35;
+coin+=20;
+document.getElementById("log").innerText="🎉 勝利 +20金幣";
 }
+
+update();
+}
+
+function skill(){
+let dmg=atk*2;
+ehp-=dmg;
+document.getElementById("log").innerText="🔥 技能 "+dmg;
+
+if(ehp<=0){
+ehp=35;
+coin+=30;
+document.getElementById("log").innerText="🔥 技能擊敗 +30金幣";
+}
+
+update();
+}
+
+function rest(){
+hp+=25;
+if(hp>100)hp=100;
+document.getElementById("log").innerText="😴 回復HP +25";
+update();
+}
+
+function shop(){
+let choice=prompt("商店：1=攻擊+5(50金幣) 2=HP+30(50金幣)");
+
+if(choice=="1" && coin>=50){
+coin-=50;
+atk+=5;
+document.getElementById("log").innerText="攻擊提升！";
+}
+else if(choice=="2" && coin>=50){
+coin-=50;
+hp+=30;
+if(hp>100)hp=100;
+document.getElementById("log").innerText="HP提升！";
+}
+else{
+document.getElementById("log").innerText="金幣不足或取消";
+}
+
+update();
+}
+
+function saveGame(){
+let data={
+hp,ehp,atk,coin
+};
+localStorage.setItem("save",JSON.stringify(data));
+document.getElementById("log").innerText="💾 已存檔";
+}
+
+function loadGame(){
+let data=localStorage.getItem("save");
+if(data){
+let s=JSON.parse(data);
+hp=s.hp;
+ehp=s.ehp;
+atk=s.atk;
+coin=s.coin;
+document.getElementById("log").innerText="📂 已讀檔";
+}
+}
+
+loadGame();
+update();
 
 </script>
 
