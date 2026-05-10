@@ -4,10 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Monster Game Beta 1.1</title>
+<title>Monster Game Beta 1.1.0（隨機版）</title>
 
 <style>
-
 body{
     margin:0;
     background:#0f172a;
@@ -23,9 +22,7 @@ body{
     font-weight:bold;
 }
 
-.container{
-    padding:15px;
-}
+.container{ padding:15px; }
 
 .card{
     background:#fef3c7;
@@ -48,15 +45,11 @@ body{
 .hpfill{
     height:100%;
     background:#ef4444;
-    width:100%;
-    transition:0.3s;
 }
 
 .expfill{
     height:100%;
     background:#3b82f6;
-    width:0%;
-    transition:0.3s;
 }
 
 .battle{
@@ -106,89 +99,54 @@ button{
 .skill{background:#2563eb;}
 .rest{background:#16a34a;}
 .save{background:#9333ea;}
-
-button:hover{
-    transform:scale(1.03);
-}
-
 </style>
 </head>
 
 <body>
 
-<div class="topbar">
-🎮 Monster Game Beta 1.1
-</div>
+<div class="topbar">🎮 Monster Game Beta 1.1.0（隨機版）</div>
 
 <div class="container">
 
 <div class="card">
-
 🧑 玩家 Lv.<span id="level">1</span>
 
 <br><br>
 
-❤️ HP：<span id="hpText">100 / 100</span>
-
-<div class="bar">
-<div class="hpfill" id="hpBar"></div>
-</div>
+❤️ HP：<span id="hpText"></span>
+<div class="bar"><div class="hpfill" id="hpBar"></div></div>
 
 <br>
 
-⭐ EXP：<span id="expText">0 / 50</span>
-
-<div class="bar">
-<div class="expfill" id="expBar"></div>
-</div>
+⭐ EXP：<span id="expText"></span>
+<div class="bar"><div class="expfill" id="expBar"></div></div>
 
 <br>
 
-⚔️ 攻擊力：<span id="atk">10</span>
-
+⚔️ 攻擊力：<span id="atk"></span>
 </div>
 
 <div class="battle">
 
-<div class="enemy" id="enemyEmoji">
-🟣
-</div>
+<div class="enemy" id="enemyEmoji">🟣</div>
 
-<div class="enemyName" id="enemyName">
-史萊姆 Lv.1
-</div>
+<div class="enemyName" id="enemyName"></div>
 
 <br>
 
-❤️ HP：<span id="enemyHpText">35 / 35</span>
-
-<div class="bar">
-<div class="hpfill" id="enemyBar"></div>
-</div>
+❤️ HP：<span id="enemyHpText"></span>
+<div class="bar"><div class="hpfill" id="enemyBar"></div></div>
 
 </div>
 
-<div class="log" id="log">
-遊戲開始！
-</div>
+<div class="log" id="log">遊戲開始！</div>
 
 <div class="buttons">
 
-<button class="attack" onclick="attack()">
-⚔️ 攻擊
-</button>
-
-<button class="skill" onclick="skill()">
-🔥 技能
-</button>
-
-<button class="rest" onclick="rest()">
-😴 休息
-</button>
-
-<button class="save" onclick="saveGame()">
-💾 存檔
-</button>
+<button class="attack" onclick="attack()">⚔️ 攻擊</button>
+<button class="skill" onclick="skill()">🔥 技能</button>
+<button class="rest" onclick="rest()">😴 休息</button>
+<button class="save" onclick="saveGame()">💾 存檔</button>
 
 </div>
 
@@ -205,39 +163,24 @@ exp:0
 };
 
 let enemies = [
-{
-name:"史萊姆",
-emoji:"🟣",
-hp:35
-},
-{
-name:"殭屍",
-emoji:"🧟",
-hp:60
-},
-{
-name:"惡魔",
-emoji:"👹",
-hp:90
-},
-{
-name:"巨龍",
-emoji:"🐉",
-hp:140
-}
+{name:"史萊姆",emoji:"🟣",hp:35},
+{name:"殭屍",emoji:"🧟",hp:60},
+{name:"惡魔",emoji:"👹",hp:90},
+{name:"巨龍",emoji:"🐉",hp:140}
 ];
 
-let currentEnemy = 0;
+// 🎲 隨機怪物
+function getEnemy(){
+return enemies[Math.floor(Math.random()*enemies.length)];
+}
 
-let enemyHp = enemies[currentEnemy].hp;
+let enemy = getEnemy();
+let enemyHp = enemy.hp;
 
 function updateUI(){
 
-document.getElementById("level").innerText =
-player.level;
-
-document.getElementById("atk").innerText =
-player.atk;
+document.getElementById("level").innerText = player.level;
+document.getElementById("atk").innerText = player.atk;
 
 document.getElementById("hpText").innerText =
 player.hp + " / " + player.maxHp;
@@ -246,30 +189,27 @@ document.getElementById("expText").innerText =
 player.exp + " / 50";
 
 document.getElementById("enemyName").innerText =
-enemies[currentEnemy].name + " Lv." + (currentEnemy+1);
+enemy.name;
 
 document.getElementById("enemyEmoji").innerText =
-enemies[currentEnemy].emoji;
+enemy.emoji;
 
 document.getElementById("enemyHpText").innerText =
-enemyHp + " / " + enemies[currentEnemy].hp;
+enemyHp + " / " + enemy.hp;
 
 document.getElementById("hpBar").style.width =
 (player.hp/player.maxHp*100) + "%";
 
 document.getElementById("enemyBar").style.width =
-(enemyHp/enemies[currentEnemy].hp*100) + "%";
+(enemyHp/enemy.hp*100) + "%";
 
 document.getElementById("expBar").style.width =
 (player.exp/50*100) + "%";
-
 }
 
 function attack(){
 
-let dmg =
-Math.floor(Math.random()*player.atk)+5;
-
+let dmg = Math.floor(Math.random()*player.atk)+5;
 enemyHp -= dmg;
 
 document.getElementById("log").innerText =
@@ -281,13 +221,11 @@ enemyTurn();
 
 function skill(){
 
-let dmg =
-Math.floor(Math.random()*player.atk*2)+10;
-
+let dmg = Math.floor(Math.random()*player.atk*2)+10;
 enemyHp -= dmg;
 
 document.getElementById("log").innerText =
-"🔥 技能造成 "+dmg+" 傷害！";
+"🔥 技能 "+dmg+" 傷害！";
 
 enemyTurn();
 
@@ -300,106 +238,59 @@ if(enemyHp <= 0){
 player.exp += 20;
 
 document.getElementById("log").innerText =
-"🎉 打敗了 "+enemies[currentEnemy].name;
+"🎉 打敗 "+enemy.name;
 
 if(player.exp >= 50){
-
 player.exp = 0;
 player.level++;
 player.maxHp += 20;
 player.hp = player.maxHp;
 player.atk += 5;
-
-alert("⬆️ 升級了！");
-
+alert("⬆️ 升級！");
 }
 
-currentEnemy++;
-
-if(currentEnemy >= enemies.length){
-currentEnemy = 0;
-}
-
-enemyHp = enemies[currentEnemy].hp;
+// 🎲 換新隨機怪物
+enemy = getEnemy();
+enemyHp = enemy.hp;
 
 updateUI();
 return;
-
 }
 
-let enemyAtk =
-Math.floor(Math.random()*10)+5;
-
-player.hp -= enemyAtk;
+let dmg = Math.floor(Math.random()*10)+5;
+player.hp -= dmg;
 
 if(player.hp <= 0){
-
-alert("💀 遊戲結束");
-
+alert("💀 死亡重置");
 player.hp = player.maxHp;
 player.exp = 0;
 player.level = 1;
 player.atk = 10;
-currentEnemy = 0;
-enemyHp = enemies[0].hp;
-
+enemy = getEnemy();
+enemyHp = enemy.hp;
 }
 
 updateUI();
-
 }
 
 function rest(){
-
 player.hp += 30;
-
-if(player.hp > player.maxHp){
-player.hp = player.maxHp;
-}
-
-document.getElementById("log").innerText =
-"😴 恢復 30 HP";
-
+if(player.hp > player.maxHp) player.hp = player.maxHp;
+document.getElementById("log").innerText = "😴 回復HP +30";
 updateUI();
-
 }
 
 function saveGame(){
-
-let data = {
-player,
-currentEnemy,
-enemyHp
-};
-
-localStorage.setItem(
-"monsterSave",
-JSON.stringify(data)
-);
-
-document.getElementById("log").innerText =
-"💾 已存檔";
-
+localStorage.setItem("save", JSON.stringify(player));
+document.getElementById("log").innerText = "💾 已存檔";
 }
 
 function loadGame(){
-
-let data =
-localStorage.getItem("monsterSave");
-
+let data = localStorage.getItem("save");
 if(data){
-
-let save = JSON.parse(data);
-
-player = save.player;
-currentEnemy = save.currentEnemy;
-enemyHp = save.enemyHp;
-
-document.getElementById("log").innerText =
-"📂 已讀取存檔";
-
+player = JSON.parse(data);
+document.getElementById("log").innerText = "📂 已讀檔";
 }
-
 }
 
 loadGame();
