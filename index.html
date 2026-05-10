@@ -2,512 +2,99 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>⚔️ 幻獸鬥士·進化版 | 回合制RPG</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>幻獸鬥士 v1.2.0</title>
 <style>
-    * {
-        user-select: none;
-        -webkit-tap-highlight-color: transparent;
-        box-sizing: border-box;
-    }
-
     body {
         margin: 0;
-        background: linear-gradient(135deg, #0b1120, #0f172a);
-        color: #f1f5f9;
-        font-family: 'Segoe UI', system-ui, 'Arial', sans-serif;
+        background: #0f172a;
+        color: white;
+        font-family: Arial;
         text-align: center;
-        padding-bottom: 30px;
     }
-
     .topbar {
-        background: rgba(30, 58, 138, 0.9);
-        backdrop-filter: blur(8px);
-        padding: 18px 12px;
-        font-size: 1.5rem;
-        font-weight: 800;
-        letter-spacing: 1px;
-        border-bottom: 3px solid #facc15;
-        box-shadow: 0 8px 18px rgba(0,0,0,0.3);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 12px;
-        flex-wrap: wrap;
-    }
-    .badge {
-        background: #facc15;
-        color: #0f172a;
-        font-size: 0.8rem;
-        padding: 4px 12px;
-        border-radius: 40px;
+        background: #1e3a8a;
+        padding: 18px;
+        font-size: 26px;
         font-weight: bold;
     }
-
     .info, .battle, .log {
-        background: rgba(15, 23, 42, 0.7);
-        backdrop-filter: blur(4px);
-        margin: 16px 18px;
-        padding: 18px;
-        border-radius: 32px;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-        border: 1px solid rgba(255,255,255,0.15);
+        background: #1e293b;
+        margin: 15px;
+        padding: 15px;
+        border-radius: 20px;
     }
-
     .bar {
         width: 90%;
-        height: 24px;
-        background: #1e293b;
-        border-radius: 40px;
+        height: 22px;
+        background: #444;
+        border-radius: 20px;
         margin: 10px auto;
         overflow: hidden;
-        box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
     }
-    .fillhp { height: 100%; background: #ef4444; width: 100%; transition: width 0.2s; }
-    .fillexp { height: 100%; background: #3b82f6; width: 0%; transition: width 0.2s; }
-    .fillmp { height: 100%; background: #10b981; width: 100%; transition: width 0.2s; }
-
+    .fillhp { height: 100%; background: #ef4444; width: 100%; }
+    .fillexp { height: 100%; background: #3b82f6; width: 0%; }
     .enemy {
-        font-size: 64px;
+        font-size: 55px;
         margin: 15px 0;
-        filter: drop-shadow(0 8px 12px black);
     }
-
     .log {
-        background: #1e293b;
-        color: #facc15;
+        background: #fef3c7;
+        color: black;
         font-weight: bold;
-        font-size: 1.2rem;
-        min-height: 75px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-left: 6px solid #facc15;
+        min-height: 60px;
     }
-
     .buttons {
+        margin: 20px;
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
-        gap: 12px;
-        margin-top: 15px;
-        margin-bottom: 10px;
+        gap: 10px;
     }
-
     button {
         border: none;
         padding: 14px 24px;
-        border-radius: 60px;
-        font-size: 1.2rem;
+        border-radius: 15px;
+        font-size: 18px;
         font-weight: bold;
         color: white;
         cursor: pointer;
-        transition: all 0.2s ease;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        min-width: 110px;
     }
-    button:active { transform: scale(0.96); }
     .attack { background: #dc2626; }
     .skill { background: #2563eb; }
     .rest { background: #16a34a; }
     .save { background: #9333ea; }
-
-    .stat-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin: 12px 8px;
-        font-size: 1.1rem;
-        font-weight: bold;
-        gap: 12px;
-        flex-wrap: wrap;
-    }
-    .mp-warning {
-        color: #a7f3d0;
-        background: #065f46;
-        padding: 4px 10px;
-        border-radius: 30px;
-        font-size: 0.8rem;
-    }
-    @media (max-width: 500px) {
-        button { padding: 10px 16px; font-size: 1rem; min-width: 85px; }
-        .info, .battle, .log { margin: 12px; padding: 14px; }
-        .topbar { font-size: 1.2rem; }
-    }
+    button:active { transform: scale(0.97); }
 </style>
 </head>
 <body>
 
-<div class="topbar">
-🐉 幻獸鬥士·戰術版 <span class="badge">v2.0 平衡改版</span>
-</div>
+<div class="topbar">🐉 幻獸鬥士 v1.2.0</div>
 
 <div class="info">
-    <div class="stat-row">
-        <span>❤️ HP <span id="hpText">100 / 100</span></span>
-        <span>⭐ EXP <span id="expText">0 / 50</span></span>
-    </div>
+    <div>❤️ HP：<span id="hpText">100 / 100</span></div>
     <div class="bar"><div class="fillhp" id="hpBar"></div></div>
+    <div>⭐ EXP：<span id="expText">0 / 50</span></div>
     <div class="bar"><div class="fillexp" id="expBar"></div></div>
-    
-    <div class="stat-row">
-        <span>⬆️ 等級 <strong id="levelText">1</strong></span>
-        <span>⚔️ 攻擊力 <strong id="atkText">10</strong></span>
-        <span>🌀 魔力值 <strong id="mpText">30 / 30</strong></span>
-    </div>
-    <div class="bar"><div class="fillmp" id="mpBar"></div></div>
+    <div>⬆️ 等級：<span id="levelText">1</span> &nbsp;|&nbsp; ⚔️ 攻擊力：<span id="atkText">10</span></div>
 </div>
 
 <div class="battle">
-    <h2 id="monsterName">🟣 史萊姆 Lv.1</h2>
+    <h2 id="monsterName">🟣 史萊姆</h2>
     <div class="enemy" id="monsterEmoji">🟣</div>
     <div>🧟 怪物 HP：<span id="monsterHpText">35 / 35</span></div>
     <div class="bar"><div class="fillhp" id="monsterBar"></div></div>
 </div>
 
-<div class="log" id="log">
-⚔️ 擊敗怪物獲得經驗！魔力不足無法放技能
-</div>
+<div class="log" id="log">⚔️ 遊戲開始！</div>
 
 <div class="buttons">
-    <button class="attack" onclick="playerAttack()">⚔️ 攻擊</button>
-    <button class="skill" onclick="playerSkill()">✨ 技能(-15MP)</button>
-    <button class="rest" onclick="playerRest()">😴 休息(+20HP)</button>
+    <button class="attack" onclick="attack()">⚔️ 攻擊</button>
+    <button class="skill" onclick="skill()">🔥 技能</button>
+    <button class="rest" id="restBtn" onclick="rest()">😴 休息</button>
     <button class="save" onclick="saveGame()">💾 存檔</button>
 </div>
 
-<script>
-    // ---------- 玩家屬性 ----------
-    let playerHp = 100;
-    let maxHp = 100;
-    let exp = 0;
-    let level = 1;
-    let atk = 10;
-    let currentMp = 30;
-    let maxMp = 30;
-
-    let currentMonster = {};
-
-    // 基礎怪物模板 (基礎值，實際生成時會依據玩家等級強化)
-    const baseMonsters = [
-        { name: "🟣 史萊姆", emoji: "🟣", baseHp: 35, baseAtk: 5, exp: 15 },
-        { name: "🟢 哥布林", emoji: "🟢", baseHp: 50, baseAtk: 8, exp: 20 },
-        { name: "👻 幽靈", emoji: "👻", baseHp: 70, baseAtk: 10, exp: 30 },
-        { name: "🐉 幼龍", emoji: "🐉", baseHp: 100, baseAtk: 15, exp: 40 }
-    ];
-
-    // 根據玩家等級生成怪物 (動態平衡)
-    function generateDynamicMonster() {
-        // 隨機挑選一種怪物基底
-        let base = baseMonsters[Math.floor(Math.random() * baseMonsters.length)];
-        // 強度係數: 等級每高1級，怪物血量增加12%，攻擊增加8%
-        let multiplier = 1 + (level - 1) * 0.12;
-        let atkMulti = 1 + (level - 1) * 0.08;
-        let finalHp = Math.floor(base.baseHp * multiplier);
-        let finalAtk = Math.floor(base.baseAtk * atkMulti);
-        // 確保血量最低不低於基礎值
-        if (finalHp < base.baseHp) finalHp = base.baseHp;
-        if (finalAtk < base.baseAtk) finalAtk = base.baseAtk;
-        
-        // 經驗值也會稍微增加 (更高級打怪更爽)
-        let expGain = base.exp + Math.floor(level * 1.5);
-        
-        return {
-            name: base.name,
-            emoji: base.emoji,
-            hp: finalHp,
-            maxHp: finalHp,
-            atk: finalAtk,
-            expGain: expGain
-        };
-    }
-
-    // 刷新怪物 (戰勝/新遊戲)
-    function spawnNewMonster() {
-        currentMonster = generateDynamicMonster();
-        updateUI();
-        addLog(`✨ 新的挑戰者出現！ ${currentMonster.name} (Lv.${level} 強化型)`, "#facc15");
-    }
-
-    // 更新所有介面
-    function updateUI() {
-        // 血量邊界控制
-        if (playerHp > maxHp) playerHp = maxHp;
-        if (playerHp < 0) playerHp = 0;
-        if (currentMp > maxMp) currentMp = maxMp;
-        if (currentMp < 0) currentMp = 0;
-        if (exp > 50) exp = 50;
-
-        document.getElementById("hpText").innerText = `${playerHp} / ${maxHp}`;
-        document.getElementById("expText").innerText = `${exp} / 50`;
-        document.getElementById("levelText").innerText = level;
-        document.getElementById("atkText").innerText = atk;
-        document.getElementById("mpText").innerText = `${currentMp} / ${maxMp}`;
-        
-        document.getElementById("monsterName").innerHTML = `${currentMonster.name} <span style="font-size:0.8rem;">(強度 Lv.${level})</span>`;
-        document.getElementById("monsterEmoji").innerText = currentMonster.emoji;
-        document.getElementById("monsterHpText").innerText = `${currentMonster.hp} / ${currentMonster.maxHp}`;
-        
-        let hpPercent = (playerHp / maxHp) * 100;
-        let expPercent = (exp / 50) * 100;
-        let mpPercent = (currentMp / maxMp) * 100;
-        let monsterPercent = (currentMonster.hp / currentMonster.maxHp) * 100;
-        
-        document.getElementById("hpBar").style.width = `${hpPercent}%`;
-        document.getElementById("expBar").style.width = `${expPercent}%`;
-        document.getElementById("mpBar").style.width = `${mpPercent}%`;
-        document.getElementById("monsterBar").style.width = `${monsterPercent}%`;
-        
-        // 魔力不足時按鈕視覺提示 (不影響功能，但用文字提醒)
-        let skillBtn = document.querySelector(".skill");
-        if (currentMp < 15) {
-            skillBtn.style.opacity = "0.7";
-            skillBtn.style.background = "#475569";
-        } else {
-            skillBtn.style.opacity = "1";
-            skillBtn.style.background = "#2563eb";
-        }
-    }
-    
-    function addLog(msg, color = "#facc15") {
-        let logDiv = document.getElementById("log");
-        logDiv.innerHTML = msg;
-        logDiv.style.color = color;
-        setTimeout(() => {
-            if(document.getElementById("log").innerHTML === msg)
-                logDiv.style.color = "#facc15";
-        }, 1800);
-    }
-
-    // 經驗升級機制 (僅打贏時觸發)
-    function gainExpAndUpgrade(earnedExp) {
-        exp += earnedExp;
-        let leveledUp = false;
-        while (exp >= 50) {
-            exp -= 50;
-            level++;
-            // 升級獎勵: 增加最大HP+15, 攻擊+4, 最大MP+8 (並補滿一半血量+全魔)
-            maxHp += 15;
-            atk += 4;
-            maxMp += 8;
-            playerHp = Math.min(playerHp + 20, maxHp);  // 升級恢復20生命，但不超過滿血
-            currentMp = maxMp;   // 魔力量直接回滿
-            leveledUp = true;
-            addLog(`🎉 恭喜升到 Lv.${level}！ 最大生命+15 攻擊+4 魔力上限+8 狀態恢復！`, "#a3e635");
-            // 避免升級太多次導致無限迴圈
-            if(level > 50) break;
-        }
-        if (leveledUp) {
-            // 因為升級後怪物強度會重新整理 (但為了體驗，不必立刻換怪，保留現有怪物戰鬥)
-            // 但最好更新一下怪物的顯示名稱(強度標籤)跟屬性? 怪物已經是舊的但無傷大雅，下次重生會更強
-            updateUI();
-            addLog(`⭐ 能力提升！目前攻擊 ${atk} 最大HP ${maxHp}`, "#93c5fd");
-        }
-        updateUI();
-    }
-
-    // 怪物反擊 (戰鬥邏輯共用)
-    function monsterCounterAttack() {
-        let dmg = Math.floor(Math.random() * currentMonster.atk) + 4;
-        playerHp -= dmg;
-        addLog(`😈 ${currentMonster.name} 反擊造成 ${dmg} 傷害！`, "#f87171");
-        if (playerHp <= 0) {
-            playerHp = 0;
-            updateUI();
-            addLog(`💀 你被擊敗了... 已復活至滿血狀態！`, "#ef4444");
-            // 戰敗懲罰：少量經驗值流失，但回到滿血
-            exp = Math.max(0, exp - 8);
-            playerHp = maxHp;
-            currentMp = maxMp;
-            updateUI();
-            addLog(`⚡ 復活懲罰: 失去 8 EXP，滿血回歸`, "#facc15");
-            // 怪物不變，繼續戰鬥
-        }
-        updateUI();
-    }
-
-    // 玩家攻擊
-    function playerAttack() {
-        if (currentMonster.hp <= 0) {
-            addLog("沒有怪物了？重新生成一隻", "#ffaa44");
-            spawnNewMonster();
-            updateUI();
-            return;
-        }
-        if (playerHp <= 0) {
-            addLog("無法戰鬥，你已昏迷", "#ff5555");
-            return;
-        }
-        
-        let dmg = Math.floor(Math.random() * atk) + 8;  // 8 ~ atk+7
-        currentMonster.hp -= dmg;
-        addLog(`⚔️ 攻擊命中！造成 ${dmg} 傷害！`, "#ffbb77");
-        
-        if (currentMonster.hp <= 0) {
-            // 擊敗怪物
-            currentMonster.hp = 0;
-            let earn = currentMonster.expGain;
-            gainExpAndUpgrade(earn);
-            addLog(`🎉 打敗 ${currentMonster.name} 獲得 ${earn} EXP!`, "#a3e635");
-            // 生成新怪物
-            spawnNewMonster();
-            updateUI();
-            return;
-        }
-        
-        // 怪物反擊
-        monsterCounterAttack();
-        updateUI();
-    }
-
-    // 技能 (消耗MP)
-    function playerSkill() {
-        if (currentMonster.hp <= 0) {
-            addLog("沒有目標，怪物重生中", "#ffaa44");
-            spawnNewMonster();
-            updateUI();
-            return;
-        }
-        if (playerHp <= 0) {
-            addLog("無法使用技能，昏迷中", "#ff5555");
-            return;
-        }
-        if (currentMp < 15) {
-            addLog(`❌ 魔力不足 (需15 MP) 目前 ${currentMp}/${maxMp}`, "#f97316");
-            return;
-        }
-        
-        // 技能傷害 = (攻擊力*2) + 隨機8~15
-        let dmg = Math.floor(Math.random() * (atk * 1.8)) + (atk + 6);
-        currentMonster.hp -= dmg;
-        currentMp -= 15;
-        addLog(`✨ 秘技爆發！造成 ${dmg} 傷害！ 消耗15 MP`, "#7aa2f7");
-        
-        if (currentMonster.hp <= 0) {
-            let earn = currentMonster.expGain;
-            gainExpAndUpgrade(earn);
-            addLog(`🔥 技能華麗終結 ${currentMonster.name} 獲得 ${earn} EXP!`, "#c084fc");
-            spawnNewMonster();
-            updateUI();
-            return;
-        }
-        
-        // 怪物反擊
-        monsterCounterAttack();
-        updateUI();
-    }
-    
-    // 休息 (但會被怪物攻擊 風險與回報)
-    function playerRest() {
-        if (playerHp <= 0) {
-            addLog("昏迷中無法休息", "#ff5555");
-            return;
-        }
-        if (currentMonster.hp <= 0) {
-            spawnNewMonster();
-        }
-        
-        let heal = 20;
-        playerHp += heal;
-        if (playerHp > maxHp) playerHp = maxHp;
-        addLog(`😴 你休息恢復 ${heal} HP。但怪物趁機攻擊！`, "#4ade80");
-        
-        // 休息風險：怪物必定造成一次傷害 (威力較輕微 但無法躲避)
-        let sneakDmg = Math.floor(Math.random() * (currentMonster.atk)) + 2;
-        playerHp -= sneakDmg;
-        addLog(`⚠️ ${currentMonster.name} 偷襲造成 ${sneakDmg} 傷害！`, "#fb923c");
-        
-        if (playerHp <= 0) {
-            playerHp = 0;
-            updateUI();
-            addLog(`💀 休息時被擊敗... 復活懲罰`, "#ef4444");
-            exp = Math.max(0, exp - 5);
-            playerHp = maxHp;
-            currentMp = maxMp;
-            updateUI();
-        } else {
-            updateUI();
-        }
-        // 檢查怪物是否死亡 (休息不會主動擊殺怪物)
-        if (currentMonster.hp <= 0) {
-            addLog(`🤔 怪物被你的隊友嚇死了? 不，但依然獲得經驗`, "#facc15");
-            let earn = currentMonster.expGain;
-            gainExpAndUpgrade(earn);
-            spawnNewMonster();
-            updateUI();
-        } else {
-            updateUI();
-        }
-    }
-    
-    // 存檔功能 (額外儲存魔力)
-    function saveGame() {
-        let saveData = {
-            playerHp, maxHp, exp, level, atk, currentMp, maxMp
-        };
-        localStorage.setItem("monsterSaveV2", JSON.stringify(saveData));
-        addLog(`💾 遊戲已存檔！ (包含等級/魔力)`, "#d8b4fe");
-    }
-    
-    function loadGame() {
-        try {
-            let data = localStorage.getItem("monsterSaveV2");
-            if (data) {
-                let s = JSON.parse(data);
-                playerHp = s.playerHp ?? 100;
-                maxHp = s.maxHp ?? 100;
-                exp = s.exp ?? 0;
-                level = s.level ?? 1;
-                atk = s.atk ?? 10;
-                currentMp = s.currentMp ?? 30;
-                maxMp = s.maxMp ?? 30;
-                if (playerHp > maxHp) playerHp = maxHp;
-                if (currentMp > maxMp) currentMp = maxMp;
-                addLog(`📀 讀取存檔成功！ 等級 ${level} 攻擊 ${atk}`, "#86efac");
-            } else {
-                addLog(`🌟 新遊戲開始！魔力系統/動態怪物已啟用`, "#a5f3fc");
-            }
-        } catch(e) {
-            console.warn(e);
-            resetToDefault();
-        }
-        // 確保基本數值
-        if (maxMp <= 0) maxMp = 30;
-        if (currentMp <= 0) currentMp = maxMp;
-        if (maxHp <= 0) maxHp = 100;
-        if (atk <= 0) atk = 10;
-        if (level <= 0) level = 1;
-    }
-    
-    function resetToDefault() {
-        playerHp = 100;
-        maxHp = 100;
-        exp = 0;
-        level = 1;
-        atk = 10;
-        currentMp = 30;
-        maxMp = 30;
-    }
-    
-    // 初始化遊戲
-    function initGame() {
-        loadGame();
-        // 確保魔力與血量不異常
-        if (playerHp > maxHp) playerHp = maxHp;
-        if (currentMp > maxMp) currentMp = maxMp;
-        // 生成第一隻動態強度怪物
-        currentMonster = generateDynamicMonster();
-        updateUI();
-        addLog(`🐺 平衡改版: 技能耗魔、休息會被反擊、怪物隨等級成長！`, "#facc15");
-    }
-    
-    // 綁定全域函式
-    window.playerAttack = playerAttack;
-    window.playerSkill = playerSkill;
-    window.playerRest = playerRest;
-    window.saveGame = saveGame;
-    
-    initGame();
-</script>
+<script src="game.js"></script>
 </body>
 </html>
