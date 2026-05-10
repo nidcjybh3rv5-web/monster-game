@@ -8,7 +8,7 @@ let monsterName = "🟣 史萊姆", monsterEmoji = "🟣";
 // ========== 休息限制 ==========
 let restUsed = false;
 
-// ========== 怪物列表 ==========
+// ========== 怪物庫 ==========
 const monsters = [
     { name: "🟣 史萊姆", emoji: "🟣", hp: 35, atk: 5, exp: 15 },
     { name: "🟢 哥布林", emoji: "🟢", hp: 50, atk: 8, exp: 20 },
@@ -65,7 +65,7 @@ function log(msg) {
     document.getElementById("log").innerText = msg;
 }
 
-// ========== 升級 (只補70%血量) ==========
+// ========== 升級（只補70%血，有音效）==========
 function checkLevelUp() {
     if (exp >= 50) {
         exp -= 50;
@@ -74,6 +74,7 @@ function checkLevelUp() {
         atk += 5;
         hp = Math.floor(maxHp * 0.7);
         log(`🎉 升級 Lv.${level}！ 攻擊${atk} 血量恢復70%`);
+        playLevelUpSound();  // 音效
         updateUI();
         return true;
     }
@@ -84,6 +85,7 @@ function checkLevelUp() {
 function monsterAttack() {
     let dmg = Math.floor(Math.random() * monsterAtk) + 3;
     hp -= dmg;
+    playHurtSound();        // 受傷音效
     log(`😈 ${monsterName} 反擊 ${dmg} 傷害！`);
     if (hp <= 0) {
         hp = maxHp;
@@ -94,6 +96,8 @@ function monsterAttack() {
 
 // ========== 攻擊 ==========
 function attack() {
+    initAudio();            // 啟用聲音
+    playAttackSound();      // 攻擊音效
     if (monsterHp <= 0) { randomMonster(); log("新怪物出現！"); updateUI(); return; }
     if (hp <= 0) { log("你已經昏迷"); return; }
     
@@ -104,6 +108,7 @@ function attack() {
     if (monsterHp <= 0) {
         exp += monsterExp;
         log(`🎉 擊敗 ${monsterName} 獲得 ${monsterExp} EXP！`);
+        playDefeatSound();   // 擊敗音效
         checkLevelUp();
         randomMonster();
         updateUI();
@@ -113,8 +118,10 @@ function attack() {
     updateUI();
 }
 
-// ========== 技能 (無額外獎勵) ==========
+// ========== 技能 ==========
 function skill() {
+    initAudio();
+    playSkillSound();       // 技能音效
     if (monsterHp <= 0) { randomMonster(); log("新怪物出現！"); updateUI(); return; }
     if (hp <= 0) { log("你已經昏迷"); return; }
     
@@ -125,6 +132,7 @@ function skill() {
     if (monsterHp <= 0) {
         exp += monsterExp;
         log(`🎉 技能擊敗 ${monsterName} 獲得 ${monsterExp} EXP！`);
+        playDefeatSound();
         checkLevelUp();
         randomMonster();
         updateUI();
@@ -134,8 +142,9 @@ function skill() {
     updateUI();
 }
 
-// ========== 休息 (每場限一次，會被偷襲) ==========
+// ========== 休息（每場限一次，會被偷襲）==========
 function rest() {
+    initAudio();
     if (restUsed) { log(`⚠️ 這場已休息過！打敗怪物後才能再休息`); return; }
     if (hp <= 0) { log("無法休息"); return; }
     
@@ -145,6 +154,7 @@ function rest() {
     restUsed = true;
     updateRestBtn();
     log(`😴 恢復 ${heal} HP (此場不能再休息)`);
+    playRestSound();        // 休息音效
     
     let sneak = Math.floor(Math.random() * monsterAtk) + 2;
     hp -= sneak;
@@ -176,7 +186,7 @@ function loadGame() {
             atk = s.atk || 10;
             log(`📀 讀取存檔 Lv.${level}`);
         } else {
-            log(`🌟 v1.2.0：技能無加成、升級補70%、休息限一次`);
+            log(`🌟 Beta 1.2.10：技能無加成、升級補70%、休息限一次、音效已加入`);
         }
     } catch(e) { }
     updateUI();
