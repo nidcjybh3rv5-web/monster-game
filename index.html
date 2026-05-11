@@ -9,14 +9,13 @@
   body{background:#0a0f1e;font-family:system-ui;min-height:100vh;display:flex;justify-content:center;align-items:center;color:#e2e8f0;}
   .app{width:100%;max-width:480px;margin:20px;background:#0f172a;border-radius:32px;padding:24px 20px 32px;text-align:center;}
   .page{display:none;}.page.active{display:block;}
-
   .main-title{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#facc15,#ff8c00);-webkit-background-clip:text;background-clip:text;color:transparent;margin:30px 0;}
   .play-btn{background:#facc15;color:#0f172a;border:none;padding:14px 28px;border-radius:60px;font-size:1.3rem;font-weight:bold;cursor:pointer;margin:20px 0;width:70%;}
   .settings-btn{background:transparent;border:1px solid #334155;color:#94a3b8;padding:8px 20px;border-radius:30px;cursor:pointer;}
-
   .setting-item{background:#1e293b;border-radius:20px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;text-align:left;}
-  .discord-btn-small{background:#5865F2;border:none;border-radius:30px;padding:6px 14px;color:white;font-size:0.75rem;font-weight:bold;cursor:pointer;transition:0.2s;}
+  .discord-btn-small{background:#5865F2;border:none;border-radius:30px;padding:6px 14px;color:white;font-size:0.75rem;font-weight:bold;cursor:pointer;}
   .discord-btn-small:hover{background:#4752c4;}
+  .difficulty-select{background:#0f172a;color:#e2e8f0;border:1px solid #475569;border-radius:20px;padding:6px 12px;cursor:pointer;}
   .switch{position:relative;display:inline-block;width:48px;height:24px;}
   .switch input{opacity:0;width:0;height:0;}
   .slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#475569;border-radius:24px;}
@@ -50,7 +49,7 @@
     <div style="margin-top:30px; font-size:0.65rem; color:#475569;">Beta 1.3.0</div>
   </div>
 
-  <!-- 設定畫面（含 Discord 按鈕）-->
+  <!-- 設定畫面（含難度 + Discord）-->
   <div id="settingsPage" class="page">
     <button class="back-btn" id="backFromSettings">← 返回</button>
     <h3 style="text-align:left;">設定</h3>
@@ -61,6 +60,14 @@
     <div class="setting-item">
       <span>🔔 音效</span>
       <label class="switch"><input type="checkbox" id="sfxToggle" checked><span class="slider"></span></label>
+    </div>
+    <div class="setting-item">
+      <span>⚔️ 難度</span>
+      <select id="difficultySelect" class="difficulty-select">
+        <option value="easy">🎈 簡單</option>
+        <option value="normal" selected>⚖️ 普通</option>
+        <option value="hard">🔥 困難</option>
+      </select>
     </div>
     <div class="setting-item">
       <span>💬 Discord 社群</span>
@@ -90,6 +97,16 @@
 </div>
 
 <script>
+  // 難度設定與儲存
+  let currentDifficulty = "normal";
+  function getDifficultyMultipliers() {
+    switch(currentDifficulty) {
+      case "easy": return { hp: 0.7, atk: 0.7, exp: 1.1 };
+      case "hard": return { hp: 1.5, atk: 1.3, exp: 0.85 };
+      default: return { hp: 1.0, atk: 1.0, exp: 1.0 };
+    }
+  }
+
   // 音效系統
   let audioCtx=null, masterGain=null, sfxEnabled=true;
   function initAudio(){if(audioCtx)return;audioCtx=new AudioContext();masterGain=audioCtx.createGain();masterGain.gain.value=document.getElementById('volumeSlider').value/100;masterGain.connect(audioCtx.destination);}
@@ -114,9 +131,17 @@
   function genMonster(){
     let z=getZone(),raw=z.mons[Math.floor(Math.random()*z.mons.length)];
     let emoji=raw[0],name=raw.slice(1);
-    let baseHp=30+level*2.5,baseAtk=5+Math.floor(level/2.5);
+    let mult = getDifficultyMultipliers();
+    let baseHp = (30 + level * 2.5) * mult.hp;
+    let baseAtk = (5 + Math.floor(level / 2.5)) * mult.atk;
     let v=v=>Math.floor(v*(0.8+Math.random()*0.4));
-    return {name,emoji,hp:v(baseHp),maxHp:v(baseHp),atk:v(baseAtk),exp:Math.floor(12+level*0.8)};
+    let expGain = Math.floor((12 + level * 0.8) * mult.exp);
+    return {
+      name, emoji,
+      hp: v(baseHp), maxHp: v(baseHp),
+      atk: v(baseAtk),
+      exp: Math.max(1, expGain)
+    };
   }
   function refresh(){cur=genMonster();restUsed=false;updateUI();logMsg(`✨ ${cur.name} HP${cur.hp} 攻${cur.atk}`);}
   function updateUI(){
@@ -165,8 +190,23 @@
     let s=Math.max(1,rand(cur.atk-2,cur.atk+1));hp-=s;logMsg(`⚠️ 被偷襲 -${s}`);
     if(hp<=0){hp=maxHp;logMsg(`💀 復活`);}updateUI();
   }
-  function saveGame(){localStorage.setItem("monsterSave",JSON.stringify({hp,maxHp,exp,level,atk,restUsed}));logMsg("💾 存檔");}
-  function loadGame(){try{let d=localStorage.getItem("monsterSave");if(d){let s=JSON.parse(d);hp=s.hp??100;maxHp=s.maxHp??100;exp=s.exp??0;level=s.level??1;atk=s.atk??10;restUsed=s.restUsed??false;logMsg("📀 讀取");}}catch(e){}refresh();}
+  function saveGame(){
+    localStorage.setItem("monsterSave",JSON.stringify({hp,maxHp,exp,level,atk,restUsed,currentDifficulty}));
+    logMsg("💾 存檔");
+  }
+  function loadGame(){
+    try{
+      let d=localStorage.getItem("monsterSave");
+      if(d){
+        let s=JSON.parse(d);
+        hp=s.hp??100;maxHp=s.maxHp??100;exp=s.exp??0;level=s.level??1;atk=s.atk??10;restUsed=s.restUsed??false;
+        if(s.currentDifficulty) currentDifficulty = s.currentDifficulty;
+        document.getElementById('difficultySelect').value = currentDifficulty;
+        logMsg("📀 讀取");
+      } else { logMsg("🌟 新遊戲"); }
+    }catch(e){}
+    refresh();
+  }
 
   // 頁面切換與事件
   const main=document.getElementById('mainPage'),sett=document.getElementById('settingsPage'),game=document.getElementById('gamePage');
@@ -176,6 +216,7 @@
   document.getElementById('backFromGame').onclick=()=>{game.classList.remove('active');main.classList.add('active');};
   document.getElementById('volumeSlider').oninput=e=>{if(masterGain)masterGain.gain.value=e.target.value/100;};
   document.getElementById('sfxToggle').onchange=e=>{sfxEnabled=e.target.checked;};
+  document.getElementById('difficultySelect').onchange=e=>{currentDifficulty=e.target.value;if(game.classList.contains('active'))refresh();};
   document.getElementById('discordLinkBtn').onclick=()=>{window.open('https://discord.gg/scG6QxxC3', '_blank');};
   document.getElementById('attackBtn').onclick=attackAction;
   document.getElementById('skillBtn').onclick=skillAction;
