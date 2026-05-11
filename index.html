@@ -168,7 +168,7 @@
   function saveGame(){localStorage.setItem("monsterSave",JSON.stringify({hp,maxHp,exp,level,atk,restUsed}));logMsg("💾 存檔");}
   function loadGame(){try{let d=localStorage.getItem("monsterSave");if(d){let s=JSON.parse(d);hp=s.hp??100;maxHp=s.maxHp??100;exp=s.exp??0;level=s.level??1;atk=s.atk??10;restUsed=s.restUsed??false;logMsg("📀 讀取");}}catch(e){}refresh();}
 
-  // 頁面切換
+  // 頁面切換與事件
   const main=document.getElementById('mainPage'),sett=document.getElementById('settingsPage'),game=document.getElementById('gamePage');
   document.getElementById('toGameBtn').onclick=()=>{main.classList.remove('active');game.classList.add('active');loadGame();};
   document.getElementById('toSettingsBtn').onclick=()=>{main.classList.remove('active');sett.classList.add('active');};
