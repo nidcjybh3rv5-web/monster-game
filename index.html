@@ -5,204 +5,39 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>MONSTER GAME</title>
 <style>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    user-select: none;
-  }
+  *{margin:0;padding:0;box-sizing:border-box;user-select:none;}
+  body{background:#0a0f1e;font-family:system-ui;min-height:100vh;display:flex;justify-content:center;align-items:center;color:#e2e8f0;}
+  .app{width:100%;max-width:480px;margin:20px;background:#0f172a;border-radius:32px;padding:24px 20px 32px;text-align:center;}
+  .page{display:none;}.page.active{display:block;}
 
-  body {
-    background: #0a0f1e;
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #e2e8f0;
-  }
+  .main-title{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#facc15,#ff8c00);-webkit-background-clip:text;background-clip:text;color:transparent;margin:30px 0;}
+  .play-btn{background:#facc15;color:#0f172a;border:none;padding:14px 28px;border-radius:60px;font-size:1.3rem;font-weight:bold;cursor:pointer;margin:20px 0;width:70%;}
+  .settings-btn{background:transparent;border:1px solid #334155;color:#94a3b8;padding:8px 20px;border-radius:30px;cursor:pointer;}
 
-  /* 主容器 */
-  .app {
-    width: 100%;
-    max-width: 500px;
-    margin: 20px;
-    background: #0f172a;
-    border-radius: 32px;
-    padding: 24px 20px 32px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    text-align: center;
-  }
-
-  /* 頁面切換 */
-  .page {
-    display: none;
-  }
-  .page.active {
-    display: block;
-  }
-
-  /* 主畫面樣式 */
-  .main-title {
-    font-size: 2.2rem;
-    font-weight: 800;
-    background: linear-gradient(135deg, #facc15, #ff8c00);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    margin: 40px 0 20px;
-  }
-  .play-btn {
-    background: #facc15;
-    color: #0f172a;
-    border: none;
-    padding: 16px 32px;
-    border-radius: 60px;
-    font-size: 1.5rem;
-    font-weight: bold;
-    cursor: pointer;
-    margin: 30px 0;
-    transition: 0.2s;
-    width: 80%;
-  }
-  .play-btn:active { transform: scale(0.97); }
-  .settings-btn {
-    background: transparent;
-    border: 1px solid #334155;
-    color: #94a3b8;
-    padding: 10px 20px;
-    border-radius: 30px;
-    cursor: pointer;
-    margin-top: 20px;
-  }
-
-  /* Google 風格設定列表 */
-  .settings-list {
-    text-align: left;
-    margin-top: 20px;
-  }
-  .setting-item {
-    background: #1e293b;
-    border-radius: 20px;
-    padding: 16px;
-    margin-bottom: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .setting-label {
-    font-weight: 500;
-    color: #e2e8f0;
-  }
-  .setting-desc {
-    font-size: 0.75rem;
-    color: #94a3b8;
-    margin-top: 4px;
-  }
-  /* Google 開關 */
-  .switch {
-    position: relative;
-    display: inline-block;
-    width: 52px;
-    height: 28px;
-  }
-  .switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
-  .slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #475569;
-    transition: 0.2s;
-    border-radius: 34px;
-  }
-  .slider:before {
-    position: absolute;
-    content: "";
-    height: 22px;
-    width: 22px;
-    left: 3px;
-    bottom: 3px;
-    background-color: white;
-    transition: 0.2s;
-    border-radius: 50%;
-  }
-  input:checked + .slider {
-    background-color: #3b82f6;
-  }
-  input:checked + .slider:before {
-    transform: translateX(24px);
-  }
-  /* 滑桿 */
-  input[type="range"] {
-    width: 160px;
-    height: 4px;
-    -webkit-appearance: none;
-    background: #475569;
-    border-radius: 2px;
-  }
-  input[type="range"]:focus {
-    outline: none;
-  }
-  input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: #3b82f6;
-    cursor: pointer;
-  }
-  .back-btn {
-    background: #334155;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 30px;
-    color: white;
-    cursor: pointer;
-    margin-bottom: 20px;
-  }
-  .back-btn:active { transform: scale(0.97); }
-  hr {
-    border-color: #334155;
-    margin: 16px 0;
-  }
-
-  /* 遊戲內部樣式 (保留原功能) */
-  .stat-row { display: flex; justify-content: space-between; margin: 12px 0; font-weight: bold; }
-  .bar { background: #1e293b; border-radius: 20px; height: 20px; overflow: hidden; margin: 8px 0; }
-  .fillhp { background: #ef4444; height: 100%; }
-  .fillexp { background: #3b82f6; height: 100%; }
-  .enemy-icon { font-size: 56px; margin: 12px; }
-  .log {
-    background: #00000055;
-    border-radius: 24px;
-    padding: 12px;
-    margin: 15px 0;
-    font-size: 0.85rem;
-  }
-  .buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-  }
-  button.game-action {
-    padding: 10px 18px;
-    border-radius: 40px;
-    font-weight: bold;
-    cursor: pointer;
-  }
-  .attack { background: #dc2626; color: white; border: none; }
-  .skill { background: #2563eb; color: white; border: none; }
-  .rest { background: #16a34a; color: white; border: none; }
-  .save { background: #9333ea; color: white; border: none; }
-  .bug { background: #6b21a5; color: white; border: none; }
+  .setting-item{background:#1e293b;border-radius:20px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;text-align:left;}
+  .discord-btn-small{background:#5865F2;border:none;border-radius:30px;padding:6px 14px;color:white;font-size:0.75rem;font-weight:bold;cursor:pointer;transition:0.2s;}
+  .discord-btn-small:hover{background:#4752c4;}
+  .switch{position:relative;display:inline-block;width:48px;height:24px;}
+  .switch input{opacity:0;width:0;height:0;}
+  .slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#475569;border-radius:24px;}
+  .slider:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background:white;border-radius:50%;transition:0.2s;}
+  input:checked+.slider{background:#3b82f6;}
+  input:checked+.slider:before{transform:translateX(24px);}
+  input[type="range"]{width:140px;height:4px;-webkit-appearance:none;background:#475569;border-radius:2px;}
+  input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#3b82f6;cursor:pointer;}
+  .back-btn{background:#334155;border:none;padding:6px 14px;border-radius:30px;color:white;cursor:pointer;margin-bottom:15px;}
+  .stat-row{display:flex;justify-content:space-between;margin:10px 0;font-weight:bold;}
+  .bar{background:#1e293b;border-radius:20px;height:18px;overflow:hidden;margin:6px 0;}
+  .fillhp{background:#ef4444;height:100%;}
+  .fillexp{background:#3b82f6;height:100%;}
+  .enemy-icon{font-size:50px;margin:10px;}
+  .log{background:#00000055;border-radius:20px;padding:10px;margin:12px 0;font-size:0.8rem;}
+  .buttons{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:10px;}
+  button.game-action{padding:8px 16px;border-radius:40px;font-weight:bold;cursor:pointer;border:none;}
+  .attack{background:#dc2626;color:white;}
+  .skill{background:#2563eb;color:white;}
+  .rest{background:#16a34a;color:white;}
+  .save{background:#9333ea;color:white;}
 </style>
 </head>
 <body>
@@ -210,231 +45,142 @@
   <!-- 主畫面 -->
   <div id="mainPage" class="page active">
     <div class="main-title">MONSTER GAME</div>
-    <button class="play-btn" id="toGameBtn">🎮 PLAY GAME</button>
-    <br>
-    <button class="settings-btn" id="toSettingsBtn">⚙️ 設定</button>
-    <div style="margin-top: 40px; font-size: 0.7rem; color: #475569;">by Disabledev | Beta 1.3.0</div>
+    <button class="play-btn" id="toGameBtn">▶ PLAY GAME</button><br>
+    <button class="settings-btn" id="toSettingsBtn">⚙ 設定</button>
+    <div style="margin-top:30px; font-size:0.65rem; color:#475569;">Beta 1.3.0</div>
   </div>
 
-  <!-- 設定畫面 (Google 風格) -->
+  <!-- 設定畫面（含 Discord 按鈕）-->
   <div id="settingsPage" class="page">
     <button class="back-btn" id="backFromSettings">← 返回</button>
-    <h3 style="text-align: left;">設定</h3>
-    <div class="settings-list">
-      <div class="setting-item">
-        <div>
-          <div class="setting-label">🔊 音量</div>
-          <div class="setting-desc">調整遊戲音效大小</div>
-        </div>
-        <input type="range" id="volumeSlider" min="0" max="100" value="70">
-      </div>
-      <div class="setting-item">
-        <div>
-          <div class="setting-label">🔔 音效開關</div>
-          <div class="setting-desc">開啟或關閉所有音效</div>
-        </div>
-        <label class="switch">
-          <input type="checkbox" id="sfxToggle" checked>
-          <span class="slider"></span>
-        </label>
-      </div>
-      <div class="setting-item">
-        <div>
-          <div class="setting-label">⚔️ 難度</div>
-          <div class="setting-desc">影響怪物強度 (開發中)</div>
-        </div>
-        <select id="difficultySelect" style="background:#1e293b; color:white; border-radius:20px; padding:8px;">
-          <option>普通</option>
-          <option>困難</option>
-        </select>
-      </div>
+    <h3 style="text-align:left;">設定</h3>
+    <div class="setting-item">
+      <span>🔊 音量</span>
+      <input type="range" id="volumeSlider" min="0" max="100" value="70">
+    </div>
+    <div class="setting-item">
+      <span>🔔 音效</span>
+      <label class="switch"><input type="checkbox" id="sfxToggle" checked><span class="slider"></span></label>
+    </div>
+    <div class="setting-item">
+      <span>💬 Discord 社群</span>
+      <button class="discord-btn-small" id="discordLinkBtn">加入</button>
     </div>
   </div>
 
   <!-- 遊戲畫面 -->
   <div id="gamePage" class="page">
-    <button class="back-btn" id="backFromGame">← 主選單</button>
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-      <span id="mapBadge" style="background:#1e3a8a; padding:4px 12px; border-radius:30px;">🌳 新手村</span>
-    </div>
-    <div class="stat-row"><span>❤️ HP <span id="hpText">100/100</span></span><span>⭐ EXP <span id="expText">0/50</span></span></div>
+    <button class="back-btn" id="backFromGame">← 選單</button>
+    <div class="stat-row"><span>❤️ <span id="hpText">100/100</span></span><span>⭐ <span id="expText">0/50</span></span><span>⬆️ Lv<span id="levelText">1</span></span></div>
     <div class="bar"><div class="fillhp" id="hpBar"></div></div>
     <div class="bar"><div class="fillexp" id="expBar"></div></div>
-    <div class="stat-row"><span>⬆️ 等級 <strong id="levelText">1</strong></span><span>⚔️ 攻擊 <strong id="atkText">10</strong></span><span>🗺️ <span id="zoneText">新手村</span></span></div>
+    <div class="stat-row"><span>⚔️ 攻擊力 <span id="atkText">10</span></span><span>🗺️ <span id="zoneText">新手村</span></span></div>
     <h3 id="monsterName">史萊姆</h3>
     <div class="enemy-icon" id="monsterEmoji">🟣</div>
     <div>💀 HP <span id="monsterHpText">0/0</span></div>
     <div class="bar"><div class="fillhp" id="monsterBar"></div></div>
-    <div id="monsterAtk">⚔️ 攻擊力 ?</div>
-    <div class="log" id="logMsg">點擊攻擊開始冒險</div>
+    <div class="log" id="logMsg">點擊攻擊開始</div>
     <div class="buttons">
-      <button class="game-action attack" id="attackBtn">⚔️ 攻擊</button>
-      <button class="game-action skill" id="skillBtn">🔥 技能</button>
-      <button class="game-action rest" id="restBtn">😴 休息</button>
-      <button class="game-action save" id="saveBtn">💾 存檔</button>
-      <button class="game-action bug" id="reportBugBtn">🐛 回報</button>
+      <button class="game-action attack" id="attackBtn">⚔️</button>
+      <button class="game-action skill" id="skillBtn">🔥</button>
+      <button class="game-action rest" id="restBtn">😴</button>
+      <button class="game-action save" id="saveBtn">💾</button>
     </div>
   </div>
 </div>
 
 <script>
-  // ---------- 音效系統 ----------
-  let audioCtx = null;
-  let masterGain = null;
-  let sfxEnabled = true;
-  function initAudio() {
-    if (audioCtx) return;
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    masterGain = audioCtx.createGain();
-    const vol = document.getElementById('volumeSlider').value / 100;
-    masterGain.gain.value = vol;
-    masterGain.connect(audioCtx.destination);
-    const buffer = audioCtx.createBuffer(1, 1, 22050);
-    const src = audioCtx.createBufferSource();
-    src.buffer = buffer;
-    src.connect(masterGain);
-    src.start();
-  }
-  function playTone(freq, dur, type = "sine", vol = 0.2) {
-    if (!sfxEnabled) return;
-    if (!audioCtx || !masterGain) return;
-    const now = audioCtx.currentTime;
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain);
-    gain.connect(masterGain);
-    osc.frequency.value = freq;
-    osc.type = type;
-    gain.gain.value = vol;
-    osc.start(now);
-    gain.gain.exponentialRampToValueAtTime(0.00001, now + dur);
-    osc.stop(now + dur);
-  }
-  function playAttack() { playTone(523.25, 0.12, "triangle", 0.15); }
-  function playSkill() { playTone(880, 0.18, "square", 0.2); }
-  function playHurt() { playTone(220, 0.25, "sawtooth", 0.2); }
-  function playLevelUp() { if(!sfxEnabled) return; playTone(523.25,0.12); setTimeout(()=>playTone(659.25,0.12),130); setTimeout(()=>playTone(784,0.25),260); }
-  function playDefeat() { playTone(392,0.15); setTimeout(()=>playTone(523.25,0.25),160); }
-  function playRestSound() { playTone(330,0.18); setTimeout(()=>playTone(262,0.22),180); }
+  // 音效系統
+  let audioCtx=null, masterGain=null, sfxEnabled=true;
+  function initAudio(){if(audioCtx)return;audioCtx=new AudioContext();masterGain=audioCtx.createGain();masterGain.gain.value=document.getElementById('volumeSlider').value/100;masterGain.connect(audioCtx.destination);}
+  function playTone(f,d,t="sine",v=0.2){if(!sfxEnabled||!audioCtx||!masterGain)return;let o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(masterGain);o.frequency.value=f;o.type=t;g.gain.value=v;o.start();g.gain.exponentialRampToValueAtTime(0.00001,audioCtx.currentTime+d);o.stop(audioCtx.currentTime+d);}
+  function playAttack(){playTone(523,0.12,"triangle",0.15);}
+  function playSkill(){playTone(880,0.18,"square",0.2);}
+  function playHurt(){playTone(220,0.25,"sawtooth",0.2);}
+  function playLevelUp(){if(!sfxEnabled)return;playTone(523,0.12);setTimeout(()=>playTone(659,0.12),130);setTimeout(()=>playTone(784,0.25),260);}
+  function playDefeat(){playTone(392,0.15);setTimeout(()=>playTone(523,0.25),160);}
+  function playRest(){playTone(330,0.18);setTimeout(()=>playTone(262,0.22),180);}
 
-  // ---------- 遊戲邏輯 (完整 Beta 1.3.0) ----------
-  let hp = 100, maxHp = 100, exp = 0, level = 1, atk = 10;
-  let restUsed = false;
-  let currentMonster = { name: "", emoji: "", hp: 0, maxHp: 0, atk: 0, exp: 0 };
-  const zones = [
-    { name: "🌳 新手村", range: [1,30], monsters: ["🟣史萊姆","🟢哥布林","🐺森林狼"] },
-    { name: "🏜️ 黃昏沙漠", range: [31,90], monsters: ["🦂巨蠍","🧻木乃伊","🐍沙蛇"] },
-    { name: "⛰️ 蒼穹之巔", range: [91,100], monsters: ["🐉青龍","👼天使","😈惡魔"] }
+  // 遊戲狀態
+  let hp=100,maxHp=100,exp=0,level=1,atk=10,restUsed=false;
+  let cur={name:"史萊姆",emoji:"🟣",hp:35,maxHp:35,atk:5,exp:15};
+  const zones=[
+    {name:"🌳新手村",range:[1,30],mons:["🟣史萊姆","🟢哥布林","🐺森林狼"]},
+    {name:"🏜️沙漠",range:[31,90],mons:["🦂巨蠍","🧻木乃伊","🐍沙蛇"]},
+    {name:"⛰️蒼穹",range:[91,100],mons:["🐉青龍","👼天使","😈惡魔"]}
   ];
-  function rand(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
-  function getZone() { for(let z of zones) if(level>=z.range[0]&&level<=z.range[1]) return z; return zones[0]; }
-  function generateMonster(){
-    let zone = getZone();
-    let raw = zone.monsters[Math.floor(Math.random()*zone.monsters.length)];
-    let emoji = raw[0], name = raw.slice(1);
-    let baseHp = 30 + level * 2.5;
-    let baseAtk = 5 + Math.floor(level / 2.5);
-    let variance = v => Math.floor(v * (0.8 + Math.random() * 0.4));
-    return { name, emoji, hp: variance(baseHp), maxHp: variance(baseHp), atk: variance(baseAtk), exp: Math.floor(12 + level * 0.8) };
+  function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+  function getZone(){for(let z of zones)if(level>=z.range[0]&&level<=z.range[1])return z;return zones[0];}
+  function genMonster(){
+    let z=getZone(),raw=z.mons[Math.floor(Math.random()*z.mons.length)];
+    let emoji=raw[0],name=raw.slice(1);
+    let baseHp=30+level*2.5,baseAtk=5+Math.floor(level/2.5);
+    let v=v=>Math.floor(v*(0.8+Math.random()*0.4));
+    return {name,emoji,hp:v(baseHp),maxHp:v(baseHp),atk:v(baseAtk),exp:Math.floor(12+level*0.8)};
   }
-  function refreshMonster(){ currentMonster = generateMonster(); restUsed = false; updateUI(); logMsg(`✨ 出現 ${currentMonster.name} 💀${currentMonster.hp} 攻${currentMonster.atk}`); }
+  function refresh(){cur=genMonster();restUsed=false;updateUI();logMsg(`✨ ${cur.name} HP${cur.hp} 攻${cur.atk}`);}
   function updateUI(){
-    hp = Math.min(maxHp, Math.max(0, hp)); exp = Math.min(50, exp);
-    let zone = getZone();
-    document.getElementById('hpText').innerText = `${hp}/${maxHp}`;
-    document.getElementById('expText').innerText = `${exp}/50`;
-    document.getElementById('levelText').innerText = level;
-    document.getElementById('atkText').innerText = atk;
-    document.getElementById('zoneText').innerText = zone.name;
-    document.getElementById('mapBadge').innerHTML = zone.name;
-    document.getElementById('monsterName').innerHTML = currentMonster.name;
-    document.getElementById('monsterEmoji').innerText = currentMonster.emoji;
-    document.getElementById('monsterHpText').innerText = `${currentMonster.hp}/${currentMonster.maxHp}`;
-    document.getElementById('monsterAtk').innerHTML = `⚔️ 攻擊力 ${currentMonster.atk}`;
-    document.getElementById('hpBar').style.width = (hp/maxHp*100)+'%';
-    document.getElementById('expBar').style.width = (exp/50*100)+'%';
-    document.getElementById('monsterBar').style.width = (currentMonster.hp/currentMonster.maxHp*100)+'%';
-    let restBtn = document.getElementById('restBtn');
-    if(restBtn) { restBtn.disabled = restUsed; restBtn.style.opacity = restUsed?0.5:1; }
+    hp=Math.min(maxHp,Math.max(0,hp));exp=Math.min(50,exp);
+    let z=getZone();
+    document.getElementById('hpText').innerText=`${hp}/${maxHp}`;
+    document.getElementById('expText').innerText=`${exp}/50`;
+    document.getElementById('levelText').innerText=level;
+    document.getElementById('atkText').innerText=atk;
+    document.getElementById('zoneText').innerHTML=z.name;
+    document.getElementById('monsterName').innerHTML=cur.name;
+    document.getElementById('monsterEmoji').innerText=cur.emoji;
+    document.getElementById('monsterHpText').innerText=`${cur.hp}/${cur.maxHp}`;
+    document.getElementById('hpBar').style.width=`${hp/maxHp*100}%`;
+    document.getElementById('expBar').style.width=`${exp/50*100}%`;
+    document.getElementById('monsterBar').style.width=`${cur.hp/cur.maxHp*100}%`;
+    let btn=document.getElementById('restBtn');
+    if(btn){btn.disabled=restUsed;btn.style.opacity=restUsed?0.5:1;}
   }
-  function logMsg(msg){ document.getElementById('logMsg').innerHTML = msg; }
-  function checkLevelUp(){
-    let leveled=false;
-    while(exp>=50){
-      exp-=50; level++; maxHp+=20; atk+=5;
-      hp = Math.floor(maxHp*0.7);
-      leveled=true;
-      logMsg(`🎉 升級 Lv.${level}！攻擊力 ${atk}，恢復70%生命`);
-      playLevelUp();
-      updateUI();
-    }
-    if(leveled) refreshMonster();
-    return leveled;
+  function logMsg(m){document.getElementById('logMsg').innerHTML=m;}
+  function levelUp(){
+    let up=false;
+    while(exp>=50){exp-=50;level++;maxHp+=20;atk+=5;hp=Math.floor(maxHp*0.7);up=true;logMsg(`🎉 Lv${level} 攻${atk}`);playLevelUp();updateUI();}
+    if(up)refresh();
   }
   function monsterCounter(){
-    let dmg = rand(currentMonster.atk-3, currentMonster.atk+2);
-    dmg = Math.max(1,dmg);
-    hp -= dmg;
-    playHurt();
-    logMsg(`😈 ${currentMonster.name} 反擊 ${dmg} 傷害！`);
-    if(hp<=0){ hp=maxHp; logMsg(`💀 戰敗復活至滿血`); }
-    updateUI();
+    let d=Math.max(1,rand(cur.atk-3,cur.atk+2));hp-=d;playHurt();logMsg(`😈 ${cur.name} 反擊 ${d}`);
+    if(hp<=0){hp=maxHp;logMsg(`💀 復活`);}updateUI();
   }
-  function defeatMonster(){
-    exp += currentMonster.exp;
-    logMsg(`🎉 擊敗 ${currentMonster.name} 獲得 ${currentMonster.exp} EXP！`);
-    playDefeat();
-    checkLevelUp();
-    refreshMonster();
-    updateUI();
+  function defeat(){
+    exp+=cur.exp;logMsg(`🎉 獲得 ${cur.exp} EXP`);playDefeat();levelUp();refresh();updateUI();
   }
-  function attackAction(){ initAudio(); playAttack(); if(hp<=0){ logMsg("昏迷"); return; } let dmg=rand(atk-3,atk+5); dmg=Math.max(2,dmg); currentMonster.hp-=dmg; logMsg(`⚔️ 造成 ${dmg} 傷害！`); if(currentMonster.hp<=0){ defeatMonster(); return; } monsterCounter(); }
-  function skillAction(){ initAudio(); playSkill(); if(hp<=0){ logMsg("昏迷"); return; } let dmg=rand(atk+5,atk*2+3); currentMonster.hp-=dmg; logMsg(`🔥 技能造成 ${dmg} 傷害！`); if(currentMonster.hp<=0){ defeatMonster(); return; } monsterCounter(); }
-  function restAction(){ initAudio(); playRestSound(); if(restUsed){ logMsg("本場已休息過"); return; } if(hp<=0){ logMsg("無法休息"); return; } let heal=30; hp=Math.min(maxHp, hp+heal); restUsed=true; logMsg(`😴 恢復 ${heal} HP（此場不能再休息）`); let sneak=rand(currentMonster.atk-2,currentMonster.atk+1); sneak=Math.max(1,sneak); hp-=sneak; logMsg(`⚠️ 休息被偷襲 -${sneak} HP`); if(hp<=0){ hp=maxHp; logMsg(`💀 偷襲致死復活`); } updateUI(); }
-  function saveGame(){ let data={ hp, maxHp, exp, level, atk, restUsed }; localStorage.setItem("monsterSaveBeta130",JSON.stringify(data)); logMsg("💾 存檔完成"); }
-  function loadGame(){
-    try{
-      let d=localStorage.getItem("monsterSaveBeta130");
-      if(d){ let s=JSON.parse(d); hp=s.hp??100; maxHp=s.maxHp??100; exp=s.exp??0; level=s.level??1; atk=s.atk??10; restUsed=s.restUsed??false; logMsg("📀 讀取存檔"); } 
-      else { logMsg("🌟 新遊戲 Beta 1.3.0"); }
-    }catch(e){}
-    updateUI();
-    refreshMonster();
+  function attackAction(){
+    initAudio();playAttack();if(hp<=0){logMsg("昏迷");return;}
+    let d=Math.max(2,rand(atk-3,atk+5));cur.hp-=d;logMsg(`⚔️ ${d}傷害`);
+    if(cur.hp<=0){defeat();return;}monsterCounter();
   }
+  function skillAction(){
+    initAudio();playSkill();if(hp<=0){logMsg("昏迷");return;}
+    let d=rand(atk+5,atk*2+3);cur.hp-=d;logMsg(`🔥 ${d}傷害`);
+    if(cur.hp<=0){defeat();return;}monsterCounter();
+  }
+  function restAction(){
+    initAudio();playRest();if(restUsed){logMsg("已休息過");return;}if(hp<=0){logMsg("無法休息");return;}
+    hp=Math.min(maxHp,hp+30);restUsed=true;logMsg(`😴 恢復30 HP`);
+    let s=Math.max(1,rand(cur.atk-2,cur.atk+1));hp-=s;logMsg(`⚠️ 被偷襲 -${s}`);
+    if(hp<=0){hp=maxHp;logMsg(`💀 復活`);}updateUI();
+  }
+  function saveGame(){localStorage.setItem("monsterSave",JSON.stringify({hp,maxHp,exp,level,atk,restUsed}));logMsg("💾 存檔");}
+  function loadGame(){try{let d=localStorage.getItem("monsterSave");if(d){let s=JSON.parse(d);hp=s.hp??100;maxHp=s.maxHp??100;exp=s.exp??0;level=s.level??1;atk=s.atk??10;restUsed=s.restUsed??false;logMsg("📀 讀取");}}catch(e){}refresh();}
 
-  // 頁面切換與設定同步
-  const mainPage = document.getElementById('mainPage');
-  const settingsPage = document.getElementById('settingsPage');
-  const gamePage = document.getElementById('gamePage');
-  document.getElementById('toGameBtn').onclick = () => {
-    mainPage.classList.remove('active');
-    gamePage.classList.add('active');
-    loadGame();
-  };
-  document.getElementById('toSettingsBtn').onclick = () => {
-    mainPage.classList.remove('active');
-    settingsPage.classList.add('active');
-  };
-  document.getElementById('backFromSettings').onclick = () => {
-    settingsPage.classList.remove('active');
-    mainPage.classList.add('active');
-  };
-  document.getElementById('backFromGame').onclick = () => {
-    gamePage.classList.remove('active');
-    mainPage.classList.add('active');
-  };
-  // 設定控制項
-  const volumeSlider = document.getElementById('volumeSlider');
-  volumeSlider.oninput = (e) => { if(masterGain) masterGain.gain.value = e.target.value / 100; };
-  const sfxToggle = document.getElementById('sfxToggle');
-  sfxToggle.onchange = (e) => { sfxEnabled = e.target.checked; };
-  // 遊戲按鈕
-  document.getElementById('attackBtn').onclick = attackAction;
-  document.getElementById('skillBtn').onclick = skillAction;
-  document.getElementById('restBtn').onclick = restAction;
-  document.getElementById('saveBtn').onclick = saveGame;
-  document.getElementById('reportBugBtn').onclick = () => { window.open('https://github.com/你的帳號/monster-game/issues/new', '_blank'); };
-  // 初始化
+  // 頁面切換
+  const main=document.getElementById('mainPage'),sett=document.getElementById('settingsPage'),game=document.getElementById('gamePage');
+  document.getElementById('toGameBtn').onclick=()=>{main.classList.remove('active');game.classList.add('active');loadGame();};
+  document.getElementById('toSettingsBtn').onclick=()=>{main.classList.remove('active');sett.classList.add('active');};
+  document.getElementById('backFromSettings').onclick=()=>{sett.classList.remove('active');main.classList.add('active');};
+  document.getElementById('backFromGame').onclick=()=>{game.classList.remove('active');main.classList.add('active');};
+  document.getElementById('volumeSlider').oninput=e=>{if(masterGain)masterGain.gain.value=e.target.value/100;};
+  document.getElementById('sfxToggle').onchange=e=>{sfxEnabled=e.target.checked;};
+  document.getElementById('discordLinkBtn').onclick=()=>{window.open('https://discord.gg/scG6QxxC3', '_blank');};
+  document.getElementById('attackBtn').onclick=attackAction;
+  document.getElementById('skillBtn').onclick=skillAction;
+  document.getElementById('restBtn').onclick=restAction;
+  document.getElementById('saveBtn').onclick=saveGame;
   loadGame();
 </script>
 </body>
