@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>MONSTER GAME</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;user-select:none;}
+  body{background:#0a0f1e;font-family:system-ui;min-height:100vh;display:flex;justify-content:center;align-items:center;color:#e2e8f0;}
+  .app{width:100%;max-width:480px;margin:20px;background:#0f172a;border-radius:32px;padding:24px 20px 32px;text-align:center;}
+  .page{display:none;}.page.active{display:block;}
+  .main-title{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#facc15,#ff8c00);-webkit-background-clip:text;background-clip:text;color:transparent;margin:30px 0;}
+  .play-btn{background:#facc15;color:#0f172a;border:none;padding:14px 28px;border-radius:60px;font-size:1.3rem;font-weight:bold;cursor:pointer;margin:20px 0;width:70%;}
+  .settings-btn{background:transparent;border:1px solid #334155;color:#94a3b8;padding:8px 20px;border-radius:30px;cursor:pointer;}
+  .setting-item{background:#1e293b;border-radius:20px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;text-align:left;}
+  .discord-btn-small{background:#5865F2;border:none;border-radius:30px;padding:6px 14px;color:white;font-size:0.75rem;font-weight:bold;cursor:pointer;}
+  .discord-btn-small:hover{background:#4752c4;}
+  .lang-btn{background:#334155;border:none;border-radius:30px;padding:6px 12px;color:white;font-size:0.7rem;cursor:pointer;margin-left:6px;}
+  .difficulty-select{background:#0f172a;color:#e2e8f0;border:1px solid #475569;border-radius:20px;padding:6px 12px;cursor:pointer;}
+  .switch{position:relative;display:inline-block;width:48px;height:24px;}
+  .switch input{opacity:0;width:0;height:0;}
+  .slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#475569;border-radius:24px;}
+  .slider:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background:white;border-radius:50%;transition:0.2s;}
+  input:checked+.slider{background:#3b82f6;}
+  input:checked+.slider:before{transform:translateX(24px);}
+  input[type="range"]{width:140px;height:4px;-webkit-appearance:none;background:#475569;border-radius:2px;}
+  input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#3b82f6;cursor:pointer;}
+  .back-btn{background:#334155;border:none;padding:6px 14px;border-radius:30px;color:white;cursor:pointer;margin-bottom:15px;}
+  .stat-row{display:flex;justify-content:space-between;margin:10px 0;font-weight:bold;}
+  .bar{background:#1e293b;border-radius:20px;height:18px;overflow:hidden;margin:6px 0;}
+  .fillhp{background:#ef4444;height:100%;}
+  .fillexp{background:#3b82f6;height:100%;}
+  .enemy-icon{font-size:50px;margin:10px;}
+  .log{background:#00000055;border-radius:20px;padding:10px;margin:12px 0;font-size:0.8rem;}
+  .buttons{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:10px;}
+  button.game-action{padding:8px 16px;border-radius:40px;font-weight:bold;cursor:pointer;border:none;}
+  .attack{background:#dc2626;color:white;}
+  .skill{background:#2563eb;color:white;}
+  .rest{background:#16a34a;color:white;}
+  .save{background:#9333ea;color:white;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div id="mainPage" class="page active">
+    <div class="main-title" id="gameTitle">MONSTER GAME</div>
+    <button class="play-btn" id="toGameBtn" data-en="▶ PLAY GAME" data-zh="▶ 開始遊戲">▶ PLAY GAME</button><br>
+    <button class="settings-btn" id="toSettingsBtn" data-en="⚙ SETTINGS" data-zh="⚙ 設定">⚙ SETTINGS</button>
+    <div style="margin-top:30px; font-size:0.65rem; color:#475569;" id="versionText">Beta 1.3.0</div>
+  </div>
+
+  <div id="settingsPage" class="page">
+    <button class="back-btn" id="backFromSettings" data-en="← BACK" data-zh="← 返回">← BACK</button>
+    <h3 style="text-align:left;" id="settingsTitle" data-en="Settings" data-zh="設定">Settings</h3>
+    <div class="setting-item"><span id="volLabel" data-en="🔊 Volume" data-zh="🔊 音量">🔊 Volume</span><input type="range" id="volumeSlider" min="0" max="100" value="70"></div>
+    <div class="setting-item"><span id="sfxLabel" data-en="🔔 SFX" data-zh="🔔 音效">🔔 SFX</span><label class="switch"><input type="checkbox" id="sfxToggle" checked><span class="slider"></span></label></div>
+    <div class="setting-item"><span id="diffLabel" data-en="⚔️ Difficulty" data-zh="⚔️ 難度">⚔️ Difficulty</span><select id="difficultySelect" class="difficulty-select"><option value="easy" data-en="🎈 Easy" data-zh="🎈 簡單">🎈 Easy</option><option value="normal" selected data-en="⚖️ Normal" data-zh="⚖️ 普通">⚖️ Normal</option><option value="hard" data-en="🔥 Hard" data-zh="🔥 困難">🔥 Hard</option></select></div>
+    <div class="setting-item"><span id="bugLabel" data-en="🐛 BUG REPORT" data-zh="🐛 回報問題">🐛 BUG REPORT</span><button class="discord-btn-small" id="reportBugBtn" data-en="SEND" data-zh="傳送">SEND</button></div>
+    <div class="setting-item"><span id="discordLabel" data-en="💬 Discord" data-zh="💬 Discord 社群">💬 Discord</span><button class="discord-btn-small" id="discordLinkBtn" data-en="JOIN" data-zh="加入">JOIN</button></div>
+    <div class="setting-item"><span id="langLabel" data-en="🌐 Language" data-zh="🌐 語言">🌐 Language</span><div><button class="lang-btn" onclick="setLang('zh')">中文</button><button class="lang-btn" onclick="setLang('en')">EN</button></div></div>
+  </div>
+
+  <div id="gamePage" class="page">
+    <button class="back-btn" id="backFromGame" data-en="← MENU" data-zh="← 選單">← MENU</button>
+    <div class="stat-row"><span id="hpLabel">❤️</span> <span id="hpText">100/100</span><span id="expLabel">⭐</span> <span id="expText">0/50</span><span id="lvLabel">⬆️ Lv</span> <span id="levelText">1</span></div>
+    <div class="bar"><div class="fillhp" id="hpBar"></div></div>
+    <div class="bar"><div class="fillexp" id="expBar"></div></div>
+    <div class="stat-row"><span id="atkLabel">⚔️</span> <span id="atkText">10</span><span id="mapLabel">🗺️</span> <span id="zoneText">新手村</span></div>
+    <h3 id="monsterName">史萊姆</h3>
+    <div class="enemy-icon" id="monsterEmoji">🟣</div>
+    <div><span id="monsterHpLabel">💀 HP</span> <span id="monsterHpText">0/0</span></div>
+    <div class="bar"><div class="fillhp" id="monsterBar"></div></div>
+    <div class="log" id="logMsg">Click attack to start</div>
+    <div class="buttons">
+      <button class="game-action attack" id="attackBtn" data-en="⚔️" data-zh="⚔️">⚔️</button>
+      <button class="game-action skill" id="skillBtn" data-en="🔥" data-zh="🔥">🔥</button>
+      <button class="game-action rest" id="restBtn" data-en="😴" data-zh="😴">😴</button>
+      <button class="game-action save" id="saveBtn" data-en="💾" data-zh="💾">💾</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== 語言切換 ====================
+let currentLang = localStorage.getItem("gameLang") || "en";
+function setLang(lang) { currentLang = lang; localStorage.setItem("gameLang", lang); updateUILang(); }
+function updateUILang() {
+  document.querySelectorAll("[data-en][data-zh]").forEach(el => {
+    el.innerText = el.getAttribute(`data-${currentLang}`);
+  });
+  const diffSelect = document.getElementById("difficultySelect");
+  if(diffSelect) {
+    for(let i=0;i<diffSelect.options.length;i++) {
+      let opt = diffSelect.options[i];
+      opt.innerText = opt.getAttribute(`data-${currentLang}`);
+    }
+  }
+}
+setLang(currentLang);
+
+// ==================== 音效系統 ====================
+let audioCtx=null, masterGain=null, sfxEnabled=true;
+function initAudio(){if(audioCtx)return;audioCtx=new AudioContext();masterGain=audioCtx.createGain();masterGain.gain.value=document.getElementById('volumeSlider').value/100;masterGain.connect(audioCtx.destination);}
+function playTone(f,d,t="sine",v=0.2){if(!sfxEnabled||!audioCtx||!masterGain)return;let o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(masterGain);o.frequency.value=f;o.type=t;g.gain.value=v;o.start();g.gain.exponentialRampToValueAtTime(0.00001,audioCtx.currentTime+d);o.stop(audioCtx.currentTime+d);}
+function playAttack(){playTone(523,0.12,"triangle",0.15);}
+function playSkill(){playTone(880,0.18,"square",0.2);}
+function playHurt(){playTone(220,0.25,"sawtooth",0.2);}
+function playLevelUp(){if(!sfxEnabled)return;playTone(523,0.12);setTimeout(()=>playTone(659,0.12),130);setTimeout(()=>playTone(784,0.25),260);}
+function playDefeat(){playTone(392,0.15);setTimeout(()=>playTone(523,0.25),160);}
+function playRest(){playTone(330,0.18);setTimeout(()=>playTone(262,0.22),180);}
+
+// ==================== 遊戲狀態 ====================
+let hp=100,maxHp=100,exp=0,level=1,atk=10,restUsed=false;
+let cur={name:"史萊姆",emoji:"🟣",hp:35,maxHp:35,atk:5,exp:15};
+let currentDifficulty = "normal";
+const zones=[
+  {name:"🌳新手村",range:[1,30],mons:["🟣史萊姆","🟢哥布林","🐺森林狼"]},
+  {name:"🏜️沙漠",range:[31,90],mons:["🦂巨蠍","🧻木乃伊","🐍沙蛇"]},
+  {name:"⛰️蒼穹",range:[91,100],mons:["🐉青龍","👼天使","😈惡魔"]}
+];
+function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function getZone(){for(let z of zones)if(level>=z.range[0]&&level<=z.range[1])return z;return zones[0];}
+function getDifficultyMultipliers() {
+  switch(currentDifficulty) {
+    case "easy": return { hp: 0.7, atk: 0.7, exp: 1.1 };
+    case "hard": return { hp: 1.5, atk: 1.3, exp: 0.85 };
+    default: return { hp: 1.0, atk: 1.0, exp: 1.0 };
+  }
+}
+function genMonster(){
+  let z=getZone(),raw=z.mons[Math.floor(Math.random()*z.mons.length)];
+  let emoji=raw[0],name=raw.slice(1);
+  let mult = getDifficultyMultipliers();
+  let baseHp = (30 + level * 2.5) * mult.hp;
+  let baseAtk = (5 + Math.floor(level / 2.5)) * mult.atk;
+  let v=v=>Math.floor(v*(0.8+Math.random()*0.4));
+  let expGain = Math.floor((12 + level * 0.8) * mult.exp);
+  return {name,emoji,hp:v(baseHp),maxHp:v(baseHp),atk:v(baseAtk),exp:Math.max(1,expGain)};
+}
+function refresh(){cur=genMonster();restUsed=false;updateUI();logMsg(`✨ ${cur.name} HP${cur.hp} ATK${cur.atk}`);}
+function updateUI(){
+  hp=Math.min(maxHp,Math.max(0,hp));exp=Math.min(50,exp);
+  let z=getZone();
+  document.getElementById('hpText').innerText=`${hp}/${maxHp}`;
+  document.getElementById('expText').innerText=`${exp}/50`;
+  document.getElementById('levelText').innerText=level;
+  document.getElementById('atkText').innerText=atk;
+  document.getElementById('zoneText').innerHTML=z.name;
+  document.getElementById('monsterName').innerHTML=cur.name;
+  document.getElementById('monsterEmoji').innerText=cur.emoji;
+  document.getElementById('monsterHpText').innerText=`${cur.hp}/${cur.maxHp}`;
+  document.getElementById('hpBar').style.width=`${hp/maxHp*100}%`;
+  document.getElementById('expBar').style.width=`${exp/50*100}%`;
+  document.getElementById('monsterBar').style.width=`${cur.hp/cur.maxHp*100}%`;
+  let btn=document.getElementById('restBtn');
+  if(btn){btn.disabled=restUsed;btn.style.opacity=restUsed?0.5:1;}
+}
+function logMsg(m){document.getElementById('logMsg').innerHTML=m;}
+function levelUp(){
+  let up=false;
+  while(exp>=50){exp-=50;level++;maxHp+=20;atk+=5;hp=Math.floor(maxHp*0.7);up=true;logMsg(`🎉 Lv${level} ATK${atk}`);playLevelUp();updateUI();}
+  if(up)refresh();
+}
+function monsterCounter(){
+  let d=Math.max(1,rand(cur.atk-3,cur.atk+2));hp-=d;playHurt();logMsg(`😈 ${cur.name} counter ${d}`);
+  if(hp<=0){hp=maxHp;logMsg(`💀 revive`);}updateUI();
+}
+function defeat(){
+  exp+=cur.exp;logMsg(`🎉 defeat ${cur.name} +${cur.exp} EXP`);playDefeat();levelUp();refresh();updateUI();
+}
+function attackAction(){
+  initAudio();playAttack();if(hp<=0){logMsg("cannot attack");return;}
+  let d=Math.max(2,rand(atk-3,atk+5));cur.hp-=d;logMsg(`⚔️ ${d} dmg`);
+  if(cur.hp<=0){defeat();return;}monsterCounter();
+}
+function skillAction(){
+  initAudio();playSkill();if(hp<=0){logMsg("cannot skill");return;}
+  let d=rand(atk+5,atk*2+3);cur.hp-=d;logMsg(`🔥 ${d} dmg`);
+  if(cur.hp<=0){defeat();return;}monsterCounter();
+}
+function restAction(){
+  initAudio();playRest();if(restUsed){logMsg("rest used");return;}if(hp<=0){logMsg("cannot rest");return;}
+  hp=Math.min(maxHp,hp+30);restUsed=true;logMsg(`😴 +30 HP`);
+  let s=Math.max(1,rand(cur.atk-2,cur.atk+1));hp-=s;logMsg(`⚠️ sneak -${s}`);
+  if(hp<=0){hp=maxHp;logMsg(`💀 revive`);}updateUI();
+}
+function saveGame(){localStorage.setItem("monsterSave",JSON.stringify({hp,maxHp,exp,level,atk,restUsed,currentDifficulty}));logMsg("💾 saved");}
+function loadGame(){
+  try{
+    let d=localStorage.getItem("monsterSave");
+    if(d){
+      let s=JSON.parse(d);
+      hp=s.hp??100;maxHp=s.maxHp??100;exp=s.exp??0;level=s.level??1;atk=s.atk??10;restUsed=s.restUsed??false;
+      if(s.currentDifficulty) currentDifficulty = s.currentDifficulty;
+      document.getElementById('difficultySelect').value = currentDifficulty;
+      logMsg("📀 loaded");
+    } else { logMsg("🌟 new game"); }
+  }catch(e){}
+  refresh();
+}
+
+// ==================== Discord Webhook 回報（含輸入框）====================
+const WEBHOOK_URL = "https://discord.com/api/webhooks/1503764494969475215/yj1L6PR8nVzbSEWomvEZYBas9Jx4_5KwQZJrvcrNUsBHcKx9nmI59bRGkOM7R_90yjb8";
+async function reportBugToDiscord() {
+  const problem = prompt("請描述您遇到的問題 / Please describe the problem:");
+  if (!problem || problem.trim() === "") {
+    alert("未輸入問題，已取消回報 / No description, cancelled.");
+    return;
+  }
+  try {
+    const msg = {
+      content: `**🐛 BUG REPORT**\n` +
+               `Problem: ${problem.trim()}\n` +
+               `Lv: ${level}\n` +
+               `Zone: ${getZone().name}\n` +
+               `HP: ${hp}/${maxHp}\n` +
+               `ATK: ${atk}\n` +
+               `UA: ${navigator.userAgent}\n` +
+               `Time: ${new Date().toLocaleString()}`
+    };
+    const res = await fetch(WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(msg)
+    });
+    alert(res.ok ? "✅ 回報已送出 / Report sent!" : "❌ 傳送失敗 / Failed to send");
+  } catch(e) {
+    alert("❌ 錯誤 / Error");
+  }
+}
+
+// ==================== 頁面切換與事件綁定 ====================
+const main=document.getElementById('mainPage'),sett=document.getElementById('settingsPage'),game=document.getElementById('gamePage');
+document.getElementById('toGameBtn').onclick=()=>{main.classList.remove('active');game.classList.add('active');loadGame();};
+document.getElementById('toSettingsBtn').onclick=()=>{main.classList.remove('active');sett.classList.add('active');};
+document.getElementById('backFromSettings').onclick=()=>{sett.classList.remove('active');main.classList.add('active');};
+document.getElementById('backFromGame').onclick=()=>{game.classList.remove('active');main.classList.add('active');};
+document.getElementById('volumeSlider').oninput=e=>{if(masterGain)masterGain.gain.value=e.target.value/100;};
+document.getElementById('sfxToggle').onchange=e=>{sfxEnabled=e.target.checked;};
+document.getElementById('difficultySelect').onchange=e=>{currentDifficulty=e.target.value;if(game.classList.contains('active'))refresh();};
+document.getElementById('reportBugBtn').onclick=reportBugToDiscord;
+document.getElementById('discordLinkBtn').onclick=()=>{window.open('https://discord.gg/scG6QxxC3', '_blank');};
+document.getElementById('attackBtn').onclick=attackAction;
+document.getElementById('skillBtn').onclick=skillAction;
+document.getElementById('restBtn').onclick=restAction;
+document.getElementById('saveBtn').onclick=saveGame;
+loadGame();
+</script>
+</body>
+</html>
