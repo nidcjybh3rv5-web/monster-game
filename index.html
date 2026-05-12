@@ -81,6 +81,7 @@
 </div>
 
 <script>
+// ==================== 語言切換 ====================
 let currentLang = localStorage.getItem("gameLang") || "en";
 function setLang(lang) { currentLang = lang; localStorage.setItem("gameLang", lang); updateUILang(); }
 function updateUILang() {
@@ -94,11 +95,10 @@ function updateUILang() {
       opt.innerText = opt.getAttribute(`data-${currentLang}`);
     }
   }
-  if(window.updateGameLogLang) window.updateGameLogLang();
 }
 setLang(currentLang);
 
-// 音效系統
+// ==================== 音效系統 ====================
 let audioCtx=null, masterGain=null, sfxEnabled=true;
 function initAudio(){if(audioCtx)return;audioCtx=new AudioContext();masterGain=audioCtx.createGain();masterGain.gain.value=document.getElementById('volumeSlider').value/100;masterGain.connect(audioCtx.destination);}
 function playTone(f,d,t="sine",v=0.2){if(!sfxEnabled||!audioCtx||!masterGain)return;let o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(masterGain);o.frequency.value=f;o.type=t;g.gain.value=v;o.start();g.gain.exponentialRampToValueAtTime(0.00001,audioCtx.currentTime+d);o.stop(audioCtx.currentTime+d);}
@@ -109,7 +109,7 @@ function playLevelUp(){if(!sfxEnabled)return;playTone(523,0.12);setTimeout(()=>p
 function playDefeat(){playTone(392,0.15);setTimeout(()=>playTone(523,0.25),160);}
 function playRest(){playTone(330,0.18);setTimeout(()=>playTone(262,0.22),180);}
 
-// 遊戲狀態
+// ==================== 遊戲狀態 ====================
 let hp=100,maxHp=100,exp=0,level=1,atk=10,restUsed=false;
 let cur={name:"史萊姆",emoji:"🟣",hp:35,maxHp:35,atk:5,exp:15};
 let currentDifficulty = "normal";
@@ -199,15 +199,37 @@ function loadGame(){
   refresh();
 }
 
+// ==================== Discord Webhook 回報（含輸入框）====================
 const WEBHOOK_URL = "https://discord.com/api/webhooks/1503764494969475215/yj1L6PR8nVzbSEWomvEZYBas9Jx4_5KwQZJrvcrNUsBHcKx9nmI59bRGkOM7R_90yjb8";
 async function reportBugToDiscord() {
+  const problem = prompt("請描述您遇到的問題 / Please describe the problem:");
+  if (!problem || problem.trim() === "") {
+    alert("未輸入問題，已取消回報 / No description, cancelled.");
+    return;
+  }
   try {
-    const msg = { content: `**BUG REPORT**\nLv:${level}\nZone:${getZone().name}\nHP:${hp}/${maxHp}\nATK:${atk}\nUA:${navigator.userAgent}\nTime:${new Date().toLocaleString()}\n\nDescribe:` };
-    const res = await fetch(WEBHOOK_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(msg) });
-    alert(res.ok ? "Report sent!" : "Failed to send");
-  } catch(e) { alert("Error"); }
+    const msg = {
+      content: `**🐛 BUG REPORT**\n` +
+               `Problem: ${problem.trim()}\n` +
+               `Lv: ${level}\n` +
+               `Zone: ${getZone().name}\n` +
+               `HP: ${hp}/${maxHp}\n` +
+               `ATK: ${atk}\n` +
+               `UA: ${navigator.userAgent}\n` +
+               `Time: ${new Date().toLocaleString()}`
+    };
+    const res = await fetch(WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(msg)
+    });
+    alert(res.ok ? "✅ 回報已送出 / Report sent!" : "❌ 傳送失敗 / Failed to send");
+  } catch(e) {
+    alert("❌ 錯誤 / Error");
+  }
 }
 
+// ==================== 頁面切換與事件綁定 ====================
 const main=document.getElementById('mainPage'),sett=document.getElementById('settingsPage'),game=document.getElementById('gamePage');
 document.getElementById('toGameBtn').onclick=()=>{main.classList.remove('active');game.classList.add('active');loadGame();};
 document.getElementById('toSettingsBtn').onclick=()=>{main.classList.remove('active');sett.classList.add('active');};
