@@ -33,7 +33,7 @@
   button.game-action{padding:10px 20px;border-radius:40px;font-weight:bold;border:none;background:rgba(255,255,255,0.2);backdrop-filter:blur(10px);color:white;font-size:1.2rem;cursor:pointer;}
   .attack{background:#dc2626;}.skill{background:#2563eb;}.rest{background:#16a34a;}.save{background:#9333ea;}
   .achievement-item{font-size:0.7rem;padding:6px 12px;margin:4px;background:rgba(0,0,0,0.5);border-radius:20px;display:inline-block;}
-  .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:#facc15;padding:8px 20px;border-radius:40px;font-size:0.8rem;z-index:999;animation:fadeOut 2s ease forwards;}
+  .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:#facc15;padding:8px 20px;border-radius:40px;font-size:0.8rem;z-index:999;animation:fadeOut 2s forwards;}
   @keyframes fadeOut{0%{opacity:1}70%{opacity:1}100%{opacity:0;visibility:hidden}}
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -90,11 +90,11 @@ const L = {
     ach1:"First Blood", ach2:"Veteran", ach3:"Level Master", ach4:"Legend", ach5:"Monster Hunter", ach6:"Full HP Master" }
 };
 let curLang = localStorage.getItem("lang") || "zh";
-function t(key, ...args) { let s = L[curLang][key] || key; for(let i=0;i<args.length;i++) s=s.replace(`{${i}}`, args[i]); return s; }
+function t(key, ...args) { let s = L[curLang][key] || key; for(let i=0;i<args.length;i++) s = s.replace(`{${i}}`, args[i]); return s; }
 window.setLang = (l) => { curLang = l; localStorage.setItem("lang", l); document.querySelectorAll("[data-i18n]").forEach(el => el.innerText = t(el.dataset.i18n)); let ds = document.getElementById("difficultySelect"); if(ds) for(let i=0;i<ds.options.length;i++) ds.options[i].innerText = t(ds.options[i].value); };
 setLang(curLang);
 
-// ==================== Firebase ====================
+// ==================== Firebase ==================
 const firebaseConfig = {
   apiKey: "AIzaSyDevirfNqjlg5hVkF6pgMMU9tfx7CDac4A",
   authDomain: "monster-game-f193f.firebaseapp.com",
@@ -115,37 +115,11 @@ let changed = false;
 
 function toast(msg, isErr=false) { let d=document.createElement("div"); d.className="toast"; d.innerText=msg; d.style.color=isErr?"#ff8888":"#facc15"; document.body.appendChild(d); setTimeout(()=>d.remove(),2000); }
 
-// 處理 redirect 登入結果 (只用一次)
-async function handleRedirectResult() {
-  try {
-    const result = await auth.getRedirectResult();
-    if (result.user) {
-      currentUser = result.user;
-      updateLoginButton(true, currentUser.displayName);
-      await loadCloudSave();
-      toast(`${t("login_welcome")} ${currentUser.displayName}`);
-    } else {
-      // 無登入結果，但仍需確保按鈕狀態正確
-      if (auth.currentUser) {
-        currentUser = auth.currentUser;
-        updateLoginButton(true, currentUser.displayName);
-        await loadCloudSave();
-      } else {
-        updateLoginButton(false);
-      }
-    }
-  } catch(e) {
-    console.error(e);
-    if(e.code !== "auth/cancelled-popup-request") toast(t("login_fail")+": "+e.message, true);
-    updateLoginButton(false);
-  }
-}
-
-function updateLoginButton(isLoggedIn, displayName="") {
+function updateLoginButton() {
   const btn = document.getElementById("googleLoginBtn");
   if (!btn) return;
-  if (isLoggedIn && displayName) {
-    btn.innerText = `👤 ${displayName}`;
+  if (currentUser) {
+    btn.innerText = `👤 ${currentUser.displayName}`;
     btn.onclick = null;
   } else {
     btn.innerText = t("login");
@@ -161,22 +135,26 @@ window.signInWithGoogle = async () => {
 window.signOut = async () => {
   await auth.signOut();
   currentUser = null;
-  updateLoginButton(false);
+  updateLoginButton();
   changed = false;
   loadGame();
   toast("已登出");
 };
 
-// 監聽認證狀態變化（備用，但主要依賴 handleRedirectResult）
+// 單一登入狀態處理：Firebase 會自動觸發
 auth.onAuthStateChanged(async (user) => {
   if (user) {
     currentUser = user;
-    updateLoginButton(true, user.displayName);
+    updateLoginButton();
     await loadCloudSave();
+    toast(`${t("login_welcome")} ${user.displayName}`);
   } else {
-    currentUser = null;
-    updateLoginButton(false);
-    loadGame();
+    // 只有當 currentUser 存在且 user 為 null 時才清空 (登出情境)
+    if (currentUser) {
+      currentUser = null;
+      updateLoginButton();
+    }
+    // 未登入時不要覆蓋遊戲進度
   }
 });
 
@@ -196,7 +174,7 @@ function loadGame() {
 window.saveGame = () => { if(currentUser) saveToCloud(); else saveLocal(); };
 window.addEventListener("beforeunload", (e) => { if(changed) { e.preventDefault(); e.returnValue = ""; } });
 
-// ==================== 遊戲核心 ====================
+// ==================== 遊戲核心 ==================
 let hp=100, maxHp=100, exp=0, level=1, atk=10, restUsed=false;
 let cur = { name:"史萊姆", emoji:"🟣", hp:35, maxHp:35, atk:5, exp:15 };
 let currentDifficulty = "normal";
@@ -302,7 +280,7 @@ function restAction() {
   updateUI(); syncGameData();
 }
 
-// ==================== 音效 ====================
+// ==================== 音效 ==================
 let audioCtx=null, masterGain=null, sfxEnabled=localStorage.getItem("sfxEnabled")!=="false";
 document.getElementById("sfxToggle").checked = sfxEnabled;
 document.getElementById("sfxToggle").onchange = (e)=>{ sfxEnabled=e.target.checked; localStorage.setItem("sfxEnabled",sfxEnabled); };
@@ -315,7 +293,7 @@ function playLevelUp(){ if(!sfxEnabled) return; playTone(523,0.12); setTimeout((
 function playDefeat(){ playTone(392,0.15); setTimeout(()=>playTone(523,0.25),160); }
 function playRest(){ playTone(330,0.18); setTimeout(()=>playTone(262,0.22),180); }
 
-// ==================== Discord ====================
+// ==================== Discord ==================
 const WEBHOOK_URL = "https://discord.com/api/webhooks/1503764494969475215/yj1L6PR8nVzbSEWomvEZYBas9Jx4_5KwQZJrvcrNUsBHcKx9nmI59bRGkOM7R_90yjb8";
 async function reportBug() {
   let problem = prompt("請描述問題 / Describe the problem:");
@@ -330,7 +308,7 @@ async function reportBug() {
   } catch(e) { toast(t("report_fail"), true); }
 }
 
-// ==================== 事件綁定 ====================
+// ==================== 事件綁定 ==================
 const main = document.getElementById('mainPage'), sett = document.getElementById('settingsPage'), game = document.getElementById('gamePage');
 document.getElementById('toGameBtn').onclick = () => { main.classList.remove('active'); game.classList.add('active'); loadGame(); };
 document.getElementById('toSettingsBtn').onclick = () => { main.classList.remove('active'); sett.classList.add('active'); updateAchievementsUI(); };
@@ -346,8 +324,8 @@ document.getElementById('restBtn').onclick = restAction;
 document.getElementById('saveBtn').onclick = saveGame;
 document.getElementById('googleLoginBtn').onclick = signInWithGoogle;
 
-// 初始化：處理 redirect 結果，然後載入遊戲
-handleRedirectResult().then(() => loadGame());
+// 初始化：載入本地存檔，等待 Firebase 登入狀態觸發
+loadGame();
 </script>
 </body>
 </html>
