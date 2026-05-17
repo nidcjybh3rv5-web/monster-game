@@ -138,21 +138,47 @@ const provider = new firebase.auth.GoogleAuthProvider();
 let currentUser = null;
 let gameData = { hp:100, maxHp:100, exp:0, level:1, atk:10, restUsed:false, currentDifficulty:"normal", achievements:[] };
 let gameChanged = false;
+let redirectResult = null;
+
+// 處理 redirect 登入結果
+async function handleRedirectResult() {
+  try {
+    const result = await auth.getRedirectResult();
+    if (result.user) {
+      currentUser = result.user;
+      document.getElementById("googleLoginBtn").innerText = `👤 ${currentUser.displayName}`;
+      document.getElementById("googleLoginBtn").onclick = null;
+      await loadCloudSave();
+      showToast(`${t("login_welcome")} ${currentUser.displayName}`);
+    }
+  } catch (error) {
+    console.error("Redirect error:", error);
+    if (error.code !== "auth/cancelled-popup-request") {
+      showToast(t("login_fail") + ": " + error.message, true);
+    }
+  }
+}
 
 function showToast(msg, isError=false) { let d=document.createElement("div"); d.className="toast"; d.innerText=msg; d.style.color=isError?"#ff8888":"#facc15"; document.body.appendChild(d); setTimeout(()=>d.remove(),2000); }
 window.signInWithGoogle = async () => {
   try {
     showToast(t("login_welcome")+"...");
-    const result = await auth.signInWithPopup(provider);
-    currentUser = result.user;
-    document.getElementById("googleLoginBtn").innerText = `👤 ${currentUser.displayName}`;
-    document.getElementById("googleLoginBtn").onclick = null;
-    await loadCloudSave();
-    showToast(`${t("login_welcome")} ${currentUser.displayName}`);
+    await auth.signInWithRedirect(provider);
   } catch(e) { showToast(t("login_fail")+": "+e.message, true); }
 };
 window.signOut = async () => { await auth.signOut(); currentUser=null; document.getElementById("googleLoginBtn").innerText=t("login"); document.getElementById("googleLoginBtn").onclick=signInWithGoogle; gameChanged=false; loadGame(); showToast("已登出"); };
-auth.onAuthStateChanged(async (user) => { currentUser = user; if(user) { document.getElementById("googleLoginBtn").innerText = `👤 ${user.displayName}`; document.getElementById("googleLoginBtn").onclick = null; await loadCloudSave(); } else { document.getElementById("googleLoginBtn").innerText = t("login"); document.getElementById("googleLoginBtn").onclick = signInWithGoogle; loadGame(); } });
+auth.onAuthStateChanged(async (user) => { 
+  currentUser = user; 
+  if(user) { 
+    document.getElementById("googleLoginBtn").innerText = `👤 ${user.displayName}`; 
+    document.getElementById("googleLoginBtn").onclick = null; 
+    await loadCloudSave(); 
+  } else { 
+    document.getElementById("googleLoginBtn").innerText = t("login"); 
+    document.getElementById("googleLoginBtn").onclick = signInWithGoogle; 
+    loadGame(); 
+  } 
+});
 async function saveToCloud() { if(!currentUser) return; try{ await db.collection("players").doc(currentUser.uid).set({ ...gameData, lastSave: new Date() }); showToast("☁️ 雲端存檔成功"); gameChanged=false; }catch(e){ showToast("雲端存檔失敗",true); } }
 async function loadCloudSave() { if(!currentUser) return; try{ let doc = await db.collection("players").doc(currentUser.uid).get(); if(doc.exists) { Object.assign(gameData, doc.data()); loadGameFromData(); showToast("☁️ 載入雲端存檔"); } else { loadGame(); } }catch(e){ loadGame(); } }
 function saveGameLocal() { localStorage.setItem("monsterSave", JSON.stringify(gameData)); showToast(t("saved")); gameChanged=false; }
@@ -287,7 +313,7 @@ async function reportBugToDiscord() {
     showToast(t("report_sent"));
   }catch(e){showToast(t("report_fail"),true);}
 }
-// ==================== 事件綁定 ====================
+// ==================== 事件綁定與初始化 ====================
 const main=document.getElementById('mainPage'),sett=document.getElementById('settingsPage'),game=document.getElementById('gamePage');
 document.getElementById('toGameBtn').onclick=()=>{main.classList.remove('active');game.classList.add('active');loadGame();updateUI();refresh();};
 document.getElementById('toSettingsBtn').onclick=()=>{main.classList.remove('active');sett.classList.add('active');updateAchievementsUI();};
@@ -302,7 +328,9 @@ document.getElementById('skillBtn').onclick=skillAction;
 document.getElementById('restBtn').onclick=restAction;
 document.getElementById('saveBtn').onclick=saveGame;
 document.getElementById('googleLoginBtn').onclick=signInWithGoogle;
-updateAllTexts(); updateUILang(); loadGame();
+updateAllTexts(); updateUILang(); 
+handleRedirectResult();  // 處理 redirect 回傳結果
+loadGame();
 </script>
 </body>
 </html>
