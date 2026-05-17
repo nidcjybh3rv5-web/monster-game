@@ -7,10 +7,10 @@
 <style>
   *{margin:0;padding:0;box-sizing:border-box;user-select:none;}
   body{background:radial-gradient(circle at 20% 30%,#1a2a3a,#0a0f1e);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui;min-height:100vh;display:flex;justify-content:center;align-items:center;color:#fff;}
-  .app{width:100%;max-width:500px;margin:20px;background:rgba(255,255,255,0.08);backdrop-filter:blur(25px) saturate(180%);border-radius:48px;padding:24px 20px 32px;box-shadow:0 20px 40px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);}
+  .app{width:100%;max-width:500px;margin:20px;background:rgba(255,255,255,0.08);backdrop-filter:blur(25px);border-radius:48px;padding:24px 20px 32px;box-shadow:0 20px 40px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);}
   .page{display:none;}.page.active{display:block;}
   .main-title{font-size:2rem;font-weight:700;background:linear-gradient(135deg,#FFE6B0,#FFB347);-webkit-background-clip:text;background-clip:text;color:transparent;margin:30px 0;}
-  .play-btn{background:rgba(255,255,255,0.2);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.3);color:white;padding:14px 28px;border-radius:60px;font-size:1.3rem;font-weight:bold;cursor:pointer;margin:20px 0;width:70%;}
+  .play-btn{background:rgba(255,255,255,0.2);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.3);padding:14px 28px;border-radius:60px;font-size:1.3rem;font-weight:bold;cursor:pointer;margin:20px 0;width:70%;color:white;}
   .settings-btn{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.2);color:#ddd;padding:8px 20px;border-radius:30px;cursor:pointer;}
   .setting-item{background:rgba(255,255,255,0.05);backdrop-filter:blur(8px);border-radius:28px;padding:14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;}
   .discord-btn-small,.lang-btn,.back-btn{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);border-radius:30px;padding:6px 14px;color:white;font-size:0.75rem;font-weight:bold;cursor:pointer;}
@@ -18,7 +18,7 @@
   .switch{position:relative;display:inline-block;width:48px;height:24px;}
   .switch input{opacity:0;width:0;height:0;}
   .slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#475569;border-radius:24px;}
-  .slider:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background:white;border-radius:50%;}
+  .slider:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background:white;border-radius:50%;transition:0.2s;}
   input:checked+.slider{background:#3b82f6;}
   input:checked+.slider:before{transform:translateX(24px);}
   input[type="range"]{width:140px;height:4px;-webkit-appearance:none;background:#475569;border-radius:2px;}
@@ -32,7 +32,13 @@
   .buttons{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:16px;}
   button.game-action{padding:10px 20px;border-radius:40px;font-weight:bold;border:none;background:rgba(255,255,255,0.2);backdrop-filter:blur(10px);color:white;font-size:1.2rem;cursor:pointer;}
   .attack{background:#dc2626;}.skill{background:#2563eb;}.rest{background:#16a34a;}.save{background:#9333ea;}
+  .achievement-item{font-size:0.7rem;padding:6px 12px;margin:4px;background:rgba(0,0,0,0.5);border-radius:20px;display:inline-block;}
+  .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:#facc15;padding:8px 20px;border-radius:40px;font-size:0.8rem;z-index:999;animation:fadeOut 2s ease forwards;}
+  @keyframes fadeOut{0%{opacity:1}70%{opacity:1}100%{opacity:0;visibility:hidden}}
 </style>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 <div class="app">
@@ -40,18 +46,20 @@
     <div class="main-title">MONSTER GAME</div>
     <button class="play-btn" id="toGameBtn">▶ PLAY GAME</button><br>
     <button class="settings-btn" id="toSettingsBtn">⚙ SETTINGS</button>
-    <div style="margin-top:30px; font-size:0.7rem;">Beta 1.3.0</div>
+    <div style="margin-top:30px; font-size:0.7rem;">Beta 2.0.0</div>
   </div>
 
   <div id="settingsPage" class="page">
     <button class="back-btn" id="backFromSettings">← BACK</button>
     <h3>Settings</h3>
     <div class="setting-item"><span>🔊 Volume</span><input type="range" id="volumeSlider" min="0" max="100" value="70"></div>
-    <div class="setting-item"><span>🔔 SFX</span><label class="switch"><input type="checkbox" id="sfxToggle" checked><span class="slider"></span></label></div>
+    <div class="setting-item"><span>🔔 SFX</span><label class="switch"><input type="checkbox" id="sfxToggle"><span class="slider"></span></label></div>
     <div class="setting-item"><span>⚔️ Difficulty</span><select id="difficultySelect"><option value="easy">🎈 Easy</option><option value="normal" selected>⚖️ Normal</option><option value="hard">🔥 Hard</option></select></div>
     <div class="setting-item"><span>🐛 BUG REPORT</span><button class="discord-btn-small" id="reportBugBtn">SEND</button></div>
     <div class="setting-item"><span>💬 Discord</span><button class="discord-btn-small" id="discordLinkBtn">JOIN</button></div>
     <div class="setting-item"><span>🌐 Language</span><div><button class="lang-btn" onclick="setLang('zh')">中文</button><button class="lang-btn" onclick="setLang('en')">EN</button></div></div>
+    <div class="setting-item"><span>🔐 Google</span><button class="discord-btn-small" id="googleLoginBtn">登入 Google</button><button class="discord-btn-small" onclick="signOut()">登出</button></div>
+    <div class="setting-item"><span>🏆 Achievements</span><div id="achievementsList" style="display:flex;flex-wrap:wrap;gap:4px;max-width:200px;"></div></div>
   </div>
 
   <div id="gamePage" class="page">
@@ -75,39 +83,96 @@
 </div>
 
 <script>
-// ==================== 語言切換 ====================
-let currentLang = localStorage.getItem("gameLang") || "en";
-function setLang(lang) { currentLang = lang; localStorage.setItem("gameLang", lang); updateUILang(); }
-function updateUILang() {
-  document.querySelectorAll("[data-en][data-zh]").forEach(el => {
-    el.innerText = el.getAttribute(`data-${currentLang}`);
-  });
-  const diffSelect = document.getElementById("difficultySelect");
-  if(diffSelect) {
-    for(let i=0;i<diffSelect.options.length;i++) {
-      let opt = diffSelect.options[i];
-      opt.innerText = opt.getAttribute(`data-${currentLang}`);
-    }
+// ==================== 多語言文字庫 ====================
+const lang = {
+  zh: {
+    attack:"⚔️ 攻擊", skill:"🔥 技能", rest:"😴 休息", save:"💾 存檔", back:"← 返回", menu:"← 選單",
+    volume:"🔊 音量", sfx:"🔔 音效", difficulty:"⚔️ 難度", easy:"🎈 簡單", normal:"⚖️ 普通", hard:"🔥 困難",
+    bug:"🐛 問題回報", send:"傳送", discord:"💬 Discord", join:"加入", language:"🌐 語言", google:"🔐 Google",
+    login:"登入 Google", logout:"登出", achievements:"🏆 成就", 
+    monster_appear:"✨ 出現", monster_counter:"😈 反擊", attack_dmg:"⚔️ 造成", skill_dmg:"🔥 技能造成",
+    defeat:"🎉 擊敗", gain_exp:" 獲得 ", level_up:"🎉 升級 ", atk_up:" 攻擊力 ", hp_recover:" 恢復70%生命",
+    cannot_attack:"無法攻擊", cannot_skill:"無法施放", rest_used:"已休息過", cannot_rest:"無法休息",
+    rest_heal:"😴 恢復30 HP", rest_sneak:"⚠️ 被偷襲", revive:"💀 復活", saved:"💾 已存檔", loaded:"📀 讀取存檔",
+    new_game:"🌟 新遊戲", report_sent:"✅ 已送出", report_fail:"❌ 傳送失敗", login_welcome:"歡迎", login_fail:"登入失敗",
+    ach1:"初戰告捷", ach2:"百戰不殆", ach3:"升級達人", ach4:"滿級傳說", ach5:"怪物獵人", ach6:"滿血大師"
+  },
+  en: {
+    attack:"⚔️ Attack", skill:"🔥 Skill", rest:"😴 Rest", save:"💾 Save", back:"← BACK", menu:"← MENU",
+    volume:"🔊 Volume", sfx:"🔔 SFX", difficulty:"⚔️ Difficulty", easy:"🎈 Easy", normal:"⚖️ Normal", hard:"🔥 Hard",
+    bug:"🐛 BUG REPORT", send:"SEND", discord:"💬 Discord", join:"JOIN", language:"🌐 Language", google:"🔐 Google",
+    login:"Login Google", logout:"Logout", achievements:"🏆 Achievements",
+    monster_appear:"✨ Appears", monster_counter:"😈 Counter", attack_dmg:"⚔️ Deal", skill_dmg:"🔥 Skill deal",
+    defeat:"🎉 Defeated", gain_exp:" gained ", level_up:"🎉 Level Up ", atk_up:" ATK ", hp_recover:" HP recover 70%",
+    cannot_attack:"Cannot attack", cannot_skill:"Cannot cast", rest_used:"Already rested", cannot_rest:"Cannot rest",
+    rest_heal:"😴 Restored 30 HP", rest_sneak:"⚠️ Sneak attack", revive:"💀 Revived", saved:"💾 Saved", loaded:"📀 Loaded",
+    new_game:"🌟 New Game", report_sent:"✅ Sent", report_fail:"❌ Failed", login_welcome:"Welcome", login_fail:"Login failed",
+    ach1:"First Blood", ach2:"Veteran", ach3:"Level Master", ach4:"Legend", ach5:"Monster Hunter", ach6:"Full HP Master"
   }
+};
+let curLang = localStorage.getItem("lang") || "zh";
+function t(key, ...args) { let text = lang[curLang][key] || key; for(let i=0;i<args.length;i++) text = text.replace(`{${i}}`, args[i]); return text; }
+window.setLang = (l) => { curLang = l; localStorage.setItem("lang", l); updateAllTexts(); updateUILang(); };
+function updateAllTexts() {
+  document.querySelectorAll("[data-i18n]").forEach(el => { el.innerText = t(el.getAttribute("data-i18n")); });
+  const btns = ["attackBtn","skillBtn","restBtn","saveBtn","backFromSettings","backFromGame","reportBugBtn","discordLinkBtn","googleLoginBtn"];
+  btns.forEach(id => { let el = document.getElementById(id); if(el && el.getAttribute("data-i18n")) el.innerText = t(el.getAttribute("data-i18n")); });
 }
-setLang(currentLang);
+function updateUILang() {
+  const diffSelect = document.getElementById("difficultySelect");
+  if(diffSelect) for(let i=0;i<diffSelect.options.length;i++) diffSelect.options[i].innerText = t(diffSelect.options[i].value);
+}
+// ==================== Firebase ====================
+const firebaseConfig = {
+  apiKey: "AIzaSyDevirfNqjlg5hVkF6pgMMU9tfx7CDac4A",
+  authDomain: "monster-game-f193f.firebaseapp.com",
+  projectId: "monster-game-f193f",
+  storageBucket: "monster-game-f193f.firebasestorage.app",
+  messagingSenderId: "304101821779",
+  appId: "1:304101821779:web:9b77e901083a7949f265a6"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const provider = new firebase.auth.GoogleAuthProvider();
+let currentUser = null;
+let gameData = { hp:100, maxHp:100, exp:0, level:1, atk:10, restUsed:false, currentDifficulty:"normal", achievements:[] };
+let gameChanged = false;
 
-// ==================== 音效系統 ====================
-let audioCtx=null, masterGain=null, sfxEnabled=true;
-function initAudio(){if(audioCtx)return;audioCtx=new AudioContext();masterGain=audioCtx.createGain();masterGain.gain.value=document.getElementById('volumeSlider').value/100;masterGain.connect(audioCtx.destination);}
-function playTone(f,d,t="sine",v=0.2){if(!sfxEnabled||!audioCtx||!masterGain)return;let o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(masterGain);o.frequency.value=f;o.type=t;g.gain.value=v;o.start();g.gain.exponentialRampToValueAtTime(0.00001,audioCtx.currentTime+d);o.stop(audioCtx.currentTime+d);}
-function playAttack(){playTone(523,0.12,"triangle",0.15);}
-function playSkill(){playTone(880,0.18,"square",0.2);}
-function playHurt(){playTone(220,0.25,"sawtooth",0.2);}
-function playLevelUp(){if(!sfxEnabled)return;playTone(523,0.12);setTimeout(()=>playTone(659,0.12),130);setTimeout(()=>playTone(784,0.25),260);}
-function playDefeat(){playTone(392,0.15);setTimeout(()=>playTone(523,0.25),160);}
-function playRest(){playTone(330,0.18);setTimeout(()=>playTone(262,0.22),180);}
-
-// ==================== 遊戲狀態 ====================
+function showToast(msg, isError=false) { let d=document.createElement("div"); d.className="toast"; d.innerText=msg; d.style.color=isError?"#ff8888":"#facc15"; document.body.appendChild(d); setTimeout(()=>d.remove(),2000); }
+window.signInWithGoogle = async () => {
+  try {
+    showToast(t("login_welcome")+"...");
+    const result = await auth.signInWithPopup(provider);
+    currentUser = result.user;
+    document.getElementById("googleLoginBtn").innerText = `👤 ${currentUser.displayName}`;
+    document.getElementById("googleLoginBtn").onclick = null;
+    await loadCloudSave();
+    showToast(`${t("login_welcome")} ${currentUser.displayName}`);
+  } catch(e) { showToast(t("login_fail")+": "+e.message, true); }
+};
+window.signOut = async () => { await auth.signOut(); currentUser=null; document.getElementById("googleLoginBtn").innerText=t("login"); document.getElementById("googleLoginBtn").onclick=signInWithGoogle; gameChanged=false; loadGame(); showToast("已登出"); };
+auth.onAuthStateChanged(async (user) => { currentUser = user; if(user) { document.getElementById("googleLoginBtn").innerText = `👤 ${user.displayName}`; document.getElementById("googleLoginBtn").onclick = null; await loadCloudSave(); } else { document.getElementById("googleLoginBtn").innerText = t("login"); document.getElementById("googleLoginBtn").onclick = signInWithGoogle; loadGame(); } });
+async function saveToCloud() { if(!currentUser) return; try{ await db.collection("players").doc(currentUser.uid).set({ ...gameData, lastSave: new Date() }); showToast("☁️ 雲端存檔成功"); gameChanged=false; }catch(e){ showToast("雲端存檔失敗",true); } }
+async function loadCloudSave() { if(!currentUser) return; try{ let doc = await db.collection("players").doc(currentUser.uid).get(); if(doc.exists) { Object.assign(gameData, doc.data()); loadGameFromData(); showToast("☁️ 載入雲端存檔"); } else { loadGame(); } }catch(e){ loadGame(); } }
+function saveGameLocal() { localStorage.setItem("monsterSave", JSON.stringify(gameData)); showToast(t("saved")); gameChanged=false; }
+function loadGameFromData() { 
+  hp=gameData.hp; maxHp=gameData.maxHp; exp=gameData.exp; level=gameData.level; atk=gameData.atk; restUsed=gameData.restUsed; currentDifficulty=gameData.currentDifficulty;
+  document.getElementById('difficultySelect').value = currentDifficulty;
+  updateUI(); refresh(); updateAchievementsUI();
+}
+function loadGame() {
+  try{ let d = localStorage.getItem("monsterSave"); if(d) { Object.assign(gameData, JSON.parse(d)); loadGameFromData(); showToast(t("loaded")); } else { showToast(t("new_game")); refresh(); } }catch(e){ refresh(); }
+}
+window.saveGame = () => { if(currentUser) saveToCloud(); else saveGameLocal(); };
+window.addEventListener("beforeunload", (e) => { if(gameChanged) { e.preventDefault(); e.returnValue = ""; } });
+// ==================== 遊戲核心 ====================
 let hp=100,maxHp=100,exp=0,level=1,atk=10,restUsed=false;
 let cur={name:"史萊姆",emoji:"🟣",hp:35,maxHp:35,atk:5,exp:15};
 let currentDifficulty = "normal";
-const zones=[
+let achievements = { firstBlood:false, veteran:false, levelMaster:false, legend:false, monsterHunter:0, fullHpMaster:false };
+let totalDefeats = 0;
+const zones = [
   {name:"🌳新手村",range:[1,30],mons:["🟣史萊姆","🟢哥布林","🐺森林狼"]},
   {name:"🏜️沙漠",range:[31,90],mons:["🦂巨蠍","🧻木乃伊","🐍沙蛇"]},
   {name:"⛰️蒼穹",range:[91,100],mons:["🐉青龍","👼天使","😈惡魔"]}
@@ -127,9 +192,9 @@ function genMonster(){
   let mult = getDifficultyMultipliers();
   let baseHp = (30 + level * 2.5) * mult.hp;
   let baseAtk = (5 + Math.floor(level / 2.5)) * mult.atk;
-  let v=v=>Math.floor(v*(0.8+Math.random()*0.4));
+  let variance = v => Math.floor(v * (0.6 + Math.random() * 0.8));
   let expGain = Math.floor((12 + level * 0.8) * mult.exp);
-  return {name,emoji,hp:v(baseHp),maxHp:v(baseHp),atk:v(baseAtk),exp:Math.max(1,expGain)};
+  return {name,emoji,hp:variance(baseHp),maxHp:variance(baseHp),atk:variance(baseAtk),exp:Math.max(1,expGain)};
 }
 function refresh(){cur=genMonster();restUsed=false;updateUI();logMsg(`✨ ${cur.name} HP${cur.hp} ATK${cur.atk}`);}
 function updateUI(){
@@ -146,99 +211,98 @@ function updateUI(){
   document.getElementById('hpBar').style.width=`${hp/maxHp*100}%`;
   document.getElementById('expBar').style.width=`${exp/50*100}%`;
   document.getElementById('monsterBar').style.width=`${cur.hp/cur.maxHp*100}%`;
-  let btn=document.getElementById('restBtn');
-  if(btn){btn.disabled=restUsed;btn.style.opacity=restUsed?0.5:1;}
+  document.getElementById('restBtn').disabled=restUsed;
+  gameChanged = true;
 }
 function logMsg(m){document.getElementById('logMsg').innerHTML=m;}
+function checkAchievements(){
+  let unlocked = false;
+  if(!achievements.firstBlood && totalDefeats>=1){ achievements.firstBlood=true; showToast("🏆 "+t("ach1")); unlocked=true; }
+  if(!achievements.veteran && totalDefeats>=10){ achievements.veteran=true; showToast("🏆 "+t("ach2")); unlocked=true; }
+  if(!achievements.levelMaster && level>=30){ achievements.levelMaster=true; showToast("🏆 "+t("ach3")); unlocked=true; }
+  if(!achievements.legend && level>=100){ achievements.legend=true; showToast("🏆 "+t("ach4")); unlocked=true; }
+  if(!achievements.fullHpMaster && hp===maxHp && totalDefeats>=5){ achievements.fullHpMaster=true; showToast("🏆 "+t("ach6")); unlocked=true; }
+  if(unlocked) updateAchievementsUI();
+}
+function updateAchievementsUI(){
+  let html = "";
+  if(achievements.firstBlood) html += `<span class="achievement-item">✅ ${t("ach1")}</span>`;
+  if(achievements.veteran) html += `<span class="achievement-item">✅ ${t("ach2")}</span>`;
+  if(achievements.levelMaster) html += `<span class="achievement-item">✅ ${t("ach3")}</span>`;
+  if(achievements.legend) html += `<span class="achievement-item">✅ ${t("ach4")}</span>`;
+  if(achievements.monsterHunter>=50) html += `<span class="achievement-item">✅ ${t("ach5")} x${achievements.monsterHunter}</span>`;
+  if(achievements.fullHpMaster) html += `<span class="achievement-item">✅ ${t("ach6")}</span>`;
+  if(html==="") html = "<span style='font-size:0.7rem;opacity:0.6'>-</span>";
+  document.getElementById("achievementsList").innerHTML = html;
+}
 function levelUp(){
   let up=false;
-  while(exp>=50){exp-=50;level++;maxHp+=20;atk+=5;hp=Math.floor(maxHp*0.7);up=true;logMsg(`🎉 Lv${level} ATK${atk}`);playLevelUp();updateUI();}
+  while(exp>=50){exp-=50;level++;maxHp+=20;atk+=5;hp=Math.floor(maxHp*0.7);up=true;logMsg(`${t("level_up")} Lv${level} ${t("atk_up")}${atk}`);playLevelUp();updateUI();checkAchievements();}
   if(up)refresh();
 }
 function monsterCounter(){
-  let d=Math.max(1,rand(cur.atk-3,cur.atk+2));hp-=d;playHurt();logMsg(`😈 ${cur.name} counter ${d}`);
-  if(hp<=0){hp=maxHp;logMsg(`💀 revive`);}updateUI();
+  let d=Math.max(1,rand(cur.atk-3,cur.atk+2));hp-=d;playHurt();logMsg(`😈 ${cur.name} ${t("monster_counter")} ${d}`);
+  if(hp<=0){hp=maxHp;restUsed=false;updateUI();logMsg(t("revive"));}
+  updateUI();
 }
 function defeat(){
-  exp+=cur.exp;logMsg(`🎉 defeat ${cur.name} +${cur.exp} EXP`);playDefeat();levelUp();refresh();updateUI();
+  exp+=cur.exp;totalDefeats++;achievements.monsterHunter=totalDefeats;
+  logMsg(`${t("defeat")} ${cur.name} +${cur.exp} EXP`);playDefeat();checkAchievements();levelUp();refresh();updateUI();
 }
 function attackAction(){
-  initAudio();playAttack();if(hp<=0){logMsg("cannot attack");return;}
-  let d=Math.max(2,rand(atk-3,atk+5));cur.hp-=d;logMsg(`⚔️ ${d} dmg`);
+  initAudio();playAttack();if(hp<=0){logMsg(t("cannot_attack"));return;}
+  let d=Math.max(2,rand(atk-3,atk+5));cur.hp-=d;logMsg(`${t("attack_dmg")} ${d}`);
   if(cur.hp<=0){defeat();return;}monsterCounter();
 }
 function skillAction(){
-  initAudio();playSkill();if(hp<=0){logMsg("cannot skill");return;}
-  let d=rand(atk+5,atk*2+3);cur.hp-=d;logMsg(`🔥 ${d} dmg`);
+  initAudio();playSkill();if(hp<=0){logMsg(t("cannot_skill"));return;}
+  let d=rand(atk+5,atk*2+3);cur.hp-=d;logMsg(`${t("skill_dmg")} ${d}`);
   if(cur.hp<=0){defeat();return;}monsterCounter();
 }
 function restAction(){
-  initAudio();playRest();if(restUsed){logMsg("rest used");return;}if(hp<=0){logMsg("cannot rest");return;}
-  hp=Math.min(maxHp,hp+30);restUsed=true;logMsg(`😴 +30 HP`);
-  let s=Math.max(1,rand(cur.atk-2,cur.atk+1));hp-=s;logMsg(`⚠️ sneak -${s}`);
-  if(hp<=0){hp=maxHp;logMsg(`💀 revive`);}updateUI();
+  initAudio();playRest();if(restUsed){logMsg(t("rest_used"));return;}if(hp<=0){logMsg(t("cannot_rest"));return;}
+  hp=Math.min(maxHp,hp+30);restUsed=true;logMsg(t("rest_heal"));
+  let s=Math.max(1,rand(cur.atk-2,cur.atk+1));hp-=s;logMsg(`${t("rest_sneak")} -${s}`);
+  if(hp<=0){hp=maxHp;restUsed=false;logMsg(t("revive"));}updateUI();
 }
-function saveGame(){localStorage.setItem("monsterSave",JSON.stringify({hp,maxHp,exp,level,atk,restUsed,currentDifficulty}));logMsg("💾 saved");}
-function loadGame(){
-  try{
-    let d=localStorage.getItem("monsterSave");
-    if(d){
-      let s=JSON.parse(d);
-      hp=s.hp??100;maxHp=s.maxHp??100;exp=s.exp??0;level=s.level??1;atk=s.atk??10;restUsed=s.restUsed??false;
-      if(s.currentDifficulty) currentDifficulty = s.currentDifficulty;
-      document.getElementById('difficultySelect').value = currentDifficulty;
-      logMsg("📀 loaded");
-    } else { logMsg("🌟 new game"); }
-  }catch(e){}
-  refresh();
-}
-
-// ==================== Discord Webhook 回報 ====================
+// ==================== 音效 ====================
+let audioCtx=null, masterGain=null, sfxEnabled=localStorage.getItem("sfxEnabled")!=="false";
+document.getElementById("sfxToggle").checked = sfxEnabled;
+document.getElementById("sfxToggle").onchange = (e)=>{ sfxEnabled=e.target.checked; localStorage.setItem("sfxEnabled",sfxEnabled); };
+function initAudio(){if(audioCtx)return;audioCtx=new AudioContext();masterGain=audioCtx.createGain();masterGain.gain.value=document.getElementById('volumeSlider').value/100;masterGain.connect(audioCtx.destination);}
+function playTone(f,d,t="sine",v=0.2){if(!sfxEnabled||!audioCtx||!masterGain)return;let o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(masterGain);o.frequency.value=f;o.type=t;g.gain.value=v;o.start();g.gain.exponentialRampToValueAtTime(0.00001,audioCtx.currentTime+d);o.stop(audioCtx.currentTime+d);}
+function playAttack(){playTone(523,0.12,"triangle",0.15);}
+function playSkill(){playTone(880,0.18,"square",0.2);}
+function playHurt(){playTone(220,0.25,"sawtooth",0.2);}
+function playLevelUp(){if(!sfxEnabled)return;playTone(523,0.12);setTimeout(()=>playTone(659,0.12),130);setTimeout(()=>playTone(784,0.25),260);}
+function playDefeat(){playTone(392,0.15);setTimeout(()=>playTone(523,0.25),160);}
+function playRest(){playTone(330,0.18);setTimeout(()=>playTone(262,0.22),180);}
+// ==================== Discord ====================
 const WEBHOOK_URL = "https://discord.com/api/webhooks/1503764494969475215/yj1L6PR8nVzbSEWomvEZYBas9Jx4_5KwQZJrvcrNUsBHcKx9nmI59bRGkOM7R_90yjb8";
 async function reportBugToDiscord() {
-  const problem = prompt("請描述您遇到的問題 / Please describe the problem:");
-  if (!problem || problem.trim() === "") {
-    alert("未輸入問題，已取消回報 / No description, cancelled.");
-    return;
-  }
-  try {
-    const msg = {
-      content: `**🐛 BUG REPORT**\n` +
-               `Problem: ${problem.trim()}\n` +
-               `Lv: ${level}\n` +
-               `Zone: ${getZone().name}\n` +
-               `HP: ${hp}/${maxHp}\n` +
-               `ATK: ${atk}\n` +
-               `UA: ${navigator.userAgent}\n` +
-               `Time: ${new Date().toLocaleString()}`
-    };
-    const res = await fetch(WEBHOOK_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(msg)
-    });
-    alert(res.ok ? "✅ 回報已送出 / Report sent!" : "❌ 傳送失敗 / Failed to send");
-  } catch(e) {
-    alert("❌ 錯誤 / Error");
-  }
+  const problem = prompt("請描述問題 / Describe the problem:");
+  if(!problem?.trim()) return;
+  try{
+    await fetch(WEBHOOK_URL, {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({content:`**🐛 BUG REPORT**\nProblem: ${problem.trim()}\nLv:${level}\nZone:${getZone().name}\nHP:${hp}/${maxHp}\nATK:${atk}\nUA:${navigator.userAgent}\nTime:${new Date().toLocaleString()}`})});
+    showToast(t("report_sent"));
+  }catch(e){showToast(t("report_fail"),true);}
 }
-
-// ==================== 頁面切換與事件綁定 ====================
+// ==================== 事件綁定 ====================
 const main=document.getElementById('mainPage'),sett=document.getElementById('settingsPage'),game=document.getElementById('gamePage');
-document.getElementById('toGameBtn').onclick=()=>{main.classList.remove('active');game.classList.add('active');loadGame();};
-document.getElementById('toSettingsBtn').onclick=()=>{main.classList.remove('active');sett.classList.add('active');};
+document.getElementById('toGameBtn').onclick=()=>{main.classList.remove('active');game.classList.add('active');loadGame();updateUI();refresh();};
+document.getElementById('toSettingsBtn').onclick=()=>{main.classList.remove('active');sett.classList.add('active');updateAchievementsUI();};
 document.getElementById('backFromSettings').onclick=()=>{sett.classList.remove('active');main.classList.add('active');};
 document.getElementById('backFromGame').onclick=()=>{game.classList.remove('active');main.classList.add('active');};
 document.getElementById('volumeSlider').oninput=e=>{if(masterGain)masterGain.gain.value=e.target.value/100;};
-document.getElementById('sfxToggle').onchange=e=>{sfxEnabled=e.target.checked;};
 document.getElementById('difficultySelect').onchange=e=>{currentDifficulty=e.target.value;if(game.classList.contains('active'))refresh();};
 document.getElementById('reportBugBtn').onclick=reportBugToDiscord;
-document.getElementById('discordLinkBtn').onclick=()=>{window.open('https://discord.gg/scG6QxxC3', '_blank');};
+document.getElementById('discordLinkBtn').onclick=()=>window.open('https://discord.gg/scG6QxxC3','_blank');
 document.getElementById('attackBtn').onclick=attackAction;
 document.getElementById('skillBtn').onclick=skillAction;
 document.getElementById('restBtn').onclick=restAction;
 document.getElementById('saveBtn').onclick=saveGame;
-loadGame();
+document.getElementById('googleLoginBtn').onclick=signInWithGoogle;
+updateAllTexts(); updateUILang(); loadGame();
 </script>
 </body>
 </html>
