@@ -13,7 +13,7 @@
   .play-btn{background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);padding:14px 28px;border-radius:60px;font-size:1.3rem;font-weight:bold;cursor:pointer;margin:20px 0;width:70%;color:white;}
   .settings-btn{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.2);color:#ddd;padding:8px 20px;border-radius:30px;cursor:pointer;}
   .setting-item{background:rgba(255,255,255,0.05);border-radius:28px;padding:14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;}
-  .small-btn{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);border-radius:30px;padding:6px 14px;color:white;font-size:0.75rem;cursor:pointer;}
+  .small-btn{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);border-radius:30px;padding:6px 14px;color:white;cursor:pointer;}
   .difficulty-select{background:rgba(0,0,0,0.5);color:white;border:1px solid rgba(255,255,255,0.3);border-radius:20px;padding:6px 12px;}
   .switch{position:relative;display:inline-block;width:48px;height:24px;}
   .switch input{opacity:0;width:0;height:0;}
@@ -48,9 +48,9 @@
   </div>
   <div id="settingsPage" class="page">
     <button class="small-btn" id="backFromSettings" style="margin-bottom:12px;">← BACK</button>
-    <div class="setting-item"><span>🔊 Volume</span><input type="range" id="volumeSlider" min="0" max="100" value="70"></div>
-    <div class="setting-item"><span>🔔 SFX</span><label class="switch"><input type="checkbox" id="sfxToggle" checked><span class="slider"></span></label></div>
-    <div class="setting-item"><span>⚔️ Difficulty</span><select id="difficultySelect"><option value="easy">Easy</option><option value="normal" selected>Normal</option><option value="hard">Hard</option></select></div>
+    <div class="setting-item"><span>🔊 音量</span><input type="range" id="volumeSlider" min="0" max="100" value="70"></div>
+    <div class="setting-item"><span>🔔 音效</span><label class="switch"><input type="checkbox" id="sfxToggle" checked><span class="slider"></span></label></div>
+    <div class="setting-item"><span>⚔️ 難度</span><select id="difficultySelect"><option value="easy">簡單</option><option value="normal" selected>普通</option><option value="hard">困難</option></select></div>
     <div class="setting-item"><span>🔐 Google</span><button class="small-btn" id="googleLoginBtn">登入 Google</button><button class="small-btn" id="logoutBtn">登出</button></div>
   </div>
   <div id="gamePage" class="page">
@@ -73,7 +73,7 @@
   </div>
 </div>
 <script>
-// ==================== Firebase 設定 ====================
+// ========== Firebase 設定 ==========
 const firebaseConfig = {
   apiKey: "AIzaSyDevirfNqjlg5hVkF6pgMMU9tfx7CDac4A",
   authDomain: "monster-game-f193f.firebaseapp.com",
@@ -86,13 +86,13 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const provider = new firebase.auth.GoogleAuthProvider();
 
-// ==================== 遊戲核心變數 ==================
+// ========== 遊戲核心變數 ==========
 let hp=100, maxHp=100, exp=0, level=1, atk=10, restUsed=false;
 let curMonster = { name:"史萊姆", emoji:"🟣", hp:35, maxHp:35, atk:5, exp:15 };
 let currentDifficulty = "normal";
 let audioCtx=null, masterGain=null, sfxEnabled=true;
 
-// ==================== 輔助函數 ==================
+// ========== 輔助函數 ==========
 function toast(msg) { let d=document.createElement("div"); d.className="toast"; d.innerText=msg; document.body.appendChild(d); setTimeout(()=>d.remove(),2000); }
 function saveLocal() { localStorage.setItem("gameSave", JSON.stringify({hp,maxHp,exp,level,atk,restUsed,currentDifficulty})); toast("💾 已存檔"); }
 function loadLocal() {
@@ -105,7 +105,8 @@ function updateUI() {
   document.getElementById('expText').innerText=`${exp}/50`;
   document.getElementById('levelText').innerText=level;
   document.getElementById('atkText').innerText=atk;
-  document.getElementById('zoneText').innerHTML=level<=30?"🌳新手村":(level<=90?"🏜️沙漠":"⛰️蒼穹");
+  let zone = level<=30 ? "🌳新手村" : (level<=90 ? "🏜️沙漠" : "⛰️蒼穹");
+  document.getElementById('zoneText').innerHTML=zone;
   document.getElementById('monsterName').innerHTML=curMonster.name;
   document.getElementById('monsterEmoji').innerText=curMonster.emoji;
   document.getElementById('monsterHpText').innerText=`${curMonster.hp}/${curMonster.maxHp}`;
@@ -170,7 +171,7 @@ function rest() {
   if(hp<=0){ hp=maxHp; restUsed=false; logMsg(`💀 復活`); }
   updateUI();
 }
-// ==================== 音效 ==================
+// ========== 音效 ==========
 function initAudio() { if(audioCtx) return; audioCtx=new AudioContext(); masterGain=audioCtx.createGain(); masterGain.gain.value=document.getElementById('volumeSlider').value/100; masterGain.connect(audioCtx.destination); }
 function playTone(f,d,t,v=0.2){ if(!sfxEnabled||!audioCtx||!masterGain) return; let o=audioCtx.createOscillator(), g=audioCtx.createGain(); o.connect(g); g.connect(masterGain); o.frequency.value=f; o.type=t; g.gain.value=v; o.start(); g.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime+d); o.stop(audioCtx.currentTime+d); }
 function playAttack(){ playTone(523,0.12,"triangle",0.15); }
@@ -181,7 +182,7 @@ function playDefeat(){ playTone(392,0.15); setTimeout(()=>playTone(523,0.25),160
 function playRest(){ playTone(330,0.18); setTimeout(()=>playTone(262,0.22),180); }
 document.getElementById("sfxToggle").onchange=e=>{ sfxEnabled=e.target.checked; };
 document.getElementById("volumeSlider").oninput=e=>{ if(masterGain) masterGain.gain.value=e.target.value/100; };
-// ==================== Google 登入（核心修復）==================
+// ========== Google 登入（彈窗，保證按鈕更新）==========
 function updateGoogleButton() {
   const btn = document.getElementById("googleLoginBtn");
   const user = auth.currentUser;
@@ -190,13 +191,28 @@ function updateGoogleButton() {
     btn.onclick = null;
   } else {
     btn.innerText = "登入 Google";
-    btn.onclick = () => auth.signInWithRedirect(provider);
+    btn.onclick = () => {
+      auth.signInWithPopup(provider).then(result => {
+        toast(`歡迎 ${result.user.displayName}`);
+        updateGoogleButton();
+      }).catch(err => toast("登入失敗: "+err.message));
+    };
   }
 }
-window.logout = () => auth.signOut().then(() => updateGoogleButton());
-auth.onAuthStateChanged(user => { updateGoogleButton(); if(user) toast(`歡迎 ${user.displayName}`); });
-updateGoogleButton(); // 初始執行
-// ==================== 頁面切換與事件綁定 ==================
+// 監聽登入狀態變化（確保按鈕即時更新）
+auth.onAuthStateChanged(() => {
+  updateGoogleButton();
+});
+// 登出功能
+document.getElementById("logoutBtn").onclick = () => {
+  auth.signOut().then(() => {
+    toast("已登出");
+    updateGoogleButton();
+  });
+};
+// 頁面載入時初始化按鈕
+updateGoogleButton();
+// ========== 頁面切換與事件綁定 ==========
 const mainDiv=document.getElementById('mainPage'), setDiv=document.getElementById('settingsPage'), gameDiv=document.getElementById('gamePage');
 document.getElementById('toGameBtn').onclick=()=>{ mainDiv.classList.remove('active'); gameDiv.classList.add('active'); loadLocal(); };
 document.getElementById('toSettingsBtn').onclick=()=>{ mainDiv.classList.remove('active'); setDiv.classList.add('active'); };
@@ -207,7 +223,6 @@ document.getElementById('attackBtn').onclick=attack;
 document.getElementById('skillBtn').onclick=skill;
 document.getElementById('restBtn').onclick=rest;
 document.getElementById('saveBtn').onclick=saveLocal;
-document.getElementById('logoutBtn').onclick=logout;
 refreshMonster(); updateUI();
 </script>
 </body>
