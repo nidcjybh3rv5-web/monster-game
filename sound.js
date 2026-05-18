@@ -65,3 +65,24 @@ function playRestSound() {
     playTone(330, 0.18, "sine", 0.1);
     setTimeout(() => playTone(262, 0.22, "sine", 0.1), 180);
 }
+
+// ========== 主畫面輕鬆快樂音效（新增）==========
+function playMainTheme() {
+    if (!soundEnabled || !audioCtx) return;
+    const now = audioCtx.currentTime;
+    // 上行音阶: C5 -> E5 -> G5 -> C6 (轻松快乐)
+    const notes = [523.25, 659.25, 783.99, 1046.50];
+    const durations = [0.2, 0.2, 0.2, 0.4];
+    notes.forEach((freq, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.frequency.value = freq;
+        osc.type = "sine";
+        gain.gain.setValueAtTime(0.2, now + i * 0.18);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.18 + durations[i]);
+        osc.start(now + i * 0.18);
+        osc.stop(now + i * 0.18 + durations[i]);
+    });
+}
