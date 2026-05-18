@@ -35,8 +35,7 @@
   .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:#facc15;padding:8px 20px;border-radius:40px;font-size:0.8rem;z-index:999;animation:fadeOut 2s forwards;}
   @keyframes fadeOut{0%{opacity:1}70%{opacity:1}100%{opacity:0;visibility:hidden}}
 </style>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="sound.js"></script>
 </head>
 <body>
 <div class="app">
@@ -51,7 +50,6 @@
     <div class="setting-item"><span>🔊 音量</span><input type="range" id="volumeSlider" min="0" max="100" value="70"></div>
     <div class="setting-item"><span>🔔 音效</span><label class="switch"><input type="checkbox" id="sfxToggle" checked><span class="slider"></span></label></div>
     <div class="setting-item"><span>⚔️ 難度</span><select id="difficultySelect"><option value="easy">簡單</option><option value="normal" selected>普通</option><option value="hard">困難</option></select></div>
-    <div class="setting-item"><span>🔐 Google</span><button class="small-btn" id="googleLoginBtn">登入 Google</button><button class="small-btn" id="logoutBtn">登出</button></div>
   </div>
   <div id="gamePage" class="page">
     <button class="small-btn" id="backFromGame">← MENU</button>
@@ -73,24 +71,12 @@
   </div>
 </div>
 <script>
-// ========== Firebase 設定 ==========
-const firebaseConfig = {
-  apiKey: "AIzaSyDevirfNqjlg5hVkF6pgMMU9tfx7CDac4A",
-  authDomain: "monster-game-f193f.firebaseapp.com",
-  projectId: "monster-game-f193f",
-  storageBucket: "monster-game-f193f.firebasestorage.app",
-  messagingSenderId: "304101821779",
-  appId: "1:304101821779:web:9b77e901083a7949f265a6"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const provider = new firebase.auth.GoogleAuthProvider();
-
 // ========== 遊戲核心變數 ==========
 let hp=100, maxHp=100, exp=0, level=1, atk=10, restUsed=false;
 let curMonster = { name:"史萊姆", emoji:"🟣", hp:35, maxHp:35, atk:5, exp:15 };
 let currentDifficulty = "normal";
-let audioCtx=null, masterGain=null, sfxEnabled=true;
+let sfxEnabled = true;
+let masterGain = null;  // 為了相容 sound.js，我們會由攻擊時初始化
 
 // ========== 輔助函數 ==========
 function toast(msg) { let d=document.createElement("div"); d.className="toast"; d.innerText=msg; document.body.appendChild(d); setTimeout(()=>d.remove(),2000); }
@@ -136,94 +122,113 @@ function genMonster() {
 function refreshMonster() { curMonster = genMonster(); restUsed=false; updateUI(); logMsg(`✨ ${curMonster.name} 出現 HP${curMonster.hp} 攻${curMonster.atk}`); }
 function levelUp() {
   let up=false;
-  while(exp>=50) { exp-=50; level++; maxHp+=20; atk+=5; hp=Math.floor(maxHp*0.7); up=true; logMsg(`🎉 升級 Lv${level} 攻擊力${atk}`); playLevelUp(); updateUI(); }
+  while(exp>=50) { exp-=50; level++; maxHp+=20; atk+=5; hp=Math.floor(maxHp*0.7); up=true; logMsg(`🎉 升級 Lv${level} 攻擊力${atk}`); playLevelUpSound(); updateUI(); }
   if(up) refreshMonster();
 }
 function monsterAttack() {
   let dmg = Math.max(1, rand(curMonster.atk-3, curMonster.atk+2));
-  hp -= dmg; playHurt(); logMsg(`😈 ${curMonster.name} 反擊 ${dmg}`);
+  hp -= dmg; playHurtSound(); logMsg(`😈 ${curMonster.name} 反擊 ${dmg}`);
   if(hp<=0) { hp=maxHp; restUsed=false; logMsg(`💀 復活`); }
   updateUI();
 }
 function defeat() {
   exp += curMonster.exp; logMsg(`🎉 擊敗 ${curMonster.name} 獲得 ${curMonster.exp} EXP`);
-  playDefeat(); levelUp(); refreshMonster(); updateUI();
+  playDefeatSound(); levelUp(); refreshMonster(); updateUI();
 }
 function attack() {
-  initAudio(); playAttack(); if(hp<=0){ logMsg("無法攻擊"); return; }
+  initAudio(); playAttackSound(); if(hp<=0){ logMsg("無法攻擊"); return; }
   let dmg = Math.max(2, rand(atk-3, atk+5));
   curMonster.hp -= dmg; logMsg(`⚔️ 造成 ${dmg} 傷害`);
   if(curMonster.hp<=0) defeat(); else monsterAttack();
   updateUI();
 }
 function skill() {
-  initAudio(); playSkill(); if(hp<=0){ logMsg("無法施放"); return; }
+  initAudio(); playSkillSound(); if(hp<=0){ logMsg("無法施放"); return; }
   let dmg = rand(atk+5, atk*2+3);
   curMonster.hp -= dmg; logMsg(`🔥 技能造成 ${dmg} 傷害`);
   if(curMonster.hp<=0) defeat(); else monsterAttack();
   updateUI();
 }
 function rest() {
-  initAudio(); playRest(); if(restUsed){ logMsg("已休息過"); return; } if(hp<=0){ logMsg("無法休息"); return; }
+  initAudio(); playRestSound(); if(restUsed){ logMsg("已休息過"); return; } if(hp<=0){ logMsg("無法休息"); return; }
   hp = Math.min(maxHp, hp+30); restUsed=true; logMsg(`😴 恢復30 HP`);
   let sneak = Math.max(1, rand(curMonster.atk-2, curMonster.atk+1));
   hp -= sneak; logMsg(`⚠️ 偷襲 -${sneak}`);
   if(hp<=0){ hp=maxHp; restUsed=false; logMsg(`💀 復活`); }
   updateUI();
 }
-// ========== 音效 ==========
-function initAudio() { if(audioCtx) return; audioCtx=new AudioContext(); masterGain=audioCtx.createGain(); masterGain.gain.value=document.getElementById('volumeSlider').value/100; masterGain.connect(audioCtx.destination); }
-function playTone(f,d,t,v=0.2){ if(!sfxEnabled||!audioCtx||!masterGain) return; let o=audioCtx.createOscillator(), g=audioCtx.createGain(); o.connect(g); g.connect(masterGain); o.frequency.value=f; o.type=t; g.gain.value=v; o.start(); g.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime+d); o.stop(audioCtx.currentTime+d); }
-function playAttack(){ playTone(523,0.12,"triangle",0.15); }
-function playSkill(){ playTone(880,0.18,"square",0.2); }
-function playHurt(){ playTone(220,0.25,"sawtooth",0.2); }
-function playLevelUp(){ if(!sfxEnabled) return; playTone(523,0.12); setTimeout(()=>playTone(659,0.12),130); setTimeout(()=>playTone(784,0.25),260); }
-function playDefeat(){ playTone(392,0.15); setTimeout(()=>playTone(523,0.25),160); }
-function playRest(){ playTone(330,0.18); setTimeout(()=>playTone(262,0.22),180); }
-document.getElementById("sfxToggle").onchange=e=>{ sfxEnabled=e.target.checked; };
-document.getElementById("volumeSlider").oninput=e=>{ if(masterGain) masterGain.gain.value=e.target.value/100; };
-// ========== Google 登入（彈窗，保證按鈕更新）==========
-function updateGoogleButton() {
-  const btn = document.getElementById("googleLoginBtn");
-  const user = auth.currentUser;
-  if (user) {
-    btn.innerText = `👤 ${user.displayName}`;
-    btn.onclick = null;
-  } else {
-    btn.innerText = "登入 Google";
-    btn.onclick = () => {
-      auth.signInWithPopup(provider).then(result => {
-        toast(`歡迎 ${result.user.displayName}`);
-        updateGoogleButton();
-      }).catch(err => toast("登入失敗: "+err.message));
-    };
+
+// ========== 主畫面與背景音樂控制 ==========
+function showMainPage() {
+  document.getElementById('mainPage').classList.add('active');
+  document.getElementById('settingsPage').classList.remove('active');
+  document.getElementById('gamePage').classList.remove('active');
+  // 如果聲音已解鎖且背景音樂未播放，則啟動背景音樂
+  if (window.soundEnabled && window.audioCtx) {
+    startBackgroundMusic();
   }
 }
-// 監聽登入狀態變化（確保按鈕即時更新）
-auth.onAuthStateChanged(() => {
-  updateGoogleButton();
-});
-// 登出功能
-document.getElementById("logoutBtn").onclick = () => {
-  auth.signOut().then(() => {
-    toast("已登出");
-    updateGoogleButton();
-  });
-};
-// 頁面載入時初始化按鈕
-updateGoogleButton();
+
+function hideMainPage() {
+  // 離開主畫面時停止背景音樂
+  stopBackgroundMusic();
+}
+
 // ========== 頁面切換與事件綁定 ==========
-const mainDiv=document.getElementById('mainPage'), setDiv=document.getElementById('settingsPage'), gameDiv=document.getElementById('gamePage');
-document.getElementById('toGameBtn').onclick=()=>{ mainDiv.classList.remove('active'); gameDiv.classList.add('active'); loadLocal(); };
-document.getElementById('toSettingsBtn').onclick=()=>{ mainDiv.classList.remove('active'); setDiv.classList.add('active'); };
-document.getElementById('backFromSettings').onclick=()=>{ setDiv.classList.remove('active'); mainDiv.classList.add('active'); };
-document.getElementById('backFromGame').onclick=()=>{ gameDiv.classList.remove('active'); mainDiv.classList.add('active'); };
-document.getElementById('difficultySelect').onchange=e=>{ currentDifficulty=e.target.value; refreshMonster(); };
-document.getElementById('attackBtn').onclick=attack;
-document.getElementById('skillBtn').onclick=skill;
-document.getElementById('restBtn').onclick=rest;
-document.getElementById('saveBtn').onclick=saveLocal;
+document.getElementById('toGameBtn').onclick = () => {
+  hideMainPage();
+  document.getElementById('mainPage').classList.remove('active');
+  document.getElementById('gamePage').classList.add('active');
+  loadLocal();
+};
+document.getElementById('toSettingsBtn').onclick = () => {
+  hideMainPage();
+  document.getElementById('mainPage').classList.remove('active');
+  document.getElementById('settingsPage').classList.add('active');
+};
+document.getElementById('backFromSettings').onclick = () => {
+  showMainPage();
+};
+document.getElementById('backFromGame').onclick = () => {
+  showMainPage();
+};
+document.getElementById('difficultySelect').onchange = e => { currentDifficulty = e.target.value; refreshMonster(); };
+document.getElementById('attackBtn').onclick = attack;
+document.getElementById('skillBtn').onclick = skill;
+document.getElementById('restBtn').onclick = rest;
+document.getElementById('saveBtn').onclick = saveLocal;
+
+// 音量與音效開關
+document.getElementById('sfxToggle').onchange = e => { sfxEnabled = e.target.checked; window.sfxEnabled = sfxEnabled; };
+document.getElementById('volumeSlider').oninput = e => {
+  if (window.masterGain) window.masterGain.gain.value = e.target.value / 100;
+};
+
+// 確保 sfxEnabled 與 sound.js 同步
+window.sfxEnabled = true;
+
+// 初始化：顯示主畫面（但背景音樂會等待用戶首次點擊解鎖聲音後才開始）
+showMainPage();
 refreshMonster(); updateUI();
+
+// 監聽首次用戶點擊以解鎖聲音並啟動背景音樂（如果當前在主畫面）
+function unlockAudioAndStartBGM() {
+  initAudio();
+  if (document.getElementById('mainPage').classList.contains('active')) {
+    startBackgroundMusic();
+  }
+  // 移除所有監聽器，只需觸發一次
+  const events = ['click', 'touchstart'];
+  events.forEach(event => {
+    document.body.removeEventListener(event, unlockAudioAndStartBGM);
+    document.querySelector('.app').removeEventListener(event, unlockAudioAndStartBGM);
+  });
+}
+// 添加監聽器到 body 和 .app 以確保用戶首次互動
+document.body.addEventListener('click', unlockAudioAndStartBGM);
+document.body.addEventListener('touchstart', unlockAudioAndStartBGM);
+document.querySelector('.app').addEventListener('click', unlockAudioAndStartBGM);
+document.querySelector('.app').addEventListener('touchstart', unlockAudioAndStartBGM);
 </script>
 </body>
 </html>
