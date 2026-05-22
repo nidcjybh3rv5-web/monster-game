@@ -114,7 +114,6 @@
     justify-content: space-between;
     align-items: center;
     padding: 12px 20px;
-    transition: background 0.2s;
   }
   .setting-item-left {
     display: flex;
@@ -197,8 +196,27 @@
     padding: 6px 12px;
     font-size: 0.9rem;
   }
+  /* Google 登入按鈕組 */
+  .google-buttons {
+    display: flex;
+    gap: 12px;
+  }
+  .google-btn {
+    background: #334155;
+    border: none;
+    border-radius: 28px;
+    padding: 6px 16px;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .google-btn:hover {
+    background: #475569;
+  }
 
-  /* 遊戲內部樣式（保持不變） */
+  /* 遊戲內部樣式 */
   .stat-row {
     display: flex;
     justify-content: space-between;
@@ -212,19 +230,9 @@
     overflow: hidden;
     margin: 8px 0;
   }
-  .fillhp {
-    background: #ef4444;
-    height: 100%;
-  }
-  .fillexp {
-    background: #3b82f6;
-    height: 100%;
-  }
-  .enemy-icon {
-    font-size: 56px;
-    margin: 12px;
-    text-align: center;
-  }
+  .fillhp { background: #ef4444; height: 100%; }
+  .fillexp { background: #3b82f6; height: 100%; }
+  .enemy-icon { font-size: 56px; margin: 12px; text-align: center; }
   .log {
     background: #1e293b;
     border-radius: 24px;
@@ -273,7 +281,9 @@
     100% { opacity: 0; visibility: hidden; }
   }
 </style>
-<!-- 引入音效檔案（需存在）-->
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="sound.js"></script>
 </head>
 <body>
@@ -286,7 +296,7 @@
     <div class="version">Beta 2.0</div>
   </div>
 
-  <!-- 設定畫面（Google 風格）-->
+  <!-- 設定畫面（Google 風格 + 登入選項）-->
   <div id="settingsPage" class="page">
     <div class="settings-header">
       <button class="back-btn" id="backFromSettings">← 返回</button>
@@ -321,6 +331,16 @@
           <option value="hard">🔥 困難</option>
         </select>
       </div>
+      <div class="setting-item">
+        <div class="setting-item-left">
+          <div class="setting-label">🔐 Google 帳號</div>
+          <div class="setting-desc">登入後可雲端儲存遊戲進度</div>
+        </div>
+        <div class="google-buttons">
+          <button class="google-btn" id="googleLoginBtn">登入 Google</button>
+          <button class="google-btn" id="logoutBtn">登出</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -348,14 +368,55 @@
 </div>
 
 <script>
+// ========== Firebase 設定（你的專案）==========
+const firebaseConfig = {
+  apiKey: "AIzaSyDevirfNqjlg5hVkF6pgMMU9tfx7CDac4A",
+  authDomain: "monster-game-f193f.firebaseapp.com",
+  projectId: "monster-game-f193f",
+  storageBucket: "monster-game-f193f.firebasestorage.app",
+  messagingSenderId: "304101821779",
+  appId: "1:304101821779:web:9b77e901083a7949f265a6"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const provider = new firebase.auth.GoogleAuthProvider();
+
+// ========== Google 登入控制 ==========
+function updateGoogleButton() {
+  const btn = document.getElementById("googleLoginBtn");
+  if (!btn) return;
+  const user = auth.currentUser;
+  if (user) {
+    btn.innerText = `👤 ${user.displayName}`;
+    btn.disabled = true;
+  } else {
+    btn.innerText = "登入 Google";
+    btn.disabled = false;
+  }
+}
+document.getElementById("googleLoginBtn").onclick = () => {
+  auth.signInWithPopup(provider)
+    .then(result => {
+      toast(`歡迎 ${result.user.displayName}`);
+      updateGoogleButton();
+    })
+    .catch(err => toast("登入失敗: "+err.message));
+};
+document.getElementById("logoutBtn").onclick = () => {
+  auth.signOut().then(() => {
+    toast("已登出");
+    updateGoogleButton();
+  });
+};
+auth.onAuthStateChanged(() => updateGoogleButton());
+updateGoogleButton();
+
 // ========== 遊戲核心變數 ==========
 let hp = 100, maxHp = 100, exp = 0, level = 1, atk = 10, restUsed = false;
 let curMonster = { name:"史萊姆", emoji:"🟣", hp:35, maxHp:35, atk:5, exp:15 };
 let currentDifficulty = "normal";
 let sfxEnabled = true;
-let masterGain = null;  // 由 sound.js 使用
 
-// ========== 輔助函數 ==========
 function toast(msg) {
   let d = document.createElement("div");
   d.className = "toast";
@@ -452,7 +513,7 @@ function rest() {
   updateUI();
 }
 
-// ========== 頁面切換與設定控制 ==========
+// ========== 頁面切換 ==========
 document.getElementById('toGameBtn').onclick = () => {
   document.getElementById('mainPage').classList.remove('active');
   document.getElementById('gamePage').classList.add('active');
@@ -476,13 +537,13 @@ document.getElementById('skillBtn').onclick = skill;
 document.getElementById('restBtn').onclick = rest;
 document.getElementById('saveBtn').onclick = saveLocal;
 
-// 音量與音效開關（需要與 sound.js 連動）
+// 音量與音效開關（與 sound.js 連動）
 const sfxToggle = document.getElementById('sfxToggle');
 sfxToggle.onchange = e => { window.sfxEnabled = e.target.checked; if(window.setSfxEnabled) window.setSfxEnabled(e.target.checked); };
 const volumeSlider = document.getElementById('volumeSlider');
 volumeSlider.oninput = e => { if(window.setMasterVolume) window.setMasterVolume(e.target.value/100); };
 
-// 初始化畫面
+// 初始化
 refreshMonster(); updateUI();
 </script>
 </body>
