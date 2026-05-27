@@ -1,229 +1,184 @@
-// ========== 玩家狀態 ==========
-let hp = 100, maxHp = 100, exp = 0, level = 1, atk = 10;
-let restUsed = false;
+let hp = 100, maxHp = 100, exp = 0, level = 1, atk = 10, restUsed = false;
+let curMonster = null;
+let currentDifficulty = localStorage.getItem('difficulty') || 'normal';
+let deathStreak = 0;  // 連續死亡次數
 
-// ========== 當前怪物 ==========
-let currentMonster = { name: "", emoji: "", hp: 0, maxHp: 0, atk: 0, exp: 0 };
-
-// ========== 區域定義 (等級區間 + 怪物池) ==========
 const zones = [
-    { 
-        name: "🌳 新手村", 
-        range: [1, 30], 
-        monsters: ["🟣史萊姆", "🟢哥布林", "🐺森林狼"] 
-    },
-    { 
-        name: "🏜️ 黃昏沙漠", 
-        range: [31, 90], 
-        monsters: ["🦂巨蠍", "🧻木乃伊", "🐍沙蛇"] 
-    },
-    { 
-        name: "⛰️ 蒼穹之巔", 
-        range: [91, 100], 
-        monsters: ["🐉青龍", "👼天使", "😈惡魔"] 
-    }
+  { name:"🌳新手村", maxLv:30, monsters:["🟣史萊姆","🟢哥布林","🐺森林狼"] },
+  { name:"🏜️沙漠", maxLv:90, monsters:["🦂巨蠍","🧻木乃伊","🐍沙蛇"] },
+  { name:"⛰️蒼穹", maxLv:100, monsters:["🐉青龍","👼天使","😈惡魔"] }
 ];
 
-// 輔助函數：隨機整數 [min,max]
-function rand(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+function getZone() {
+  if (level <= 30) return zones[0];
+  if (level <= 90) return zones[1];
+  return zones[2];
 }
-
-// 獲取當前區域
-function getCurrentZone() {
-    for (let z of zones) {
-        if (level >= z.range[0] && level <= z.range[1]) return z;
-    }
-    return zones[0];
+function getDifficultyMultiplier() {
+  let base = { hp:1, atk:1, exp:1, levelOffset:0 };
+  if (currentDifficulty === 'easy') return { hp:0.7, atk:0.7, exp:1.1, levelOffset:-2 };
+  if (currentDifficulty === 'hard') return { hp:1.5, atk:1.3, exp:0.85, levelOffset:3 };
+  if (currentDifficulty === 'extreme') return { hp:2.0, atk:1.6, exp:0.7, levelOffset:6 };
+  return base;
 }
-
-// 生成隨機怪物（血量/攻擊力隨等級線性成長並波動 ±20%）
 function generateMonster() {
-    const zone = getCurrentZone();
-    const rawName = zone.monsters[Math.floor(Math.random() * zone.monsters.length)];
-    const emoji = rawName[0];
-    const name = rawName.slice(1);
-    
-    // 基礎值 = 等級相關
-    let baseHp = 30 + level * 2.5;      // 30級約 105，100級約 280
-    let baseAtk = 5 + Math.floor(level / 2.5); // 30級約 17，100級約 45
-    let variance = (v) => Math.floor(v * (0.8 + Math.random() * 0.4)); // ±20%
-    
-    let finalHp = variance(baseHp);
-    let finalAtk = variance(baseAtk);
-    let expGain = Math.floor(12 + level * 0.8);
-    
-    return {
-        name: name,
-        emoji: emoji,
-        hp: finalHp,
-        maxHp: finalHp,
-        atk: finalAtk,
-        exp: expGain
-    };
+  const zone = getZone();
+  const raw = zone.monsters[Math.floor(Math.random() * zone.monsters.length)];
+  const emoji = raw[0];
+  const name = raw.slice(1);
+  const mult = getDifficultyMultiplier();
+  let monsterLevel = Math.max(1, level + mult.levelOffset);
+  // 動態輔助：若連續死亡超過3次，暫時降低怪物等級（不低於1）
+  if (deathStreak >= 3 && currentDifficulty !== 'easy') {
+    monsterLevel = Math.max(1, monsterLevel - Math.floor(deathStreak/2));
+  }
+  let baseHp = (30 + monsterLevel * 2.5) * mult.hp;
+  let baseAtk = (5 + Math.floor(monsterLevel / 2.5)) * mult.atk;
+  let variance = v => Math.floor(v * (0.6 + Math.random() * 0.8));
+  let expGain = Math.floor((12 + monsterLevel * 0.8) * mult.exp);
+  return {
+    name, emoji, monsterLevel,
+    hp: variance(baseHp), maxHp: variance(baseHp),
+    atk: variance(baseAtk),
+    exp: Math.max(1, expGain)
+  };
 }
-
-// 刷新怪物
 function refreshMonster() {
-    currentMonster = generateMonster();
-    updateUI();
-    addLog(`✨ 出現 ${currentMonster.name}  💀HP ${currentMonster.hp}  ⚔️攻 ${currentMonster.atk}`);
+  curMonster = generateMonster();
+  restUsed = false;
+  updateUI();
+  logMsg(`✨ Lv.${curMonster.monsterLevel} ${curMonster.name} 出現 | HP${curMonster.hp} 攻${curMonster.atk}`);
 }
-
-// 更新所有 UI
 function updateUI() {
-    hp = Math.min(maxHp, Math.max(0, hp));
-    exp = Math.min(50, exp);
-    const zone = getCurrentZone();
-    
-    document.getElementById("hpText").innerText = `${hp}/${maxHp}`;
-    document.getElementById("expText").innerText = `${exp}/50`;
-    document.getElementById("levelText").innerText = level;
-    document.getElementById("atkText").innerText = atk;
-    document.getElementById("zoneText").innerHTML = zone.name;
-    document.getElementById("mapDisplay").innerHTML = zone.name;
-    
-    document.getElementById("monsterName").innerHTML = currentMonster.name;
-    document.getElementById("monsterEmoji").innerText = currentMonster.emoji;
-    document.getElementById("monsterHpText").innerText = `${currentMonster.hp}/${currentMonster.maxHp}`;
-    document.getElementById("monsterAtkDisplay").innerHTML = `⚔️ 攻擊力 ${currentMonster.atk}`;
-    
-    let hpPercent = (hp / maxHp) * 100;
-    let expPercent = (exp / 50) * 100;
-    let monsterPercent = (currentMonster.hp / currentMonster.maxHp) * 100;
-    document.getElementById("hpBar").style.width = hpPercent + "%";
-    document.getElementById("expBar").style.width = expPercent + "%";
-    document.getElementById("monsterBar").style.width = monsterPercent + "%";
-    
-    // 休息按鈕狀態
-    let restBtn = document.getElementById("restBtn");
-    restBtn.disabled = restUsed;
-    restBtn.style.opacity = restUsed ? "0.5" : "1";
+  document.getElementById('hpText').innerText = `${hp}/${maxHp}`;
+  document.getElementById('expText').innerText = `${exp}/50`;
+  document.getElementById('levelText').innerText = level;
+  document.getElementById('atkText').innerText = atk;
+  document.getElementById('zoneText').innerHTML = getZone().name;
+  document.getElementById('monsterName').innerHTML = curMonster.name;
+  document.getElementById('monsterEmoji').innerText = curMonster.emoji;
+  document.getElementById('monsterHpText').innerText = `${curMonster.hp}/${curMonster.maxHp}`;
+  document.getElementById('monsterLevelText').innerText = curMonster.monsterLevel;
+  document.getElementById('hpBar').style.width = (hp / maxHp * 100) + '%';
+  document.getElementById('expBar').style.width = (exp / 50 * 100) + '%';
+  document.getElementById('monsterBar').style.width = (curMonster.hp / curMonster.maxHp * 100) + '%';
+  document.getElementById('restBtn').disabled = restUsed;
 }
-
-function addLog(msg) {
-    document.getElementById("log").innerHTML = msg;
+function logMsg(msg) { document.getElementById('logMsg').innerHTML = msg; }
+function levelUp() {
+  let up = false;
+  while (exp >= 50) {
+    exp -= 50; level++; maxHp += 20; atk += 5;
+    hp = Math.floor(maxHp * 0.7);
+    up = true;
+    logMsg(`🎉 升級 Lv${level} 攻擊力${atk}`);
+    if (window.playLevelUpSound) playLevelUpSound();
+    if (window.recordMaxLevel) recordMaxLevel(level);
+  }
+  if (up) refreshMonster();
+  updateUI();
+  saveLocal(); // 自動存檔
 }
-
-// 升級 (恢復 70% 血量)
-function checkLevelUp() {
-    let leveled = false;
-    while (exp >= 50) {
-        exp -= 50;
-        level++;
-        maxHp += 20;
-        atk += 5;
-        hp = Math.floor(maxHp * 0.7);
-        leveled = true;
-        addLog(`🎉 升級 Lv.${level}！攻擊力 ${atk}，生命恢復 70%`);
-        playLevelUpSound();
-        updateUI();
-    }
-    if (leveled) refreshMonster(); // 升級後怪物強度重新生成
-    return leveled;
-}
-
-// 怪物反擊
 function monsterCounter() {
-    let dmg = rand(currentMonster.atk - 3, currentMonster.atk + 2);
-    dmg = Math.max(1, dmg);
-    hp -= dmg;
-    playHurtSound();
-    addLog(`😈 ${currentMonster.name} 反擊 ${dmg} 傷害！`);
-    if (hp <= 0) {
-        hp = maxHp;
-        addLog(`💀 你戰敗了，已復活至滿血`);
-    }
-    updateUI();
+  let dmg = Math.max(1, rand(curMonster.atk-3, curMonster.atk+2));
+  hp -= dmg;
+  if (window.playHurtSound) playHurtSound();
+  logMsg(`😈 Lv.${curMonster.monsterLevel} ${curMonster.name} 反擊 ${dmg}`);
+  if (hp <= 0) {
+    hp = maxHp;
+    restUsed = false;
+    deathStreak++;
+    logMsg(`💀 復活 (連續死亡: ${deathStreak})`);
+    if (window.recordDeath) recordDeath();
+  } else {
+    deathStreak = 0;
+  }
+  updateUI();
+  saveLocal();
 }
-
-// 擊敗怪物結算
-function defeatMonster() {
-    exp += currentMonster.exp;
-    addLog(`🎉 擊敗 ${currentMonster.name} 獲得 ${currentMonster.exp} EXP！`);
-    playDefeatSound();
-    checkLevelUp();
-    refreshMonster();
-    updateUI();
+function defeat() {
+  exp += curMonster.exp;
+  logMsg(`🎉 擊敗 Lv.${curMonster.monsterLevel} ${curMonster.name} 獲得 ${curMonster.exp} EXP`);
+  if (window.playDefeatSound) playDefeatSound();
+  if (window.recordKill) recordKill();
+  if (window.recordDamage && window.lastDamage) recordDamage(window.lastDamage);
+  levelUp();
+  refreshMonster();
+  updateUI();
+  saveLocal();
 }
-
-// 攻擊
 function attack() {
-    initAudio();
-    playAttackSound();
-    if (hp <= 0) { addLog("你已昏迷，無法攻擊"); return; }
-    let dmg = rand(atk - 3, atk + 5);
-    dmg = Math.max(2, dmg);
-    currentMonster.hp -= dmg;
-    addLog(`⚔️ 造成 ${dmg} 傷害！`);
-    if (currentMonster.hp <= 0) { defeatMonster(); return; }
-    monsterCounter();
+  if (window.initAudio) initAudio();
+  if (window.playAttackSound) playAttackSound();
+  if (hp <= 0) { logMsg('無法攻擊'); return; }
+  let dmg = Math.max(2, rand(atk-3, atk+5));
+  window.lastDamage = dmg;
+  curMonster.hp -= dmg;
+  logMsg(`⚔️ 造成 ${dmg} 傷害`);
+  if (curMonster.hp <= 0) defeat();
+  else monsterCounter();
+  updateUI();
+  saveLocal();
 }
-
-// 技能
 function skill() {
-    initAudio();
-    playSkillSound();
-    if (hp <= 0) { addLog("你已昏迷，無法施法"); return; }
-    let dmg = rand(atk + 5, atk * 2 + 3);
-    currentMonster.hp -= dmg;
-    addLog(`🔥 技能造成 ${dmg} 傷害！`);
-    if (currentMonster.hp <= 0) { defeatMonster(); return; }
-    monsterCounter();
+  if (window.initAudio) initAudio();
+  if (window.playSkillSound) playSkillSound();
+  if (hp <= 0) { logMsg('無法施放'); return; }
+  let dmg = rand(atk+5, atk*2+3);
+  window.lastDamage = dmg;
+  curMonster.hp -= dmg;
+  logMsg(`🔥 技能造成 ${dmg} 傷害`);
+  if (curMonster.hp <= 0) defeat();
+  else monsterCounter();
+  updateUI();
+  saveLocal();
 }
-
-// 休息 (每場一次，會被偷襲)
 function rest() {
-    initAudio();
-    if (restUsed) { addLog("⚠️ 本場戰鬥已經休息過了！"); return; }
-    if (hp <= 0) { addLog("無法休息，你已昏迷"); return; }
-    let heal = 30;
-    hp = Math.min(maxHp, hp + heal);
-    restUsed = true;
-    playRestSound();
-    addLog(`😴 恢復 ${heal} HP（此場不能再休息）`);
-    let sneak = rand(currentMonster.atk - 2, currentMonster.atk + 1);
-    sneak = Math.max(1, sneak);
-    hp -= sneak;
-    addLog(`⚠️ 休息時被偷襲，損失 ${sneak} HP`);
-    if (hp <= 0) {
-        hp = maxHp;
-        addLog(`💀 被偷襲致死，已復活`);
-    }
-    updateUI();
+  if (window.initAudio) initAudio();
+  if (window.playRestSound) playRestSound();
+  if (restUsed) { logMsg('已休息過'); return; }
+  if (hp <= 0) { logMsg('無法休息'); return; }
+  hp = Math.min(maxHp, hp+30);
+  restUsed = true;
+  logMsg(`😴 恢復30 HP`);
+  let sneak = Math.max(1, rand(curMonster.atk-2, curMonster.atk+1));
+  hp -= sneak;
+  logMsg(`⚠️ 偷襲 -${sneak}`);
+  if (hp <= 0) { hp = maxHp; restUsed = false; logMsg(`💀 復活`); }
+  updateUI();
+  saveLocal();
 }
-
-// 存檔 (儲存等級、經驗、血量、攻擊等，區域自動根據等級恢復)
-function saveGame() {
-    let data = {
-        hp, maxHp, exp, level, atk, restUsed
-    };
-    localStorage.setItem("monsterSave_v130", JSON.stringify(data));
-    addLog("💾 遊戲已存檔！");
+function saveLocal() {
+  const gameState = { hp, maxHp, exp, level, atk, restUsed, currentDifficulty, achievements: window.achievements };
+  localStorage.setItem('gameSave', JSON.stringify(gameState));
+  toast('💾 本地存檔');
+  if (window.saveToCloud && window.currentUser) window.saveToCloud(gameState);
 }
-
-// 讀檔
 function loadGame() {
-    try {
-        let data = localStorage.getItem("monsterSave_v130");
-        if (data) {
-            let s = JSON.parse(data);
-            hp = s.hp ?? 100;
-            maxHp = s.maxHp ?? 100;
-            exp = s.exp ?? 0;
-            level = s.level ?? 1;
-            atk = s.atk ?? 10;
-            restUsed = s.restUsed ?? false;
-            addLog("📀 讀取存檔成功！");
-        } else {
-            addLog("🌟  Beta 1.3.0 歡迎！區域會隨等級自動切換，怪物強度隨機波動。");
-        }
-    } catch(e) {
-        addLog("⚠️ 存檔損壞，使用預設值");
-    }
-    updateUI();
-    refreshMonster();
+  const data = localStorage.getItem('gameSave');
+  if (data) {
+    const s = JSON.parse(data);
+    hp = s.hp; maxHp = s.maxHp; exp = s.exp; level = s.level; atk = s.atk; restUsed = s.restUsed; currentDifficulty = s.currentDifficulty;
+    if (s.achievements && window.initAchievements) window.initAchievements(s.achievements);
+    document.getElementById('difficultySelect').value = currentDifficulty;
+  }
+  refreshMonster();
+  updateUI();
 }
-
-// 初始化
-loadGame();
+window.loadGame = loadGame;
+window.changeDifficulty = (diff) => {
+  if (confirm('切換難度會重置當前怪物，確定嗎？')) {
+    currentDifficulty = diff;
+    localStorage.setItem('difficulty', diff);
+    refreshMonster();
+    toast(`難度已切換為 ${diff}`);
+  }
+};
+window.initGame = () => {
+  loadGame();
+  // 綁定按鈕事件
+  document.getElementById('attackBtn').onclick = attack;
+  document.getElementById('skillBtn').onclick = skill;
+  document.getElementById('restBtn').onclick = rest;
+  document.getElementById('saveBtn').onclick = saveLocal;
+};
