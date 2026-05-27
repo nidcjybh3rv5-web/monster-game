@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>幻獸鬥士</title>
 <link rel="stylesheet" href="styles.css">
-<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -17,87 +16,47 @@
     <div class="main-title">MONSTER GAME</div>
     <button class="play-btn" id="toGameBtn">▶ 開始遊戲</button>
     <button class="settings-btn" id="toSettingsBtn">⚙️ 設定</button>
-    <button class="help-btn" id="helpBtn">❓ 幫助</button>
-    <div class="version">v2.1 完全版</div>
+    <button class="settings-btn" id="helpBtn">❓ 幫助</button>
+    <div class="version">v2.0</div>
   </div>
 
   <!-- 設定畫面 -->
   <div id="settingsPage" class="page">
-    <div class="settings-header">
-      <button class="back-btn" id="backFromSettings">← 返回</button>
-      <div class="settings-title">設定</div>
-    </div>
+    <div class="settings-header"><button class="back-btn" id="backFromSettings">← 返回</button><div class="settings-title">設定</div></div>
     <div class="settings-list" id="settingsList"></div>
   </div>
 
   <!-- 幫助畫面 -->
   <div id="helpPage" class="page">
-    <div class="settings-header">
-      <button class="back-btn" id="backFromHelp">← 返回</button>
-      <div class="settings-title">幫助</div>
-    </div>
-    <div class="help-content">
-      <p>⚔️ 攻擊：穩定傷害</p>
-      <p>🔥 技能：高傷害，無額外經驗</p>
-      <p>😴 休息：每場限1次，恢復30HP，會被偷襲</p>
-      <p>📈 等級：滿50經驗升1級，提升攻擊與HP</p>
-      <p>🎚️ 難度：影響怪物強度與經驗</p>
-      <p>☁️ Google登入：自動雲端存檔</p>
-    </div>
+    <div class="settings-header"><button class="back-btn" id="backFromHelp">← 返回</button><div class="settings-title">幫助</div></div>
+    <div class="help-content"><p>⚔️ 攻擊：穩定傷害</p><p>🔥 技能：高傷害</p><p>😴 休息：每場1次，恢復30HP，會被偷襲</p><p>📈 滿50經驗升級</p><p>🎚️ 難度影響怪物強度</p><p>☁️ Google登入雲端存檔</p><p>🏆 成就自動記錄</p></div>
   </div>
 
   <!-- 遊戲畫面 -->
   <div id="gamePage" class="page">
-    <div class="game-header">
-      <button class="back-btn" id="backFromGame">← 主選單</button>
-      <div class="stats-line">
-        <span>❤️ <span id="hpText">100/100</span></span>
-        <span>⭐ <span id="expText">0/50</span></span>
-        <span>⬆️ Lv <span id="levelText">1</span></span>
-      </div>
-      <div class="bar"><div class="fillhp" id="hpBar"></div></div>
-      <div class="bar"><div class="fillexp" id="expBar"></div></div>
-      <div class="stats-line">
-        <span>⚔️ 攻擊力 <span id="atkText">10</span></span>
-        <span>🗺️ <span id="zoneText">新手村</span></span>
-      </div>
-    </div>
-    <div class="battle-area">
-      <h3 id="monsterName">史萊姆</h3>
-      <div class="enemy-icon" id="monsterEmoji">🟣</div>
-      <div>💀 HP <span id="monsterHpText">0/0</span> | ⭐ Lv <span id="monsterLevelText">0</span></div>
-      <div class="bar"><div class="fillhp" id="monsterBar"></div></div>
-      <div class="log" id="logMsg">點擊攻擊開始冒險</div>
-      <div class="buttons">
-        <button class="game-action attack" id="attackBtn">⚔️</button>
-        <button class="game-action skill" id="skillBtn">🔥</button>
-        <button class="game-action rest" id="restBtn">😴</button>
-        <button class="game-action save" id="saveBtn">💾</button>
-      </div>
+    <button class="back-btn" id="backFromGame">← 主選單</button>
+    <div class="stats-line"><span>❤️ <span id="hpText">100/100</span></span><span>⭐ <span id="expText">0/50</span></span><span>⬆️ Lv <span id="levelText">1</span></span></div>
+    <div class="bar"><div class="fillhp" id="hpBar"></div></div>
+    <div class="bar"><div class="fillexp" id="expBar"></div></div>
+    <div class="stats-line"><span>⚔️ <span id="atkText">10</span></span><span>🗺️ <span id="zoneText">新手村</span></span></div>
+    <h3 id="monsterName">史萊姆</h3>
+    <div class="enemy-icon" id="monsterEmoji">🟣</div>
+    <div>💀 HP <span id="monsterHpText">0/0</span> | ⭐ Lv <span id="monsterLevelText">0</span></div>
+    <div class="bar"><div class="fillhp" id="monsterBar"></div></div>
+    <div class="log" id="logMsg">點擊攻擊開始</div>
+    <div class="buttons">
+      <button class="game-action attack" id="attackBtn">⚔️</button>
+      <button class="game-action skill" id="skillBtn">🔥</button>
+      <button class="game-action rest" id="restBtn">😴</button>
+      <button class="game-action save" id="saveBtn">💾</button>
     </div>
   </div>
 </div>
-
 <script src="utils.js"></script>
 <script src="sound.js"></script>
-<script src="firebase.js"></script>
 <script src="achievements.js"></script>
+<script src="firebase.js"></script>
 <script src="settings.js"></script>
 <script src="game.js"></script>
-<script>
-  // 簡單的頁面切換輔助
-  function showPage(pageId) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById(pageId).classList.add('active');
-  }
-  document.getElementById('toGameBtn').onclick = () => { showPage('gamePage'); if(window.loadGame) loadGame(); };
-  document.getElementById('toSettingsBtn').onclick = () => { showPage('settingsPage'); if(window.refreshSettingsUI) refreshSettingsUI(); };
-  document.getElementById('helpBtn').onclick = () => showPage('helpPage');
-  document.getElementById('backFromSettings').onclick = () => showPage('mainPage');
-  document.getElementById('backFromHelp').onclick = () => showPage('mainPage');
-  document.getElementById('backFromGame').onclick = () => showPage('mainPage');
-  // 初始化
-  if(window.initGame) initGame();
-</script>
 </body>
 </html>
