@@ -3,548 +3,101 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>MONSTER GAME</title>
-<style>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    user-select: none;
-  }
-  body {
-    background: #0f172a;
-    font-family: 'Segoe UI', 'Google Sans', Roboto, system-ui, sans-serif;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #e2e8f0;
-    padding: 16px;
-  }
-  .app {
-    width: 100%;
-    max-width: 550px;
-    background: #111827;
-    border-radius: 32px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-    overflow: hidden;
-  }
-  .page {
-    display: none;
-    padding: 24px 20px 32px;
-  }
-  .page.active {
-    display: block;
-  }
-
-  /* 主畫面 */
-  .main-title {
-    font-size: 2.2rem;
-    font-weight: 700;
-    background: linear-gradient(135deg, #facc15, #ff8c00);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    text-align: center;
-    margin: 30px 0 20px;
-  }
-  .play-btn {
-    background: #facc15;
-    color: #0f172a;
-    font-weight: bold;
-    font-size: 1.3rem;
-    border: none;
-    border-radius: 40px;
-    padding: 14px;
-    width: 80%;
-    margin: 20px auto;
-    display: block;
-    cursor: pointer;
-    transition: 0.2s;
-  }
-  .play-btn:active { transform: scale(0.97); }
-  .settings-btn {
-    background: transparent;
-    border: 1px solid #334155;
-    color: #94a3b8;
-    padding: 10px 24px;
-    border-radius: 40px;
-    font-size: 1rem;
-    cursor: pointer;
-    display: inline-block;
-    margin-top: 10px;
-  }
-  .version {
-    text-align: center;
-    font-size: 0.7rem;
-    color: #475569;
-    margin-top: 30px;
-  }
-
-  /* ========== Google 風格設定列表 ========== */
-  .settings-header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 24px;
-  }
-  .back-btn {
-    background: none;
-    border: none;
-    color: #3b82f6;
-    font-size: 1.2rem;
-    font-weight: 500;
-    cursor: pointer;
-    padding: 8px 0;
-  }
-  .settings-title {
-    font-size: 1.5rem;
-    font-weight: 500;
-    color: #f1f5f9;
-  }
-  .settings-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .setting-item {
-    background: #1e293b;
-    border-radius: 28px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 20px;
-  }
-  .setting-item-left {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .setting-label {
-    font-weight: 500;
-    color: #f1f5f9;
-  }
-  .setting-desc {
-    font-size: 0.7rem;
-    color: #94a3b8;
-  }
-  /* Google 風格開關 */
-  .switch {
-    position: relative;
-    display: inline-block;
-    width: 52px;
-    height: 28px;
-  }
-  .switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
-  .slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #475569;
-    transition: 0.2s;
-    border-radius: 34px;
-  }
-  .slider:before {
-    position: absolute;
-    content: "";
-    height: 22px;
-    width: 22px;
-    left: 3px;
-    bottom: 3px;
-    background-color: white;
-    transition: 0.2s;
-    border-radius: 50%;
-  }
-  input:checked + .slider {
-    background-color: #3b82f6;
-  }
-  input:checked + .slider:before {
-    transform: translateX(24px);
-  }
-  /* 滑桿 */
-  input[type="range"] {
-    width: 160px;
-    height: 4px;
-    -webkit-appearance: none;
-    background: #475569;
-    border-radius: 2px;
-  }
-  input[type="range"]:focus {
-    outline: none;
-  }
-  input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: #3b82f6;
-    cursor: pointer;
-  }
-  /* 下拉選單（難度）*/
-  .difficulty-select {
-    background: #0f172a;
-    color: #e2e8f0;
-    border: 1px solid #475569;
-    border-radius: 20px;
-    padding: 6px 12px;
-    font-size: 0.9rem;
-  }
-  /* Google 登入按鈕組 */
-  .google-buttons {
-    display: flex;
-    gap: 12px;
-  }
-  .google-btn {
-    background: #334155;
-    border: none;
-    border-radius: 28px;
-    padding: 6px 16px;
-    color: white;
-    font-size: 0.8rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: 0.2s;
-  }
-  .google-btn:hover {
-    background: #475569;
-  }
-
-  /* 遊戲內部樣式 */
-  .stat-row {
-    display: flex;
-    justify-content: space-between;
-    margin: 12px 0;
-    font-weight: bold;
-  }
-  .bar {
-    background: #1e293b;
-    border-radius: 20px;
-    height: 18px;
-    overflow: hidden;
-    margin: 8px 0;
-  }
-  .fillhp { background: #ef4444; height: 100%; }
-  .fillexp { background: #3b82f6; height: 100%; }
-  .enemy-icon { font-size: 56px; margin: 12px; text-align: center; }
-  .log {
-    background: #1e293b;
-    border-radius: 24px;
-    padding: 12px;
-    margin: 16px 0;
-    font-size: 0.85rem;
-    color: #facc15;
-  }
-  .buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    justify-content: center;
-    margin-top: 16px;
-  }
-  .game-action {
-    padding: 10px 20px;
-    border-radius: 40px;
-    font-weight: bold;
-    border: none;
-    background: #334155;
-    color: white;
-    font-size: 1.2rem;
-    cursor: pointer;
-  }
-  .attack { background: #dc2626; }
-  .skill { background: #2563eb; }
-  .rest { background: #16a34a; }
-  .save { background: #9333ea; }
-  .toast {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0,0,0,0.8);
-    color: #facc15;
-    padding: 8px 20px;
-    border-radius: 40px;
-    font-size: 0.8rem;
-    z-index: 999;
-    animation: fadeOut 2s forwards;
-  }
-  @keyframes fadeOut {
-    0% { opacity: 1; }
-    70% { opacity: 1; }
-    100% { opacity: 0; visibility: hidden; }
-  }
-</style>
+<title>幻獸鬥士</title>
+<link rel="stylesheet" href="styles.css">
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-<script src="sound.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 <div class="app">
   <!-- 主畫面 -->
   <div id="mainPage" class="page active">
     <div class="main-title">MONSTER GAME</div>
-    <button class="play-btn" id="toGameBtn">▶ PLAY GAME</button><br>
-    <button class="settings-btn" id="toSettingsBtn">⚙️ SETTINGS</button>
-    <div class="version">Beta 2.0</div>
+    <button class="play-btn" id="toGameBtn">▶ 開始遊戲</button>
+    <button class="settings-btn" id="toSettingsBtn">⚙️ 設定</button>
+    <button class="help-btn" id="helpBtn">❓ 幫助</button>
+    <div class="version">v2.1 完全版</div>
   </div>
 
-  <!-- 設定畫面（Google 風格 + 登入選項）-->
+  <!-- 設定畫面 -->
   <div id="settingsPage" class="page">
     <div class="settings-header">
       <button class="back-btn" id="backFromSettings">← 返回</button>
       <div class="settings-title">設定</div>
     </div>
-    <div class="settings-list">
-      <div class="setting-item">
-        <div class="setting-item-left">
-          <div class="setting-label">🔊 音量</div>
-          <div class="setting-desc">調整音效與背景音樂大小</div>
-        </div>
-        <input type="range" id="volumeSlider" min="0" max="100" value="70">
-      </div>
-      <div class="setting-item">
-        <div class="setting-item-left">
-          <div class="setting-label">🔔 音效開關</div>
-          <div class="setting-desc">開啟或關閉所有遊戲音效</div>
-        </div>
-        <label class="switch">
-          <input type="checkbox" id="sfxToggle" checked>
-          <span class="slider"></span>
-        </label>
-      </div>
-      <div class="setting-item">
-        <div class="setting-item-left">
-          <div class="setting-label">⚔️ 難度</div>
-          <div class="setting-desc">影響怪物強度與經驗獲取</div>
-        </div>
-        <select id="difficultySelect" class="difficulty-select">
-          <option value="easy">🎈 簡單</option>
-          <option value="normal" selected>⚖️ 普通</option>
-          <option value="hard">🔥 困難</option>
-        </select>
-      </div>
-      <div class="setting-item">
-        <div class="setting-item-left">
-          <div class="setting-label">🔐 Google 帳號</div>
-          <div class="setting-desc">登入後可雲端儲存遊戲進度</div>
-        </div>
-        <div class="google-buttons">
-          <button class="google-btn" id="googleLoginBtn">登入 Google</button>
-          <button class="google-btn" id="logoutBtn">登出</button>
-        </div>
-      </div>
+    <div class="settings-list" id="settingsList"></div>
+  </div>
+
+  <!-- 幫助畫面 -->
+  <div id="helpPage" class="page">
+    <div class="settings-header">
+      <button class="back-btn" id="backFromHelp">← 返回</button>
+      <div class="settings-title">幫助</div>
+    </div>
+    <div class="help-content">
+      <p>⚔️ 攻擊：穩定傷害</p>
+      <p>🔥 技能：高傷害，無額外經驗</p>
+      <p>😴 休息：每場限1次，恢復30HP，會被偷襲</p>
+      <p>📈 等級：滿50經驗升1級，提升攻擊與HP</p>
+      <p>🎚️ 難度：影響怪物強度與經驗</p>
+      <p>☁️ Google登入：自動雲端存檔</p>
     </div>
   </div>
 
   <!-- 遊戲畫面 -->
   <div id="gamePage" class="page">
-    <div style="margin-bottom: 12px;">
-      <button class="back-btn" id="backFromGame" style="background:none; border:none; color:#3b82f6; padding:0;">← 主選單</button>
+    <div class="game-header">
+      <button class="back-btn" id="backFromGame">← 主選單</button>
+      <div class="stats-line">
+        <span>❤️ <span id="hpText">100/100</span></span>
+        <span>⭐ <span id="expText">0/50</span></span>
+        <span>⬆️ Lv <span id="levelText">1</span></span>
+      </div>
+      <div class="bar"><div class="fillhp" id="hpBar"></div></div>
+      <div class="bar"><div class="fillexp" id="expBar"></div></div>
+      <div class="stats-line">
+        <span>⚔️ 攻擊力 <span id="atkText">10</span></span>
+        <span>🗺️ <span id="zoneText">新手村</span></span>
+      </div>
     </div>
-    <div class="stat-row"><span>❤️</span> <span id="hpText">100/100</span><span>⭐</span> <span id="expText">0/50</span><span>⬆️ Lv</span> <span id="levelText">1</span></div>
-    <div class="bar"><div class="fillhp" id="hpBar"></div></div>
-    <div class="bar"><div class="fillexp" id="expBar"></div></div>
-    <div class="stat-row"><span>⚔️</span> <span id="atkText">10</span><span>🗺️</span> <span id="zoneText">新手村</span></div>
-    <h3 id="monsterName" style="text-align:center;">史萊姆</h3>
-    <div class="enemy-icon" id="monsterEmoji">🟣</div>
-    <div style="text-align:center;">💀 HP <span id="monsterHpText">0/0</span></div>
-    <div class="bar"><div class="fillhp" id="monsterBar"></div></div>
-    <div class="log" id="logMsg">點擊攻擊開始冒險</div>
-    <div class="buttons">
-      <button class="game-action attack" id="attackBtn">⚔️</button>
-      <button class="game-action skill" id="skillBtn">🔥</button>
-      <button class="game-action rest" id="restBtn">😴</button>
-      <button class="game-action save" id="saveBtn">💾</button>
+    <div class="battle-area">
+      <h3 id="monsterName">史萊姆</h3>
+      <div class="enemy-icon" id="monsterEmoji">🟣</div>
+      <div>💀 HP <span id="monsterHpText">0/0</span> | ⭐ Lv <span id="monsterLevelText">0</span></div>
+      <div class="bar"><div class="fillhp" id="monsterBar"></div></div>
+      <div class="log" id="logMsg">點擊攻擊開始冒險</div>
+      <div class="buttons">
+        <button class="game-action attack" id="attackBtn">⚔️</button>
+        <button class="game-action skill" id="skillBtn">🔥</button>
+        <button class="game-action rest" id="restBtn">😴</button>
+        <button class="game-action save" id="saveBtn">💾</button>
+      </div>
     </div>
   </div>
 </div>
 
+<script src="utils.js"></script>
+<script src="sound.js"></script>
+<script src="firebase.js"></script>
+<script src="achievements.js"></script>
+<script src="settings.js"></script>
+<script src="game.js"></script>
 <script>
-// ========== Firebase 設定（你的專案）==========
-const firebaseConfig = {
-  apiKey: "AIzaSyDevirfNqjlg5hVkF6pgMMU9tfx7CDac4A",
-  authDomain: "monster-game-f193f.firebaseapp.com",
-  projectId: "monster-game-f193f",
-  storageBucket: "monster-game-f193f.firebasestorage.app",
-  messagingSenderId: "304101821779",
-  appId: "1:304101821779:web:9b77e901083a7949f265a6"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const provider = new firebase.auth.GoogleAuthProvider();
-
-// ========== Google 登入控制 ==========
-function updateGoogleButton() {
-  const btn = document.getElementById("googleLoginBtn");
-  if (!btn) return;
-  const user = auth.currentUser;
-  if (user) {
-    btn.innerText = `👤 ${user.displayName}`;
-    btn.disabled = true;
-  } else {
-    btn.innerText = "登入 Google";
-    btn.disabled = false;
+  // 簡單的頁面切換輔助
+  function showPage(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(pageId).classList.add('active');
   }
-}
-document.getElementById("googleLoginBtn").onclick = () => {
-  auth.signInWithPopup(provider)
-    .then(result => {
-      toast(`歡迎 ${result.user.displayName}`);
-      updateGoogleButton();
-    })
-    .catch(err => toast("登入失敗: "+err.message));
-};
-document.getElementById("logoutBtn").onclick = () => {
-  auth.signOut().then(() => {
-    toast("已登出");
-    updateGoogleButton();
-  });
-};
-auth.onAuthStateChanged(() => updateGoogleButton());
-updateGoogleButton();
-
-// ========== 遊戲核心變數 ==========
-let hp = 100, maxHp = 100, exp = 0, level = 1, atk = 10, restUsed = false;
-let curMonster = { name:"史萊姆", emoji:"🟣", hp:35, maxHp:35, atk:5, exp:15 };
-let currentDifficulty = "normal";
-let sfxEnabled = true;
-
-function toast(msg) {
-  let d = document.createElement("div");
-  d.className = "toast";
-  d.innerText = msg;
-  document.body.appendChild(d);
-  setTimeout(() => d.remove(), 2000);
-}
-function saveLocal() {
-  localStorage.setItem("gameSave", JSON.stringify({hp,maxHp,exp,level,atk,restUsed,currentDifficulty}));
-  toast("💾 已存檔");
-}
-function loadLocal() {
-  let d = localStorage.getItem("gameSave");
-  if (d) {
-    let s = JSON.parse(d);
-    hp = s.hp; maxHp = s.maxHp; exp = s.exp; level = s.level; atk = s.atk; restUsed = s.restUsed; currentDifficulty = s.currentDifficulty;
-    document.getElementById('difficultySelect').value = currentDifficulty;
-  }
-  refreshMonster(); updateUI();
-}
-function updateUI() {
-  document.getElementById('hpText').innerText = `${hp}/${maxHp}`;
-  document.getElementById('expText').innerText = `${exp}/50`;
-  document.getElementById('levelText').innerText = level;
-  document.getElementById('atkText').innerText = atk;
-  let zone = level <= 30 ? "🌳新手村" : (level <= 90 ? "🏜️沙漠" : "⛰️蒼穹");
-  document.getElementById('zoneText').innerHTML = zone;
-  document.getElementById('monsterName').innerHTML = curMonster.name;
-  document.getElementById('monsterEmoji').innerText = curMonster.emoji;
-  document.getElementById('monsterHpText').innerText = `${curMonster.hp}/${curMonster.maxHp}`;
-  document.getElementById('hpBar').style.width = `${hp/maxHp*100}%`;
-  document.getElementById('expBar').style.width = `${exp/50*100}%`;
-  document.getElementById('monsterBar').style.width = `${curMonster.hp/curMonster.maxHp*100}%`;
-  document.getElementById('restBtn').disabled = restUsed;
-}
-function logMsg(m){ document.getElementById('logMsg').innerHTML = m; }
-function rand(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
-function getDifficultyMultiplier() {
-  if(currentDifficulty=="easy") return { hp:0.7, atk:0.7, exp:1.1 };
-  if(currentDifficulty=="hard") return { hp:1.5, atk:1.3, exp:0.85 };
-  return { hp:1, atk:1, exp:1 };
-}
-function genMonster() {
-  let zoneList = level<=30 ? ["🟣史萊姆","🟢哥布林","🐺森林狼"] : (level<=90 ? ["🦂巨蠍","🧻木乃伊","🐍沙蛇"] : ["🐉青龍","👼天使","😈惡魔"]);
-  let raw = zoneList[Math.floor(Math.random()*zoneList.length)];
-  let emoji = raw[0], name = raw.slice(1);
-  let mult = getDifficultyMultiplier();
-  let baseHp = (30 + level*2.5)*mult.hp;
-  let baseAtk = (5 + Math.floor(level/2.5))*mult.atk;
-  let variance = v => Math.floor(v * (0.6 + Math.random()*0.8));
-  let expGain = Math.floor((12 + level*0.8) * mult.exp);
-  return { name, emoji, hp:variance(baseHp), maxHp:variance(baseHp), atk:variance(baseAtk), exp:Math.max(1,expGain) };
-}
-function refreshMonster() { curMonster = genMonster(); restUsed=false; updateUI(); logMsg(`✨ ${curMonster.name} 出現 HP${curMonster.hp} 攻${curMonster.atk}`); }
-function levelUp() {
-  let up=false;
-  while(exp>=50) { exp-=50; level++; maxHp+=20; atk+=5; hp=Math.floor(maxHp*0.7); up=true; logMsg(`🎉 升級 Lv${level} 攻擊力${atk}`); if(window.playLevelUpSound) playLevelUpSound(); updateUI(); }
-  if(up) refreshMonster();
-}
-function monsterAttack() {
-  let dmg = Math.max(1, rand(curMonster.atk-3, curMonster.atk+2));
-  hp -= dmg; if(window.playHurtSound) playHurtSound(); logMsg(`😈 ${curMonster.name} 反擊 ${dmg}`);
-  if(hp<=0) { hp=maxHp; restUsed=false; logMsg(`💀 復活`); }
-  updateUI();
-}
-function defeat() {
-  exp += curMonster.exp; logMsg(`🎉 擊敗 ${curMonster.name} 獲得 ${curMonster.exp} EXP`);
-  if(window.playDefeatSound) playDefeatSound(); levelUp(); refreshMonster(); updateUI();
-}
-function attack() {
-  if(window.initAudio) initAudio(); if(window.playAttackSound) playAttackSound();
-  if(hp<=0){ logMsg("無法攻擊"); return; }
-  let dmg = Math.max(2, rand(atk-3, atk+5));
-  curMonster.hp -= dmg; logMsg(`⚔️ 造成 ${dmg} 傷害`);
-  if(curMonster.hp<=0) defeat(); else monsterAttack();
-  updateUI();
-}
-function skill() {
-  if(window.initAudio) initAudio(); if(window.playSkillSound) playSkillSound();
-  if(hp<=0){ logMsg("無法施放"); return; }
-  let dmg = rand(atk+5, atk*2+3);
-  curMonster.hp -= dmg; logMsg(`🔥 技能造成 ${dmg} 傷害`);
-  if(curMonster.hp<=0) defeat(); else monsterAttack();
-  updateUI();
-}
-function rest() {
-  if(window.initAudio) initAudio(); if(window.playRestSound) playRestSound();
-  if(restUsed){ logMsg("已休息過"); return; }
-  if(hp<=0){ logMsg("無法休息"); return; }
-  hp = Math.min(maxHp, hp+30); restUsed=true; logMsg(`😴 恢復30 HP`);
-  let sneak = Math.max(1, rand(curMonster.atk-2, curMonster.atk+1));
-  hp -= sneak; logMsg(`⚠️ 偷襲 -${sneak}`);
-  if(hp<=0){ hp=maxHp; restUsed=false; logMsg(`💀 復活`); }
-  updateUI();
-}
-
-// ========== 頁面切換 ==========
-document.getElementById('toGameBtn').onclick = () => {
-  document.getElementById('mainPage').classList.remove('active');
-  document.getElementById('gamePage').classList.add('active');
-  loadLocal();
-};
-document.getElementById('toSettingsBtn').onclick = () => {
-  document.getElementById('mainPage').classList.remove('active');
-  document.getElementById('settingsPage').classList.add('active');
-};
-document.getElementById('backFromSettings').onclick = () => {
-  document.getElementById('settingsPage').classList.remove('active');
-  document.getElementById('mainPage').classList.add('active');
-};
-document.getElementById('backFromGame').onclick = () => {
-  document.getElementById('gamePage').classList.remove('active');
-  document.getElementById('mainPage').classList.add('active');
-};
-document.getElementById('difficultySelect').onchange = e => { currentDifficulty = e.target.value; refreshMonster(); };
-document.getElementById('attackBtn').onclick = attack;
-document.getElementById('skillBtn').onclick = skill;
-document.getElementById('restBtn').onclick = rest;
-document.getElementById('saveBtn').onclick = saveLocal;
-
-// 音量與音效開關（與 sound.js 連動）
-const sfxToggle = document.getElementById('sfxToggle');
-sfxToggle.onchange = e => { window.sfxEnabled = e.target.checked; if(window.setSfxEnabled) window.setSfxEnabled(e.target.checked); };
-const volumeSlider = document.getElementById('volumeSlider');
-volumeSlider.oninput = e => { if(window.setMasterVolume) window.setMasterVolume(e.target.value/100); };
-
-// 初始化
-refreshMonster(); updateUI();
+  document.getElementById('toGameBtn').onclick = () => { showPage('gamePage'); if(window.loadGame) loadGame(); };
+  document.getElementById('toSettingsBtn').onclick = () => { showPage('settingsPage'); if(window.refreshSettingsUI) refreshSettingsUI(); };
+  document.getElementById('helpBtn').onclick = () => showPage('helpPage');
+  document.getElementById('backFromSettings').onclick = () => showPage('mainPage');
+  document.getElementById('backFromHelp').onclick = () => showPage('mainPage');
+  document.getElementById('backFromGame').onclick = () => showPage('mainPage');
+  // 初始化
+  if(window.initGame) initGame();
 </script>
 </body>
 </html>
