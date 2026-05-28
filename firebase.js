@@ -10,20 +10,59 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth(), db = firebase.firestore(), provider = new firebase.auth.GoogleAuthProvider();
 let currentUser = null;
 
-window.signInWithGoogle = () => auth.signInWithPopup(provider).then(r => { currentUser = r.user; toast(`歡迎 ${currentUser.displayName}`); updateGoogleBtn(); syncCloud(); }).catch(e => toast('登入失敗', 1));
-window.signOut = () => auth.signOut().then(() => { currentUser = null; updateGoogleBtn(); toast('已登出'); loadLocal(); });
-function updateGoogleBtn() { let btn = document.getElementById('googleLoginBtn'); if (!btn) return; btn.innerText = currentUser ? `👤 ${currentUser.displayName}` : '登入 Google'; btn.disabled = !!currentUser; }
-auth.onAuthStateChanged(u => { currentUser = u; updateGoogleBtn(); if (u) syncCloud(); else loadLocal(); });
+window.signInWithGoogle = () => {
+  auth.signInWithPopup(provider)
+    .then(r => {
+      currentUser = r.user;
+      window.toast(`歡迎 ${currentUser.displayName}`);
+      window.updateGoogleBtn?.();
+      window.syncCloud?.();
+    })
+    .catch(e => window.toast('登入失敗', true));
+};
 
-async function syncCloud() {
+window.signOut = () => {
+  auth.signOut().then(() => {
+    currentUser = null;
+    window.updateGoogleBtn?.();
+    window.toast('已登出');
+    window.loadLocal?.();
+  });
+};
+
+window.updateGoogleBtn = () => {
+  const btn = document.getElementById('googleLoginBtn');
+  if (!btn) return;
+  btn.innerText = currentUser ? `👤 ${currentUser.displayName}` : '登入 Google';
+  btn.disabled = !!currentUser;
+};
+
+auth.onAuthStateChanged(u => {
+  currentUser = u;
+  window.updateGoogleBtn?.();
+  if (u) window.syncCloud?.();
+  else window.loadLocal?.();
+});
+
+window.syncCloud = async () => {
   if (!currentUser) return;
   try {
-    let doc = await db.collection('players').doc(currentUser.uid).get();
+    const doc = await db.collection('players').doc(currentUser.uid).get();
     if (doc.exists) {
-      let d = doc.data();
-      if (window.loadFromCloud) window.loadFromCloud(d);
-      toast('☁️ 同步完成');
-    } else loadLocal();
-  } catch (e) { toast('雲端錯誤', 1); loadLocal(); }
-}
-window.saveToCloud = (data) => { if (currentUser) db.collection('players').doc(currentUser.uid).set(data).catch(e => toast('雲端失敗', 1)); };
+      const data = doc.data();
+      if (window.loadFromCloud) window.loadFromCloud(data);
+      window.toast('☁️ 同步完成');
+    } else {
+      window.loadLocal?.();
+    }
+  } catch (e) {
+    window.toast('雲端錯誤', true);
+    window.loadLocal?.();
+  }
+};
+
+window.saveToCloud = (data) => {
+  if (currentUser) {
+    db.collection('players').doc(currentUser.uid).set(data).catch(e => window.toast('雲端失敗', true));
+  }
+};
