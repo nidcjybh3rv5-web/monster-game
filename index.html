@@ -4,35 +4,79 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>幻獸鬥士</title>
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="css/styles.css">
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<style>
+  .guide-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.85);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: system-ui;
+  }
+  .guide-card {
+    background: #1e293b;
+    max-width: 300px;
+    padding: 24px;
+    border-radius: 32px;
+    text-align: center;
+    border: 1px solid #facc15;
+  }
+  .guide-card p { margin: 16px 0; line-height: 1.5; }
+  .guide-card button { background: #facc15; border: none; padding: 8px 20px; border-radius: 40px; font-weight: bold; cursor: pointer; }
+</style>
 </head>
 <body>
+<div id="guideOverlay" class="guide-overlay" style="display: none;">
+  <div class="guide-card">
+    <p>🎮 <strong>歡迎來到幻獸鬥士！</strong></p>
+    <p>⚔️ 攻擊：穩定傷害<br>🔥 技能：高傷害<br>✨ 第二技能：可切換不同效果<br>😴 休息：每場1次，恢復30HP但會被偷襲<br>⚙️ 設定：調整音量、難度、裝備</p>
+    <p>💾 每次戰鬥後會自動存檔！</p>
+    <button id="closeGuideBtn">開始冒險</button>
+  </div>
+</div>
+
 <div class="app">
-  <!-- 主畫面 -->
   <div id="mainPage" class="page active">
     <div class="main-title">MONSTER GAME</div>
+    <!-- 主畫面每日獎勵狀態列 -->
+    <div id="dailyRewardStatusMain" style="background: #1e293b; border-radius: 40px; padding: 8px 16px; margin: 10px auto; width: 90%; text-align: center; font-size: 0.8rem;">
+      ⭐ 載入中...
+    </div>
     <button class="play-btn" id="toGameBtn">▶ 開始遊戲</button>
     <button class="settings-btn" id="toSettingsBtn">⚙️ 設定</button>
+    <button class="settings-btn" id="shopBtn">🛒 商店</button>
     <button class="settings-btn" id="helpBtn">❓ 幫助</button>
     <div class="version">v2.0</div>
   </div>
 
-  <!-- 設定畫面 -->
   <div id="settingsPage" class="page">
     <div class="settings-header"><button class="back-btn" id="backFromSettings">← 返回</button><div class="settings-title">設定</div></div>
     <div class="settings-list" id="settingsList"></div>
   </div>
 
-  <!-- 幫助畫面 -->
-  <div id="helpPage" class="page">
-    <div class="settings-header"><button class="back-btn" id="backFromHelp">← 返回</button><div class="settings-title">幫助</div></div>
-    <div class="help-content"><p>⚔️ 攻擊：穩定傷害</p><p>🔥 技能：高傷害</p><p>😴 休息：每場1次，恢復30HP，會被偷襲</p><p>📈 滿50經驗升級</p><p>🎚️ 難度影響怪物強度</p><p>☁️ Google登入雲端存檔</p><p>🏆 成就自動記錄</p></div>
+  <div id="shopPage" class="page">
+    <div class="settings-header"><button class="back-btn" id="backFromShop">← 返回</button><div class="settings-title">商店</div></div>
+    <div class="shop-panel" style="padding: 16px; text-align: center;">
+      <div id="dailyRewardStatus" style="margin-bottom: 20px;">⭐ 每日獎勵</div>
+      <button id="claimDailyBtn" class="play-btn" style="width: auto; padding: 10px 20px;">🎁 領取每日獎勵</button>
+      <div id="rewardMessage" style="margin-top: 20px; color: #facc15;"></div>
+    </div>
   </div>
 
-  <!-- 遊戲畫面 -->
+  <div id="helpPage" class="page">
+    <div class="settings-header"><button class="back-btn" id="backFromHelp">← 返回</button><div class="settings-title">幫助</div></div>
+    <div class="help-content"><p>⚔️ 攻擊：穩定傷害</p><p>🔥 技能：高傷害</p><p>✨ 第二技能：可從設定切換 (重擊/治療/防禦)</p><p>😴 休息：每場1次，恢復30HP，會被偷襲</p><p>📈 滿50經驗升級</p><p>🎚️ 難度影響怪物強度</p><p>☁️ Google登入雲端存檔</p><p>🏆 成就自動記錄</p><p>🎁 每日獎勵：每天可領取一次獎勵</p></div>
+  </div>
+
   <div id="gamePage" class="page">
     <button class="back-btn" id="backFromGame">← 主選單</button>
     <div class="stats-line"><span>❤️ <span id="hpText">100/100</span></span><span>⭐ <span id="expText">0/50</span></span><span>⬆️ Lv <span id="levelText">1</span></span></div>
@@ -47,16 +91,30 @@
     <div class="buttons">
       <button class="game-action attack" id="attackBtn">⚔️</button>
       <button class="game-action skill" id="skillBtn">🔥</button>
+      <button class="game-action skill2" id="skill2Btn">✨</button>
       <button class="game-action rest" id="restBtn">😴</button>
       <button class="game-action save" id="saveBtn">💾</button>
     </div>
   </div>
 </div>
-<script src="utils.js"></script>
-<script src="sound.js"></script>
-<script src="achievements.js"></script>
-<script src="firebase.js"></script>
-<script src="settings.js"></script>
-<script src="game.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/sound.js"></script>
+<script src="js/achievements.js"></script>
+<script src="js/firebase.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/spotify.js"></script>
+<script src="js/game.js"></script>
+<script>
+  (function() {
+    const hasSeenGuide = localStorage.getItem('guideShown');
+    if (!hasSeenGuide) {
+      document.getElementById('guideOverlay').style.display = 'flex';
+      document.getElementById('closeGuideBtn').onclick = () => {
+        document.getElementById('guideOverlay').style.display = 'none';
+        localStorage.setItem('guideShown', 'true');
+      };
+    }
+  })();
+</script>
 </body>
 </html>
