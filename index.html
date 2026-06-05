@@ -4,206 +4,47 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>幻獸鬥士</title>
-<!-- Firebase SDK -->
+<!-- Firebase SDK (必须) -->
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <style>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    user-select: none;
-  }
-
-  body {
-    background: radial-gradient(circle at 20% 30%, #1a2a3a, #0a0f1e);
-    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #fff;
-    padding: 16px;
-  }
-
-  /* 主容器 — 液態玻璃效果 */
-  .app {
-    width: 100%;
-    max-width: 550px;
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(25px) saturate(180%);
-    border-radius: 48px;
-    padding: 24px 20px 32px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-  }
-
-  /* 頁面切換：非活動頁面隱藏 */
-  .page {
-    display: none;
-  }
-  .page.active {
-    display: block;
-  }
-
-  /* 主畫面標題 */
-  .main-title {
-    font-size: 2rem;
-    font-weight: 700;
-    background: linear-gradient(135deg, #facc15, #ff8c00);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    text-align: center;
-    margin: 20px 0;
-  }
-
-  /* 主要按鈕 */
-  .play-btn, .settings-btn {
-    background: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 40px;
-    padding: 12px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    cursor: pointer;
-    width: 80%;
-    margin: 10px auto;
-    display: block;
-    text-align: center;
-    color: #fff;
-    transition: 0.2s;
-  }
-  .play-btn {
-    background: #facc15;
-    color: #0f172a;
-    border: none;
-  }
-  button:active {
-    transform: scale(0.97);
-  }
-
-  .version {
-    text-align: center;
-    font-size: 0.7rem;
-    color: #94a3b8;
-    margin-top: 20px;
-  }
-
-  /* 通用返回按鈕 */
-  .back-btn {
-    background: none;
-    border: none;
-    color: #3b82f6;
-    font-size: 1rem;
-    cursor: pointer;
-    display: inline-block;
-    margin-bottom: 16px;
-  }
-
-  /* 設定頁面列表 */
-  .settings-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .setting-item {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 28px;
-    padding: 12px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  /* 幫助內容 */
-  .help-content {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 28px;
-    padding: 20px;
-    line-height: 2;
-  }
-
-  /* 遊戲戰鬥區域 */
-  .stats-line {
-    display: flex;
-    justify-content: space-between;
-    margin: 12px 0;
-    font-weight: bold;
-  }
-  .bar {
-    background: #1e293b;
-    border-radius: 20px;
-    height: 18px;
-    overflow: hidden;
-    margin: 8px 0;
-  }
-  .fillhp {
-    background: #ef4444;
-    height: 100%;
-    width: 100%;
-  }
-  .fillexp {
-    background: #3b82f6;
-    height: 100%;
-  }
-  .enemy-icon {
-    font-size: 56px;
-    margin: 12px;
-    text-align: center;
-  }
-  .log {
-    background: rgba(0, 0, 0, 0.5);
-    border-radius: 24px;
-    padding: 12px;
-    margin: 16px 0;
-    font-size: 0.85rem;
-    color: #facc15;
-    min-height: 70px;
-  }
-  .buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    justify-content: center;
-    margin-top: 16px;
-  }
-  .game-action {
-    padding: 12px 24px;
-    border-radius: 40px;
-    font-weight: bold;
-    border: none;
-    background: #334155;
-    color: white;
-    font-size: 1.2rem;
-    cursor: pointer;
-  }
-  .attack { background: #dc2626; }
-  .skill { background: #2563eb; }
-  .skill2 { background: #8b5cf6; }
-  .rest { background: #16a34a; }
-  .save { background: #9333ea; }
-
-  /* 提示訊息 */
-  .toast {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0,0,0,0.8);
-    color: #facc15;
-    padding: 8px 20px;
-    border-radius: 40px;
-    font-size: 0.8rem;
-    z-index: 999;
-    animation: fadeOut 2s forwards;
-  }
-  @keyframes fadeOut {
-    0% { opacity: 1; }
-    70% { opacity: 1; }
-    100% { opacity: 0; visibility: hidden; }
-  }
+  *{margin:0;padding:0;box-sizing:border-box;user-select:none;}
+  body{background:radial-gradient(circle at 20% 30%,#1a2a3a,#0a0f1e);font-family:system-ui,-apple-system,'Segoe UI',sans-serif;min-height:100vh;display:flex;justify-content:center;align-items:center;color:#fff;padding:16px;}
+  .app{width:100%;max-width:550px;background:rgba(255,255,255,0.08);backdrop-filter:blur(25px);border-radius:48px;padding:24px 20px 32px;border:1px solid rgba(255,255,255,0.2);box-shadow:0 20px 40px rgba(0,0,0,0.4);}
+  .page{display:none;}.page.active{display:block;}
+  .main-title{font-size:2rem;font-weight:700;background:linear-gradient(135deg,#facc15,#ff8c00);-webkit-background-clip:text;background-clip:text;color:transparent;text-align:center;margin:20px 0;}
+  .play-btn,.settings-btn{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:40px;padding:12px;font-size:1.1rem;font-weight:bold;cursor:pointer;width:80%;margin:10px auto;display:block;text-align:center;color:#fff;transition:0.2s;}
+  .play-btn{background:#facc15;color:#0f172a;border:none;}
+  button:active{transform:scale(0.97);}
+  .version{text-align:center;font-size:0.7rem;color:#94a3b8;margin-top:20px;}
+  .back-btn{background:none;border:none;color:#3b82f6;font-size:1rem;cursor:pointer;display:inline-block;margin-bottom:16px;}
+  .settings-list{display:flex;flex-direction:column;gap:12px;}
+  .setting-item{background:rgba(255,255,255,0.05);border-radius:28px;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;}
+  .help-content{background:rgba(255,255,255,0.05);border-radius:28px;padding:20px;line-height:2;}
+  .stats-line{display:flex;justify-content:space-between;margin:12px 0;font-weight:bold;}
+  .bar{background:#1e293b;border-radius:20px;height:18px;overflow:hidden;margin:8px 0;}
+  .fillhp{background:#ef4444;height:100%;}
+  .fillexp{background:#3b82f6;height:100%;}
+  .enemy-icon{font-size:56px;margin:12px;text-align:center;}
+  .log{background:rgba(0,0,0,0.5);border-radius:24px;padding:12px;margin:16px 0;font-size:0.85rem;color:#facc15;min-height:70px;}
+  .buttons{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:16px;}
+  .game-action{padding:12px 24px;border-radius:40px;font-weight:bold;border:none;background:#334155;color:#fff;font-size:1.2rem;cursor:pointer;}
+  .attack{background:#dc2626;}.skill{background:#2563eb;}.skill2{background:#8b5cf6;}.rest{background:#16a34a;}.save{background:#9333ea;}
+  .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:#facc15;padding:8px 20px;border-radius:40px;font-size:0.8rem;z-index:999;animation:fadeOut 2s forwards;}
+  @keyframes fadeOut{0%{opacity:1}70%{opacity:1}100%{opacity:0;visibility:hidden}}
+  .switch{position:relative;display:inline-block;width:52px;height:28px;}
+  .switch input{opacity:0;width:0;height:0;}
+  .slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#475569;border-radius:34px;}
+  .slider:before{position:absolute;content:"";height:22px;width:22px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:0.2s;}
+  input:checked+.slider{background:#3b82f6;}
+  input:checked+.slider:before{transform:translateX(24px);}
+  input[type="range"]{width:160px;height:4px;-webkit-appearance:none;background:#475569;border-radius:2px;}
+  input[type="range"]::-webkit-slider-thumb{width:18px;height:18px;border-radius:50%;background:#3b82f6;-webkit-appearance:none;}
+  .difficulty-select{background:#0f172a;color:#fff;border:1px solid #475569;border-radius:20px;padding:6px 12px;}
+  .guide-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:1000;display:flex;justify-content:center;align-items:center;}
+  .guide-card{background:#1e293b;max-width:300px;padding:24px;border-radius:32px;text-align:center;border:1px solid #facc15;}
+  .guide-card button{margin-top:16px;background:#facc15;border:none;padding:8px 20px;border-radius:40px;font-weight:bold;cursor:pointer;}
 </style>
 </head>
 <body>
@@ -220,42 +61,27 @@
 
   <!-- 設定畫面 -->
   <div id="settingsPage" class="page">
-    <div class="settings-header">
-      <button class="back-btn" id="backFromSettings">← 返回</button>
-      <div class="settings-title">設定</div>
-    </div>
+    <div><button class="back-btn" id="backFromSettings">← 返回</button><span style="font-size:1.3rem; font-weight:500;">設定</span></div>
     <div class="settings-list" id="settingsList"></div>
   </div>
 
   <!-- 商店畫面 -->
   <div id="shopPage" class="page">
-    <div class="settings-header">
-      <button class="back-btn" id="backFromShop">← 返回</button>
-      <div class="settings-title">商店</div>
-    </div>
-    <div style="padding: 16px; text-align: center;">
-      <div id="dailyRewardStatus" style="background: rgba(255,255,255,0.1); border-radius: 40px; padding: 12px; margin-bottom: 20px;">⭐ 每日獎勵</div>
-      <button id="claimDailyBtn" class="play-btn" style="width: auto; padding: 10px 20px;">🎁 領取每日獎勵</button>
-      <div id="rewardMessage" style="margin-top: 20px;"></div>
+    <div><button class="back-btn" id="backFromShop">← 返回</button><span style="font-size:1.3rem; font-weight:500;">商店</span></div>
+    <div style="padding:16px; text-align:center;">
+      <div id="dailyRewardStatus" style="background:rgba(255,255,255,0.1); border-radius:40px; padding:12px; margin-bottom:20px;">⭐ 每日獎勵</div>
+      <button id="claimDailyBtn" class="play-btn" style="width:auto; padding:10px 20px;">🎁 領取每日獎勵</button>
+      <div id="rewardMessage" style="margin-top:20px;"></div>
     </div>
   </div>
 
   <!-- 幫助畫面 -->
   <div id="helpPage" class="page">
-    <div class="settings-header">
-      <button class="back-btn" id="backFromHelp">← 返回</button>
-      <div class="settings-title">幫助</div>
-    </div>
+    <div><button class="back-btn" id="backFromHelp">← 返回</button><span style="font-size:1.3rem; font-weight:500;">幫助</span></div>
     <div class="help-content">
-      <p>⚔️ 攻擊：穩定傷害</p>
-      <p>🔥 技能：高傷害</p>
-      <p>✨ 第二技能：可從設定切換 (重擊/治療/防禦)</p>
-      <p>😴 休息：每場1次，恢復30HP，會被偷襲</p>
-      <p>📈 滿50經驗升級</p>
-      <p>🎚️ 難度影響怪物強度</p>
-      <p>☁️ Google登入雲端存檔</p>
-      <p>🏆 成就自動記錄</p>
-      <p>🎁 每日獎勵：每天可領取一次</p>
+      <p>⚔️ 攻擊：穩定傷害</p><p>🔥 技能：高傷害</p><p>✨ 第二技能：可從設定切換 (重擊/治療/防禦)</p>
+      <p>😴 休息：每場1次，恢復30HP，會被偷襲</p><p>📈 滿50經驗升級</p><p>🎚️ 難度影響怪物強度</p>
+      <p>☁️ Google登入雲端存檔</p><p>🏆 成就自動記錄</p><p>🎁 每日獎勵：每天可領取一次</p>
     </div>
   </div>
 
@@ -281,41 +107,410 @@
   </div>
 </div>
 
+<!-- 新手引導浮層 -->
+<div id="guideOverlay" class="guide-overlay" style="display:none;">
+  <div class="guide-card">
+    <p>🎮 <strong>歡迎來到幻獸鬥士！</strong></p>
+    <p>⚔️ 攻擊：穩定傷害<br>🔥 技能：高傷害<br>✨ 第二技能：可切換<br>😴 休息：每場1次，恢復30HP但會被偷襲</p>
+    <p>💾 自動存檔！</p>
+    <button id="closeGuideBtn">開始冒險</button>
+  </div>
+</div>
+
 <script>
-  // ========== 簡易頁面切換（確保只有 active 頁面顯示）==========
-  function showPage(id) {
-    // 隱藏所有頁面
-    document.querySelectorAll('.page').forEach(page => {
-      page.classList.remove('active');
-    });
-    // 顯示目標頁面
-    const target = document.getElementById(id);
-    if (target) target.classList.add('active');
+// ==================== 全局工具 ====================
+function toast(msg, isErr=false) {
+  let d=document.createElement('div'); d.className='toast'; d.innerText=msg;
+  d.style.color=isErr?'#ff8888':'#facc15'; document.body.appendChild(d);
+  setTimeout(()=>d.remove(),2000);
+}
+function rand(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+
+// ==================== 裝備系統 ====================
+const QUALITY = [
+  { name:'普通', color:'#9ca3af', min:1, max:3, rate:0.5 },
+  { name:'优秀', color:'#4ade80', min:4, max:6, rate:0.3 },
+  { name:'稀有', color:'#3b82f6', min:7, max:10, rate:0.15 },
+  { name:'史诗', color:'#a855f7', min:11, max:15, rate:0.05 }
+];
+function randomQuality(){
+  let r=Math.random(), acc=0;
+  for(let q of QUALITY) if((acc+=q.rate)>r) return q;
+  return QUALITY[0];
+}
+function generateEquipment(){
+  let type = rand(0,1) ? 'weapon' : 'armor';
+  let q = randomQuality();
+  let bonus = rand(q.min,q.max);
+  return { id:Date.now()+'-'+Math.random(), type, quality:q.name, color:q.color, bonus,
+           name:`${q.name} ${type==='weapon'?'武器':'防具'}`, equipped:false };
+}
+function calcEquipBonus(){
+  let atk=0, hp=0;
+  (window.equipment||[]).forEach(e=>{ if(e.equipped) e.type==='weapon'? atk+=e.bonus : hp+=e.bonus; });
+  return {atk,hp};
+}
+function applyEquipBonus(){
+  let b=calcEquipBonus();
+  window.atk = window.baseAtk + b.atk;
+  window.maxHp = window.baseHp + b.hp;
+  if(window.hp > window.maxHp) window.hp = window.maxHp;
+  updateUI();
+}
+
+// ==================== 遊戲狀態 ====================
+window.hp=100; window.maxHp=100; window.exp=0; window.lv=1; window.atk=10;
+window.restUsed=false; window.curMonster=null;
+window.difficulty = localStorage.getItem('difficulty')||'normal';
+window.deathStreak=0; window.lastDmg=0;
+window.equipment = [];
+window.baseAtk=10; window.baseHp=100;
+window.secondSkill = localStorage.getItem('secondSkill')||'重擊';
+
+const zones = [
+  { name:"🌳新手村", maxLv:30, mons:["🟣史萊姆","🟢哥布林","🐺森林狼"] },
+  { name:"🏜️沙漠", maxLv:90, mons:["🦂巨蠍","🧻木乃伊","🐍沙蛇"] },
+  { name:"⛰️蒼穹", maxLv:100, mons:["🐉青龍","👼天使","😈惡魔"] }
+];
+function getZone(){ return window.lv<=30?zones[0]:window.lv<=90?zones[1]:zones[2]; }
+function getMult(){
+  switch(window.difficulty){
+    case 'easy':return {hp:0.7,atk:0.7,exp:1.1,off:-2};
+    case 'hard':return {hp:1.5,atk:1.3,exp:0.85,off:3};
+    case 'extreme':return {hp:2.0,atk:1.6,exp:0.7,off:6};
+    default:return {hp:1,atk:1,exp:1,off:0};
   }
+}
+function genMonster(){
+  let zone=getZone(), mons=zone.mons.length?zone.mons:["🟣史萊姆"];
+  let raw=mons[Math.floor(Math.random()*mons.length)];
+  let emoji=raw[0], name=raw.slice(1);
+  let m=getMult();
+  let off=m.off;
+  if(window.deathStreak>=3 && window.difficulty!=='easy') off=Math.max(-5, off-Math.floor(window.deathStreak/2));
+  let mlv=Math.max(1, window.lv+off);
+  let baseHp=(30+mlv*2.5)*m.hp, baseAtk=(5+Math.floor(mlv/2.5))*m.atk;
+  let varf=v=>Math.floor(v*(0.6+Math.random()*0.8));
+  return { name, emoji, mlv, hp:varf(baseHp), maxHp:varf(baseHp), atk:varf(baseAtk), exp:Math.max(1,Math.floor((12+mlv*0.8)*m.exp)) };
+}
+function refresh(){
+  window.curMonster = genMonster();
+  window.restUsed=false;
+  updateUI();
+  log(`✨ Lv.${window.curMonster.mlv} ${window.curMonster.name} | HP${window.curMonster.hp} 攻${window.curMonster.atk}`);
+}
+function updateUI(){
+  document.getElementById('hpText').innerText = `${window.hp}/${window.maxHp}`;
+  document.getElementById('expText').innerText = `${window.exp}/50`;
+  document.getElementById('levelText').innerText = window.lv;
+  document.getElementById('atkText').innerText = window.atk;
+  document.getElementById('zoneText').innerHTML = getZone().name;
+  if(window.curMonster){
+    document.getElementById('monsterName').innerHTML = window.curMonster.name;
+    document.getElementById('monsterEmoji').innerText = window.curMonster.emoji;
+    document.getElementById('monsterHpText').innerText = `${window.curMonster.hp}/${window.curMonster.maxHp}`;
+    document.getElementById('monsterLevelText').innerText = window.curMonster.mlv;
+    let percent = (window.curMonster.hp / window.curMonster.maxHp) * 100;
+    document.getElementById('monsterBar').style.width = `${percent}%`;
+  }
+  document.getElementById('hpBar').style.width = `${(window.hp/window.maxHp)*100}%`;
+  document.getElementById('expBar').style.width = `${(window.exp/50)*100}%`;
+  document.getElementById('restBtn').disabled = window.restUsed;
+}
+function log(msg){ document.getElementById('logMsg').innerHTML=msg; }
 
-  // 綁定按鈕事件
-  document.getElementById('toGameBtn').onclick = () => showPage('gamePage');
-  document.getElementById('toSettingsBtn').onclick = () => showPage('settingsPage');
-  document.getElementById('shopBtn').onclick = () => showPage('shopPage');
-  document.getElementById('helpBtn').onclick = () => showPage('helpPage');
-  document.getElementById('backFromSettings').onclick = () => showPage('mainPage');
-  document.getElementById('backFromShop').onclick = () => showPage('mainPage');
-  document.getElementById('backFromHelp').onclick = () => showPage('mainPage');
-  document.getElementById('backFromGame').onclick = () => showPage('mainPage');
+// ==================== 存檔 ====================
+function saveLocal(){
+  const state = {
+    lv:window.lv, exp:window.exp, baseAtk:window.baseAtk, baseHp:window.baseHp,
+    hp:window.hp, maxHp:window.maxHp, atk:window.atk, restUsed:window.restUsed,
+    difficulty:window.difficulty, equipment:window.equipment,
+    deathStreak:window.deathStreak, lastDmg:window.lastDmg,
+    secondSkill:window.secondSkill
+  };
+  localStorage.setItem('gameSave', JSON.stringify(state));
+  toast('💾 本地存檔');
+  if(window.saveToCloud) window.saveToCloud(state);
+}
+function loadLocal(){
+  let raw = localStorage.getItem('gameSave');
+  if(raw){
+    try{
+      let s = JSON.parse(raw);
+      window.lv = s.lv??1; window.exp = s.exp??0;
+      window.baseAtk = s.baseAtk??10; window.baseHp = s.baseHp??100;
+      window.hp = s.hp??100; window.maxHp = s.maxHp??100; window.atk = s.atk??10;
+      window.restUsed = s.restUsed??false; window.difficulty = s.difficulty??'normal';
+      window.equipment = Array.isArray(s.equipment)? s.equipment : [];
+      window.deathStreak = s.deathStreak??0; window.lastDmg = s.lastDmg??0;
+      window.secondSkill = s.secondSkill??'重擊';
+      let diffSel = document.getElementById('diffSelect');
+      if(diffSel) diffSel.value = window.difficulty;
+      let skillSel = document.getElementById('skillSelect');
+      if(skillSel) skillSel.value = window.secondSkill;
+    }catch(e){ console.error(e); }
+  }
+  applyEquipBonus();
+  refresh(); updateUI();
+}
 
-  // ========== 遊戲核心變數（簡化版，只讓按鈕暫時不報錯）==========
-  // 實際完整遊戲邏輯在 game.js 中，此處僅保證頁面切換正常
-  // 你原本的 game.js 等檔案會補齊所有功能，請保留它們
-  console.log("頁面切換已就緒");
+// ==================== 戰鬥邏輯 ====================
+function levelUp(){
+  let upgraded=false;
+  while(window.exp>=50){
+    window.exp-=50; window.lv++;
+    window.baseHp+=20; window.baseAtk+=5;
+    window.hp = Math.floor((window.baseHp + calcEquipBonus().hp)*0.7);
+    upgraded=true;
+    log(`🎉 升級 Lv${window.lv} 攻擊力 ${window.baseAtk+calcEquipBonus().atk}`);
+    if(window.playLevelUp) window.playLevelUp();
+    if(window.recordMaxLevel) window.recordMaxLevel(window.lv);
+  }
+  if(upgraded) refresh();
+  applyEquipBonus();
+  saveLocal();
+}
+function monsterCounter(){
+  if(!window.curMonster) return;
+  let dmg = Math.max(1, rand(window.curMonster.atk-3, window.curMonster.atk+2));
+  window.hp -= dmg;
+  if(window.playHurt) window.playHurt();
+  log(`😈 Lv.${window.curMonster.mlv} ${window.curMonster.name} 反擊 ${dmg}`);
+  if(window.hp<=0){
+    window.hp = window.maxHp;
+    window.restUsed=false;
+    window.deathStreak++;
+    log(`💀 復活 (連死${window.deathStreak})`);
+  } else window.deathStreak=0;
+  updateUI(); saveLocal();
+}
+function defeat(){
+  if(!window.curMonster) return;
+  window.exp += window.curMonster.exp;
+  log(`🎉 擊敗 Lv.${window.curMonster.mlv} ${window.curMonster.name} +${window.curMonster.exp}EXP`);
+  if(window.playDefeat) window.playDefeat();
+  if(window.recordKill) window.recordKill(window.lastDmg);
+  // 30%掉落装备
+  if(Math.random()<0.3){
+    let eq = generateEquipment();
+    window.equipment.push(eq);
+    toast(`🎁 獲得 ${eq.name} +${eq.bonus}`);
+    if(!window.equipment.some(e=>e.type===eq.type && e.equipped)){
+      eq.equipped=true;
+      applyEquipBonus();
+      toast(`✨ 自動裝備 ${eq.name}`);
+    }
+    saveLocal();
+  }
+  levelUp(); refresh(); updateUI(); saveLocal();
+}
+function attack(){
+  if(window.initAudio) window.initAudio();
+  if(window.playAttack) window.playAttack();
+  if(window.hp<=0){ log('無法攻擊'); return; }
+  let dmg = Math.max(2, rand(window.atk-3, window.atk+5));
+  window.lastDmg = dmg;
+  window.curMonster.hp -= dmg;
+  log(`⚔️ 造成 ${dmg} 傷害`);
+  if(window.curMonster.hp<=0) defeat(); else monsterCounter();
+  updateUI(); saveLocal();
+}
+function skill(){
+  if(window.initAudio) window.initAudio();
+  if(window.playSkill) window.playSkill();
+  if(window.hp<=0){ log('無法施放技能'); return; }
+  let dmg = rand(window.atk+5, window.atk*2+3);
+  window.lastDmg = dmg;
+  window.curMonster.hp -= dmg;
+  log(`🔥 技能造成 ${dmg} 傷害`);
+  if(window.curMonster.hp<=0) defeat(); else monsterCounter();
+  updateUI(); saveLocal();
+}
+function skill2Action(){
+  if(window.initAudio) window.initAudio();
+  if(window.playSkill) window.playSkill();
+  if(window.hp<=0){ log('無法施放技能'); return; }
+  let dmg=0, heal=0, msg='';
+  switch(window.secondSkill){
+    case '重擊':
+      dmg = rand(window.atk+8, window.atk*2+5);
+      window.curMonster.hp -= dmg;
+      msg = `✨ 重擊造成 ${dmg} 傷害`;
+      break;
+    case '治療':
+      heal = rand(20,40);
+      window.hp = Math.min(window.maxHp, window.hp+heal);
+      msg = `✨ 治療恢復 ${heal} HP`;
+      break;
+    case '防禦':
+      dmg = rand(window.atk+3, window.atk+10);
+      window.curMonster.hp -= dmg;
+      let shield = rand(5,15);
+      window.hp += shield;
+      if(window.hp>window.maxHp) window.hp=window.maxHp;
+      msg = `✨ 防禦反擊 ${dmg} 傷害，獲得 ${shield} 護盾`;
+      break;
+    default:
+      dmg = rand(window.atk+5, window.atk*2+3);
+      window.curMonster.hp -= dmg;
+      msg = `✨ 技能造成 ${dmg} 傷害`;
+  }
+  window.lastDmg = dmg;
+  log(msg);
+  if(window.curMonster.hp<=0) defeat(); else monsterCounter();
+  updateUI(); saveLocal();
+}
+function rest(){
+  if(window.initAudio) window.initAudio();
+  if(window.playRest) window.playRest();
+  if(window.restUsed){ log('已經休息過了'); return; }
+  if(window.hp<=0){ log('無法休息'); return; }
+  window.hp = Math.min(window.maxHp, window.hp+30);
+  window.restUsed = true;
+  log(`😴 恢復 30 HP`);
+  let sneak = Math.max(1, rand(window.curMonster.atk-2, window.curMonster.atk+1));
+  window.hp -= sneak;
+  log(`⚠️ 偷襲 -${sneak}`);
+  if(window.hp<=0){ window.hp=window.maxHp; window.restUsed=false; log('💀 復活'); }
+  updateUI(); saveLocal();
+}
+
+// ==================== 裝備操作 ====================
+window.toggleEquip = (id)=>{
+  let item = window.equipment.find(e=>e.id==id);
+  if(!item) return;
+  if(item.equipped){
+    item.equipped=false;
+    toast(`已卸下 ${item.name}`);
+  } else {
+    let same = window.equipment.find(e=>e.type===item.type && e.equipped);
+    if(same) same.equipped=false;
+    item.equipped=true;
+    toast(`已裝備 ${item.name}`);
+  }
+  applyEquipBonus(); saveLocal();
+  renderSettings(); // 刷新設定頁面
+};
+
+// ==================== 每日獎勵 ====================
+function checkDailyReward(){
+  let last = localStorage.getItem('lastRewardDate');
+  let today = new Date().toDateString();
+  return last !== today;
+}
+function claimDailyReward(){
+  if(!checkDailyReward()){ toast('今天已經領過獎勵了！'); return false; }
+  if(typeof generateEquipment !== 'function'){ toast('裝備系統未載入'); return false; }
+  let r = rand(1,3), msg='';
+  if(r===1){
+    window.exp += 20;
+    msg = '🎁 獲得 20 經驗值！';
+  } else if(r===2){
+    let eq = generateEquipment();
+    window.equipment.push(eq);
+    msg = `🎁 獲得裝備：${eq.name} +${eq.bonus}`;
+    if(!window.equipment.some(e=>e.type===eq.type && e.equipped)){
+      eq.equipped=true; applyEquipBonus();
+      msg += ` 已自動裝備`;
+    }
+  } else {
+    window.hp = Math.min(window.maxHp, (window.hp||0)+50);
+    msg = '🎁 獲得 50 HP 恢復藥水！';
+  }
+  localStorage.setItem('lastRewardDate', new Date().toDateString());
+  toast(msg);
+  updateUI(); saveLocal();
+  return true;
+}
+
+// ==================== 設定頁面渲染 ====================
+function renderSettings(){
+  const container = document.getElementById('settingsList');
+  if(!container) return;
+  let vol = Math.round((localStorage.getItem('volume')?parseFloat(localStorage.volume):0.7)*100);
+  let diff = window.difficulty;
+  let skill = window.secondSkill;
+  let isMuted = localStorage.getItem('mute')==='1';
+  let weapon = window.equipment?.find(e=>e.type==='weapon');
+  let armor = window.equipment?.find(e=>e.type==='armor');
+  container.innerHTML = `
+    <div class="setting-item"><div><div>🔊 音量</div></div><input type="range" id="volSlider" min="0" max="100" value="${vol}"></div>
+    <div class="setting-item"><div><div>🔔 音效開關</div></div><label class="switch"><input type="checkbox" id="sfxCheck" ${!isMuted?'checked':''}><span class="slider"></span></label></div>
+    <div class="setting-item"><div><div>⚔️ 難度</div></div><select id="diffSelect" class="difficulty-select"><option value="easy" ${diff==='easy'?'selected':''}>簡單</option><option value="normal" ${diff==='normal'?'selected':''}>普通</option><option value="hard" ${diff==='hard'?'selected':''}>困難</option><option value="extreme" ${diff==='extreme'?'selected':''}>極限</option></select></div>
+    <div class="setting-item"><div><div>✨ 第二技能</div></div><select id="skillSelect" class="difficulty-select"><option value="重擊" ${skill==='重擊'?'selected':''}>⚡ 重擊</option><option value="治療" ${skill==='治療'?'selected':''}>💚 治療</option><option value="防禦" ${skill==='防禦'?'selected':''}>🛡️ 防禦</option></select></div>
+    <div class="setting-item"><div><div>⚔️ 裝備</div></div><div>武器:${weapon?`${weapon.name}+${weapon.bonus} <button class="eq-btn" data-id="${weapon.id}">${weapon.equipped?'卸下':'裝備'}</button>`:'無'} 防具:${armor?`${armor.name}+${armor.bonus} <button class="eq-btn" data-id="${armor.id}">${armor.equipped?'卸下':'裝備'}</button>`:'無'}</div></div>
+    <div class="setting-item"><div><div>🔐 Google</div></div><div><button id="googleLoginBtn" style="background:#334155;padding:6px 12px;">登入 Google</button> <button id="logoutBtn" style="background:#334155;padding:6px 12px;">登出</button></div></div>
+    <div class="setting-item"><div><div>🏆 成就</div></div><div id="achievementsList">🐉 擊殺:${window.totalKills||0} | 💥 最高傷:${window.maxDamage||0} | 🏆 最高等:${window.maxLevel||1}</div></div>
+  `;
+  // 绑定事件
+  document.getElementById('volSlider')?.addEventListener('input', e => { let v=e.target.value/100; if(window.setMasterVolume) window.setMasterVolume(v); else console.log('音量',v); });
+  document.getElementById('sfxCheck')?.addEventListener('change', e => { if(window.setSfxEnabled) window.setSfxEnabled(e.target.checked); localStorage.setItem('mute',e.target.checked?'0':'1'); });
+  document.getElementById('diffSelect')?.addEventListener('change', e => { window.difficulty=e.target.value; localStorage.setItem('difficulty',window.difficulty); refresh(); toast(`難度:${window.difficulty}`); });
+  document.getElementById('skillSelect')?.addEventListener('change', e => { window.secondSkill=e.target.value; localStorage.setItem('secondSkill',window.secondSkill); toast(`第二技能:${window.secondSkill}`); });
+  document.querySelectorAll('.eq-btn').forEach(btn=>btn.addEventListener('click',()=>window.toggleEquip(btn.dataset.id)));
+  document.getElementById('googleLoginBtn')?.addEventListener('click',()=>window.signInWithGoogle?.());
+  document.getElementById('logoutBtn')?.addEventListener('click',()=>window.signOut?.());
+}
+
+// ==================== 頁面切換 ====================
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id)?.classList.add('active');
+  if(id==='settingsPage') renderSettings();
+  if(id==='shopPage'){
+    let statusDiv = document.getElementById('dailyRewardStatus');
+    if(statusDiv) statusDiv.innerHTML = checkDailyReward() ? '⭐ 今日獎勵可領取！' : '✅ 今日已領取，明天再來吧！';
+    document.getElementById('claimDailyBtn').onclick = ()=>{ claimDailyReward(); if(statusDiv) statusDiv.innerHTML = checkDailyReward() ? '⭐ 今日獎勵可領取！' : '✅ 今日已領取，明天再來吧！'; };
+  }
+}
+
+// ==================== 綁定按鈕 ====================
+document.getElementById('toGameBtn').onclick = ()=>showPage('gamePage');
+document.getElementById('toSettingsBtn').onclick = ()=>showPage('settingsPage');
+document.getElementById('shopBtn').onclick = ()=>showPage('shopPage');
+document.getElementById('helpBtn').onclick = ()=>showPage('helpPage');
+document.getElementById('backFromSettings').onclick = ()=>showPage('mainPage');
+document.getElementById('backFromShop').onclick = ()=>showPage('mainPage');
+document.getElementById('backFromHelp').onclick = ()=>showPage('mainPage');
+document.getElementById('backFromGame').onclick = ()=>showPage('mainPage');
+document.getElementById('attackBtn').onclick = attack;
+document.getElementById('skillBtn').onclick = skill;
+document.getElementById('skill2Btn').onclick = skill2Action;
+document.getElementById('restBtn').onclick = rest;
+document.getElementById('saveBtn').onclick = saveLocal;
+
+// ==================== 音效佔位 (避免錯誤) ====================
+window.initAudio = ()=>{};
+window.playAttack = ()=>{};
+window.playSkill = ()=>{};
+window.playHurt = ()=>{};
+window.playLevelUp = ()=>{};
+window.playDefeat = ()=>{};
+window.playRest = ()=>{};
+window.setMasterVolume = (v)=>{ console.log('音量',v); };
+window.setSfxEnabled = (e)=>{ console.log('音效',e); };
+
+// ==================== Firebase (簡單佔位，可自行替換) ====================
+window.signInWithGoogle = ()=>{ alert('請在 Firebase 控制台啟用 Google 登入並替換 firebaseConfig'); };
+window.signOut = ()=>{ alert('登出'); };
+window.saveToCloud = ()=>{};
+window.loadFromCloud = ()=>{};
+
+// ==================== 成就佔位 ====================
+window.recordKill = (dmg)=>{ window.totalKills = (window.totalKills||0)+1; window.maxDamage = Math.max(window.maxDamage||0, dmg); };
+window.recordMaxLevel = (lv)=>{ window.maxLevel = Math.max(window.maxLevel||0, lv); };
+
+// ==================== 初始化 ====================
+loadLocal();
+// 新手引導
+if(!localStorage.getItem('guideShown')){
+  let overlay = document.getElementById('guideOverlay');
+  overlay.style.display = 'flex';
+  document.getElementById('closeGuideBtn').onclick = ()=>{
+    overlay.style.display = 'none';
+    localStorage.setItem('guideShown','true');
+  };
+}
 </script>
-
-<!-- 引入你原本的其他 JS 檔案（如果有的話）-->
-<script src="js/utils.js"></script>
-<script src="js/sound.js"></script>
-<script src="js/achievements.js"></script>
-<script src="js/firebase.js"></script>
-<script src="js/settings.js"></script>
-<script src="js/spotify.js"></script>
-<script src="js/game.js"></script>
 </body>
 </html>
