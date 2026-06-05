@@ -4,14 +4,211 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>幻獸鬥士</title>
-<link rel="stylesheet" href="css/styles.css">
+<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+  }
+
+  body {
+    background: radial-gradient(circle at 20% 30%, #1a2a3a, #0a0f1e);
+    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    padding: 16px;
+  }
+
+  /* 主容器 — 液態玻璃效果 */
+  .app {
+    width: 100%;
+    max-width: 550px;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(25px) saturate(180%);
+    border-radius: 48px;
+    padding: 24px 20px 32px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  }
+
+  /* 頁面切換：非活動頁面隱藏 */
+  .page {
+    display: none;
+  }
+  .page.active {
+    display: block;
+  }
+
+  /* 主畫面標題 */
+  .main-title {
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #facc15, #ff8c00);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-align: center;
+    margin: 20px 0;
+  }
+
+  /* 主要按鈕 */
+  .play-btn, .settings-btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 40px;
+    padding: 12px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    width: 80%;
+    margin: 10px auto;
+    display: block;
+    text-align: center;
+    color: #fff;
+    transition: 0.2s;
+  }
+  .play-btn {
+    background: #facc15;
+    color: #0f172a;
+    border: none;
+  }
+  button:active {
+    transform: scale(0.97);
+  }
+
+  .version {
+    text-align: center;
+    font-size: 0.7rem;
+    color: #94a3b8;
+    margin-top: 20px;
+  }
+
+  /* 通用返回按鈕 */
+  .back-btn {
+    background: none;
+    border: none;
+    color: #3b82f6;
+    font-size: 1rem;
+    cursor: pointer;
+    display: inline-block;
+    margin-bottom: 16px;
+  }
+
+  /* 設定頁面列表 */
+  .settings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .setting-item {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 28px;
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* 幫助內容 */
+  .help-content {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 28px;
+    padding: 20px;
+    line-height: 2;
+  }
+
+  /* 遊戲戰鬥區域 */
+  .stats-line {
+    display: flex;
+    justify-content: space-between;
+    margin: 12px 0;
+    font-weight: bold;
+  }
+  .bar {
+    background: #1e293b;
+    border-radius: 20px;
+    height: 18px;
+    overflow: hidden;
+    margin: 8px 0;
+  }
+  .fillhp {
+    background: #ef4444;
+    height: 100%;
+    width: 100%;
+  }
+  .fillexp {
+    background: #3b82f6;
+    height: 100%;
+  }
+  .enemy-icon {
+    font-size: 56px;
+    margin: 12px;
+    text-align: center;
+  }
+  .log {
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 24px;
+    padding: 12px;
+    margin: 16px 0;
+    font-size: 0.85rem;
+    color: #facc15;
+    min-height: 70px;
+  }
+  .buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 16px;
+  }
+  .game-action {
+    padding: 12px 24px;
+    border-radius: 40px;
+    font-weight: bold;
+    border: none;
+    background: #334155;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+  }
+  .attack { background: #dc2626; }
+  .skill { background: #2563eb; }
+  .skill2 { background: #8b5cf6; }
+  .rest { background: #16a34a; }
+  .save { background: #9333ea; }
+
+  /* 提示訊息 */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.8);
+    color: #facc15;
+    padding: 8px 20px;
+    border-radius: 40px;
+    font-size: 0.8rem;
+    z-index: 999;
+    animation: fadeOut 2s forwards;
+  }
+  @keyframes fadeOut {
+    0% { opacity: 1; }
+    70% { opacity: 1; }
+    100% { opacity: 0; visibility: hidden; }
+  }
+</style>
 </head>
 <body>
 <div class="app">
-  <!-- 主畫面（極簡版，沒有每日獎勵狀態列）-->
+  <!-- 主畫面 -->
   <div id="mainPage" class="page active">
     <div class="main-title">MONSTER GAME</div>
     <button class="play-btn" id="toGameBtn">▶ 開始遊戲</button>
@@ -23,15 +220,21 @@
 
   <!-- 設定畫面 -->
   <div id="settingsPage" class="page">
-    <div class="settings-header"><button class="back-btn" id="backFromSettings">← 返回</button><div class="settings-title">設定</div></div>
+    <div class="settings-header">
+      <button class="back-btn" id="backFromSettings">← 返回</button>
+      <div class="settings-title">設定</div>
+    </div>
     <div class="settings-list" id="settingsList"></div>
   </div>
 
   <!-- 商店畫面 -->
   <div id="shopPage" class="page">
-    <div class="settings-header"><button class="back-btn" id="backFromShop">← 返回</button><div class="settings-title">商店</div></div>
+    <div class="settings-header">
+      <button class="back-btn" id="backFromShop">← 返回</button>
+      <div class="settings-title">商店</div>
+    </div>
     <div style="padding: 16px; text-align: center;">
-      <div id="dailyRewardStatus" style="margin-bottom: 20px;">⭐ 每日獎勵</div>
+      <div id="dailyRewardStatus" style="background: rgba(255,255,255,0.1); border-radius: 40px; padding: 12px; margin-bottom: 20px;">⭐ 每日獎勵</div>
       <button id="claimDailyBtn" class="play-btn" style="width: auto; padding: 10px 20px;">🎁 領取每日獎勵</button>
       <div id="rewardMessage" style="margin-top: 20px;"></div>
     </div>
@@ -39,11 +242,14 @@
 
   <!-- 幫助畫面 -->
   <div id="helpPage" class="page">
-    <div class="settings-header"><button class="back-btn" id="backFromHelp">← 返回</button><div class="settings-title">幫助</div></div>
+    <div class="settings-header">
+      <button class="back-btn" id="backFromHelp">← 返回</button>
+      <div class="settings-title">幫助</div>
+    </div>
     <div class="help-content">
       <p>⚔️ 攻擊：穩定傷害</p>
       <p>🔥 技能：高傷害</p>
-      <p>✨ 第二技能：可從設定切換</p>
+      <p>✨ 第二技能：可從設定切換 (重擊/治療/防禦)</p>
       <p>😴 休息：每場1次，恢復30HP，會被偷襲</p>
       <p>📈 滿50經驗升級</p>
       <p>🎚️ 難度影響怪物強度</p>
@@ -55,7 +261,7 @@
 
   <!-- 遊戲畫面 -->
   <div id="gamePage" class="page">
-    <button class="back-btn" id="backFromGame">← 主選單</button>
+    <button class="back-btn" id="backFromGame" style="background:none; border:none; color:#3b82f6; cursor:pointer;">← 主選單</button>
     <div class="stats-line"><span>❤️ <span id="hpText">100/100</span></span><span>⭐ <span id="expText">0/50</span></span><span>⬆️ Lv <span id="levelText">1</span></span></div>
     <div class="bar"><div class="fillhp" id="hpBar"></div></div>
     <div class="bar"><div class="fillexp" id="expBar"></div></div>
@@ -74,20 +280,20 @@
     </div>
   </div>
 </div>
-<script src="js/utils.js"></script>
-<script src="js/sound.js"></script>
-<script src="js/achievements.js"></script>
-<script src="js/firebase.js"></script>
-<script src="js/settings.js"></script>
-<script src="js/spotify.js"></script>
-<script src="js/game.js"></script>
+
 <script>
-  // 簡單的頁面切換邏輯（如果你的 settings.js 已經有 showPage，可刪除此區塊）
+  // ========== 簡易頁面切換（確保只有 active 頁面顯示）==========
   function showPage(id) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    // 隱藏所有頁面
+    document.querySelectorAll('.page').forEach(page => {
+      page.classList.remove('active');
+    });
+    // 顯示目標頁面
     const target = document.getElementById(id);
     if (target) target.classList.add('active');
   }
+
+  // 綁定按鈕事件
   document.getElementById('toGameBtn').onclick = () => showPage('gamePage');
   document.getElementById('toSettingsBtn').onclick = () => showPage('settingsPage');
   document.getElementById('shopBtn').onclick = () => showPage('shopPage');
@@ -96,6 +302,20 @@
   document.getElementById('backFromShop').onclick = () => showPage('mainPage');
   document.getElementById('backFromHelp').onclick = () => showPage('mainPage');
   document.getElementById('backFromGame').onclick = () => showPage('mainPage');
+
+  // ========== 遊戲核心變數（簡化版，只讓按鈕暫時不報錯）==========
+  // 實際完整遊戲邏輯在 game.js 中，此處僅保證頁面切換正常
+  // 你原本的 game.js 等檔案會補齊所有功能，請保留它們
+  console.log("頁面切換已就緒");
 </script>
+
+<!-- 引入你原本的其他 JS 檔案（如果有的話）-->
+<script src="js/utils.js"></script>
+<script src="js/sound.js"></script>
+<script src="js/achievements.js"></script>
+<script src="js/firebase.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/spotify.js"></script>
+<script src="js/game.js"></script>
 </body>
 </html>
