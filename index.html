@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>幻獸鬥士</title>
-<!-- Firebase SDK (必须) -->
+<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -20,7 +20,7 @@
   .version{text-align:center;font-size:0.7rem;color:#94a3b8;margin-top:20px;}
   .back-btn{background:none;border:none;color:#3b82f6;font-size:1rem;cursor:pointer;display:inline-block;margin-bottom:16px;}
   .settings-list{display:flex;flex-direction:column;gap:12px;}
-  .setting-item{background:rgba(255,255,255,0.05);border-radius:28px;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;}
+  .setting-item{background:rgba(255,255,255,0.05);border-radius:28px;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;}
   .help-content{background:rgba(255,255,255,0.05);border-radius:28px;padding:20px;line-height:2;}
   .stats-line{display:flex;justify-content:space-between;margin:12px 0;font-weight:bold;}
   .bar{background:#1e293b;border-radius:20px;height:18px;overflow:hidden;margin:8px 0;}
@@ -118,6 +118,22 @@
 </div>
 
 <script>
+// ==================== Firebase 配置（你的專案）====================
+const firebaseConfig = {
+  apiKey: "AIzaSyDevirfNqjlg5hVkF6pgMMU9tfx7CDac4A",
+  authDomain: "monster-game-f193f.firebaseapp.com",
+  projectId: "monster-game-f193f",
+  storageBucket: "monster-game-f193f.firebasestorage.app",
+  messagingSenderId: "304101821779",
+  appId: "1:304101821779:web:9b77e901083a7949f265a6"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const provider = new firebase.auth.GoogleAuthProvider();
+
+let currentUser = null;
+
 // ==================== 全局工具 ====================
 function toast(msg, isErr=false) {
   let d=document.createElement('div'); d.className='toast'; d.innerText=msg;
@@ -129,9 +145,9 @@ function rand(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
 // ==================== 裝備系統 ====================
 const QUALITY = [
   { name:'普通', color:'#9ca3af', min:1, max:3, rate:0.5 },
-  { name:'优秀', color:'#4ade80', min:4, max:6, rate:0.3 },
+  { name:'優秀', color:'#4ade80', min:4, max:6, rate:0.3 },
   { name:'稀有', color:'#3b82f6', min:7, max:10, rate:0.15 },
-  { name:'史诗', color:'#a855f7', min:11, max:15, rate:0.05 }
+  { name:'史詩', color:'#a855f7', min:11, max:15, rate:0.05 }
 ];
 function randomQuality(){
   let r=Math.random(), acc=0;
@@ -166,6 +182,9 @@ window.deathStreak=0; window.lastDmg=0;
 window.equipment = [];
 window.baseAtk=10; window.baseHp=100;
 window.secondSkill = localStorage.getItem('secondSkill')||'重擊';
+window.totalKills = 0;
+window.maxDamage = 0;
+window.maxLevel = 1;
 
 const zones = [
   { name:"🌳新手村", maxLv:30, mons:["🟣史萊姆","🟢哥布林","🐺森林狼"] },
@@ -226,11 +245,12 @@ function saveLocal(){
     hp:window.hp, maxHp:window.maxHp, atk:window.atk, restUsed:window.restUsed,
     difficulty:window.difficulty, equipment:window.equipment,
     deathStreak:window.deathStreak, lastDmg:window.lastDmg,
-    secondSkill:window.secondSkill
+    secondSkill:window.secondSkill, totalKills:window.totalKills,
+    maxDamage:window.maxDamage, maxLevel:window.maxLevel
   };
   localStorage.setItem('gameSave', JSON.stringify(state));
   toast('💾 本地存檔');
-  if(window.saveToCloud) window.saveToCloud(state);
+  if(currentUser) saveToCloud(state);
 }
 function loadLocal(){
   let raw = localStorage.getItem('gameSave');
@@ -244,6 +264,9 @@ function loadLocal(){
       window.equipment = Array.isArray(s.equipment)? s.equipment : [];
       window.deathStreak = s.deathStreak??0; window.lastDmg = s.lastDmg??0;
       window.secondSkill = s.secondSkill??'重擊';
+      window.totalKills = s.totalKills??0;
+      window.maxDamage = s.maxDamage??0;
+      window.maxLevel = s.maxLevel??1;
       let diffSel = document.getElementById('diffSelect');
       if(diffSel) diffSel.value = window.difficulty;
       let skillSel = document.getElementById('skillSelect');
@@ -254,6 +277,72 @@ function loadLocal(){
   refresh(); updateUI();
 }
 
+// ==================== 雲端存檔 ====================
+async function saveToCloud(state){
+  if(!currentUser) return;
+  try{
+    await db.collection('players').doc(currentUser.uid).set(state);
+    toast('☁️ 雲端存檔成功');
+  } catch(e){ toast('雲端存檔失敗', true); }
+}
+async function loadCloudSave(){
+  if(!currentUser) return;
+  try{
+    let doc = await db.collection('players').doc(currentUser.uid).get();
+    if(doc.exists){
+      let data = doc.data();
+      window.lv = data.lv??1; window.exp = data.exp??0;
+      window.baseAtk = data.baseAtk??10; window.baseHp = data.baseHp??100;
+      window.hp = data.hp??100; window.maxHp = data.maxHp??100; window.atk = data.atk??10;
+      window.restUsed = data.restUsed??false; window.difficulty = data.difficulty??'normal';
+      window.equipment = Array.isArray(data.equipment)? data.equipment : [];
+      window.deathStreak = data.deathStreak??0; window.lastDmg = data.lastDmg??0;
+      window.secondSkill = data.secondSkill??'重擊';
+      window.totalKills = data.totalKills??0;
+      window.maxDamage = data.maxDamage??0;
+      window.maxLevel = data.maxLevel??1;
+      applyEquipBonus();
+      refresh(); updateUI();
+      toast('☁️ 雲端同步完成');
+    } else {
+      loadLocal();
+    }
+  } catch(e){ toast('雲端讀取失敗', true); loadLocal(); }
+}
+
+// ==================== Google 登入 ====================
+window.signInWithGoogle = async () => {
+  try{
+    let result = await auth.signInWithPopup(provider);
+    currentUser = result.user;
+    document.getElementById('googleLoginBtn').innerText = `👤 ${currentUser.displayName}`;
+    document.getElementById('googleLoginBtn').disabled = true;
+    toast(`歡迎 ${currentUser.displayName}`);
+    await loadCloudSave();
+  } catch(e){ toast('登入失敗: '+e.message, true); }
+};
+window.signOut = async () => {
+  await auth.signOut();
+  currentUser = null;
+  document.getElementById('googleLoginBtn').innerText = '登入 Google';
+  document.getElementById('googleLoginBtn').disabled = false;
+  toast('已登出');
+  loadLocal();
+};
+auth.onAuthStateChanged(user => {
+  currentUser = user;
+  let btn = document.getElementById('googleLoginBtn');
+  if(btn){
+    if(user){
+      btn.innerText = `👤 ${user.displayName}`;
+      btn.disabled = true;
+    } else {
+      btn.innerText = '登入 Google';
+      btn.disabled = false;
+    }
+  }
+});
+
 // ==================== 戰鬥邏輯 ====================
 function levelUp(){
   let upgraded=false;
@@ -263,8 +352,7 @@ function levelUp(){
     window.hp = Math.floor((window.baseHp + calcEquipBonus().hp)*0.7);
     upgraded=true;
     log(`🎉 升級 Lv${window.lv} 攻擊力 ${window.baseAtk+calcEquipBonus().atk}`);
-    if(window.playLevelUp) window.playLevelUp();
-    if(window.recordMaxLevel) window.recordMaxLevel(window.lv);
+    if(window.lv > window.maxLevel) window.maxLevel = window.lv;
   }
   if(upgraded) refresh();
   applyEquipBonus();
@@ -274,7 +362,6 @@ function monsterCounter(){
   if(!window.curMonster) return;
   let dmg = Math.max(1, rand(window.curMonster.atk-3, window.curMonster.atk+2));
   window.hp -= dmg;
-  if(window.playHurt) window.playHurt();
   log(`😈 Lv.${window.curMonster.mlv} ${window.curMonster.name} 反擊 ${dmg}`);
   if(window.hp<=0){
     window.hp = window.maxHp;
@@ -288,8 +375,8 @@ function defeat(){
   if(!window.curMonster) return;
   window.exp += window.curMonster.exp;
   log(`🎉 擊敗 Lv.${window.curMonster.mlv} ${window.curMonster.name} +${window.curMonster.exp}EXP`);
-  if(window.playDefeat) window.playDefeat();
-  if(window.recordKill) window.recordKill(window.lastDmg);
+  window.totalKills++;
+  if(window.lastDmg > window.maxDamage) window.maxDamage = window.lastDmg;
   // 30%掉落装备
   if(Math.random()<0.3){
     let eq = generateEquipment();
@@ -305,8 +392,6 @@ function defeat(){
   levelUp(); refresh(); updateUI(); saveLocal();
 }
 function attack(){
-  if(window.initAudio) window.initAudio();
-  if(window.playAttack) window.playAttack();
   if(window.hp<=0){ log('無法攻擊'); return; }
   let dmg = Math.max(2, rand(window.atk-3, window.atk+5));
   window.lastDmg = dmg;
@@ -316,8 +401,6 @@ function attack(){
   updateUI(); saveLocal();
 }
 function skill(){
-  if(window.initAudio) window.initAudio();
-  if(window.playSkill) window.playSkill();
   if(window.hp<=0){ log('無法施放技能'); return; }
   let dmg = rand(window.atk+5, window.atk*2+3);
   window.lastDmg = dmg;
@@ -327,8 +410,6 @@ function skill(){
   updateUI(); saveLocal();
 }
 function skill2Action(){
-  if(window.initAudio) window.initAudio();
-  if(window.playSkill) window.playSkill();
   if(window.hp<=0){ log('無法施放技能'); return; }
   let dmg=0, heal=0, msg='';
   switch(window.secondSkill){
@@ -361,8 +442,6 @@ function skill2Action(){
   updateUI(); saveLocal();
 }
 function rest(){
-  if(window.initAudio) window.initAudio();
-  if(window.playRest) window.playRest();
   if(window.restUsed){ log('已經休息過了'); return; }
   if(window.hp<=0){ log('無法休息'); return; }
   window.hp = Math.min(window.maxHp, window.hp+30);
@@ -440,16 +519,24 @@ function renderSettings(){
     <div class="setting-item"><div><div>✨ 第二技能</div></div><select id="skillSelect" class="difficulty-select"><option value="重擊" ${skill==='重擊'?'selected':''}>⚡ 重擊</option><option value="治療" ${skill==='治療'?'selected':''}>💚 治療</option><option value="防禦" ${skill==='防禦'?'selected':''}>🛡️ 防禦</option></select></div>
     <div class="setting-item"><div><div>⚔️ 裝備</div></div><div>武器:${weapon?`${weapon.name}+${weapon.bonus} <button class="eq-btn" data-id="${weapon.id}">${weapon.equipped?'卸下':'裝備'}</button>`:'無'} 防具:${armor?`${armor.name}+${armor.bonus} <button class="eq-btn" data-id="${armor.id}">${armor.equipped?'卸下':'裝備'}</button>`:'無'}</div></div>
     <div class="setting-item"><div><div>🔐 Google</div></div><div><button id="googleLoginBtn" style="background:#334155;padding:6px 12px;">登入 Google</button> <button id="logoutBtn" style="background:#334155;padding:6px 12px;">登出</button></div></div>
-    <div class="setting-item"><div><div>🏆 成就</div></div><div id="achievementsList">🐉 擊殺:${window.totalKills||0} | 💥 最高傷:${window.maxDamage||0} | 🏆 最高等:${window.maxLevel||1}</div></div>
+    <div class="setting-item"><div><div>🏆 成就</div></div><div id="achievementsList">🐉 擊殺:${window.totalKills} | 💥 最高傷:${window.maxDamage} | 🏆 最高等:${window.maxLevel}</div></div>
   `;
   // 绑定事件
-  document.getElementById('volSlider')?.addEventListener('input', e => { let v=e.target.value/100; if(window.setMasterVolume) window.setMasterVolume(v); else console.log('音量',v); });
+  document.getElementById('volSlider')?.addEventListener('input', e => { let v=e.target.value/100; if(window.setMasterVolume) window.setMasterVolume(v); });
   document.getElementById('sfxCheck')?.addEventListener('change', e => { if(window.setSfxEnabled) window.setSfxEnabled(e.target.checked); localStorage.setItem('mute',e.target.checked?'0':'1'); });
   document.getElementById('diffSelect')?.addEventListener('change', e => { window.difficulty=e.target.value; localStorage.setItem('difficulty',window.difficulty); refresh(); toast(`難度:${window.difficulty}`); });
   document.getElementById('skillSelect')?.addEventListener('change', e => { window.secondSkill=e.target.value; localStorage.setItem('secondSkill',window.secondSkill); toast(`第二技能:${window.secondSkill}`); });
   document.querySelectorAll('.eq-btn').forEach(btn=>btn.addEventListener('click',()=>window.toggleEquip(btn.dataset.id)));
-  document.getElementById('googleLoginBtn')?.addEventListener('click',()=>window.signInWithGoogle?.());
-  document.getElementById('logoutBtn')?.addEventListener('click',()=>window.signOut?.());
+  document.getElementById('googleLoginBtn')?.addEventListener('click',()=>window.signInWithGoogle());
+  document.getElementById('logoutBtn')?.addEventListener('click',()=>window.signOut());
+  // 如果已登入，更新按钮文字
+  if(currentUser){
+    document.getElementById('googleLoginBtn').innerText = `👤 ${currentUser.displayName}`;
+    document.getElementById('googleLoginBtn').disabled = true;
+  } else {
+    document.getElementById('googleLoginBtn').innerText = '登入 Google';
+    document.getElementById('googleLoginBtn').disabled = false;
+  }
 }
 
 // ==================== 頁面切換 ====================
@@ -479,7 +566,7 @@ document.getElementById('skill2Btn').onclick = skill2Action;
 document.getElementById('restBtn').onclick = rest;
 document.getElementById('saveBtn').onclick = saveLocal;
 
-// ==================== 音效佔位 (避免錯誤) ====================
+// ==================== 音效佔位（避免錯誤）====================
 window.initAudio = ()=>{};
 window.playAttack = ()=>{};
 window.playSkill = ()=>{};
@@ -489,16 +576,6 @@ window.playDefeat = ()=>{};
 window.playRest = ()=>{};
 window.setMasterVolume = (v)=>{ console.log('音量',v); };
 window.setSfxEnabled = (e)=>{ console.log('音效',e); };
-
-// ==================== Firebase (簡單佔位，可自行替換) ====================
-window.signInWithGoogle = ()=>{ alert('請在 Firebase 控制台啟用 Google 登入並替換 firebaseConfig'); };
-window.signOut = ()=>{ alert('登出'); };
-window.saveToCloud = ()=>{};
-window.loadFromCloud = ()=>{};
-
-// ==================== 成就佔位 ====================
-window.recordKill = (dmg)=>{ window.totalKills = (window.totalKills||0)+1; window.maxDamage = Math.max(window.maxDamage||0, dmg); };
-window.recordMaxLevel = (lv)=>{ window.maxLevel = Math.max(window.maxLevel||0, lv); };
 
 // ==================== 初始化 ====================
 loadLocal();
