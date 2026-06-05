@@ -8,49 +8,10 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-<style>
-  .guide-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.85);
-    z-index: 1000;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  .guide-card {
-    background: #1e293b;
-    max-width: 300px;
-    padding: 24px;
-    border-radius: 32px;
-    text-align: center;
-    border: 1px solid #facc15;
-  }
-  .guide-card button {
-    background: #facc15;
-    border: none;
-    padding: 8px 20px;
-    border-radius: 40px;
-    font-weight: bold;
-    cursor: pointer;
-  }
-</style>
 </head>
 <body>
-<div id="guideOverlay" class="guide-overlay" style="display: none;">
-  <div class="guide-card">
-    <p>🎮 <strong>歡迎來到幻獸鬥士！</strong></p>
-    <p>⚔️ 攻擊：穩定傷害<br>🔥 技能：高傷害<br>✨ 第二技能：可切換不同效果<br>😴 休息：每場1次，恢復30HP但會被偷襲</p>
-    <p>💾 每次戰鬥後會自動存檔！</p>
-    <button id="closeGuideBtn">開始冒險</button>
-  </div>
-</div>
-
 <div class="app">
-  <!-- 主畫面（只多了商店按鈕）-->
+  <!-- 主畫面（極簡版，沒有每日獎勵狀態列）-->
   <div id="mainPage" class="page active">
     <div class="main-title">MONSTER GAME</div>
     <button class="play-btn" id="toGameBtn">▶ 開始遊戲</button>
@@ -60,11 +21,13 @@
     <div class="version">v2.0</div>
   </div>
 
+  <!-- 設定畫面 -->
   <div id="settingsPage" class="page">
     <div class="settings-header"><button class="back-btn" id="backFromSettings">← 返回</button><div class="settings-title">設定</div></div>
     <div class="settings-list" id="settingsList"></div>
   </div>
 
+  <!-- 商店畫面 -->
   <div id="shopPage" class="page">
     <div class="settings-header"><button class="back-btn" id="backFromShop">← 返回</button><div class="settings-title">商店</div></div>
     <div style="padding: 16px; text-align: center;">
@@ -74,21 +37,23 @@
     </div>
   </div>
 
+  <!-- 幫助畫面 -->
   <div id="helpPage" class="page">
     <div class="settings-header"><button class="back-btn" id="backFromHelp">← 返回</button><div class="settings-title">幫助</div></div>
     <div class="help-content">
       <p>⚔️ 攻擊：穩定傷害</p>
       <p>🔥 技能：高傷害</p>
-      <p>✨ 第二技能：可從設定切換 (重擊/治療/防禦)</p>
+      <p>✨ 第二技能：可從設定切換</p>
       <p>😴 休息：每場1次，恢復30HP，會被偷襲</p>
       <p>📈 滿50經驗升級</p>
       <p>🎚️ 難度影響怪物強度</p>
       <p>☁️ Google登入雲端存檔</p>
       <p>🏆 成就自動記錄</p>
-      <p>🎁 每日獎勵：每天可領取一次獎勵</p>
+      <p>🎁 每日獎勵：每天可領取一次</p>
     </div>
   </div>
 
+  <!-- 遊戲畫面 -->
   <div id="gamePage" class="page">
     <button class="back-btn" id="backFromGame">← 主選單</button>
     <div class="stats-line"><span>❤️ <span id="hpText">100/100</span></span><span>⭐ <span id="expText">0/50</span></span><span>⬆️ Lv <span id="levelText">1</span></span></div>
@@ -117,16 +82,20 @@
 <script src="js/spotify.js"></script>
 <script src="js/game.js"></script>
 <script>
-  (function() {
-    const hasSeenGuide = localStorage.getItem('guideShown');
-    if (!hasSeenGuide) {
-      document.getElementById('guideOverlay').style.display = 'flex';
-      document.getElementById('closeGuideBtn').onclick = () => {
-        document.getElementById('guideOverlay').style.display = 'none';
-        localStorage.setItem('guideShown', 'true');
-      };
-    }
-  })();
+  // 簡單的頁面切換邏輯（如果你的 settings.js 已經有 showPage，可刪除此區塊）
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const target = document.getElementById(id);
+    if (target) target.classList.add('active');
+  }
+  document.getElementById('toGameBtn').onclick = () => showPage('gamePage');
+  document.getElementById('toSettingsBtn').onclick = () => showPage('settingsPage');
+  document.getElementById('shopBtn').onclick = () => showPage('shopPage');
+  document.getElementById('helpBtn').onclick = () => showPage('helpPage');
+  document.getElementById('backFromSettings').onclick = () => showPage('mainPage');
+  document.getElementById('backFromShop').onclick = () => showPage('mainPage');
+  document.getElementById('backFromHelp').onclick = () => showPage('mainPage');
+  document.getElementById('backFromGame').onclick = () => showPage('mainPage');
 </script>
 </body>
 </html>
