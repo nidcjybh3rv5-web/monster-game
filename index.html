@@ -9,6 +9,19 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <style>
+  /* 確保所有頁面基本容器正常 */
+  .page { display: none; padding: 20px; }
+  .page.active { display: block; }
+  .app { width: 100%; max-width: 550px; margin: 0 auto; }
+  .settings-list { display: flex; flex-direction: column; gap: 12px; }
+  .setting-item { background: #1e293b; border-radius: 28px; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; }
+  .buttons { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 16px; }
+  .game-action { padding: 12px 20px; border-radius: 40px; font-weight: bold; border: none; background: #334155; color: white; cursor: pointer; }
+  .attack { background: #dc2626; }
+  .skill { background: #2563eb; }
+  .skill2 { background: #8b5cf6; }
+  .rest { background: #16a34a; }
+  .save { background: #9333ea; }
   .guide-overlay {
     position: fixed;
     top: 0;
@@ -20,7 +33,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    font-family: system-ui;
   }
   .guide-card {
     background: #1e293b;
@@ -30,15 +42,14 @@
     text-align: center;
     border: 1px solid #facc15;
   }
-  .guide-card p { margin: 16px 0; line-height: 1.5; }
-  .guide-card button { background: #facc15; border: none; padding: 8px 20px; border-radius: 40px; font-weight: bold; cursor: pointer; }
+  .guide-card button { background: #facc15; border: none; padding: 8px 20px; border-radius: 40px; cursor: pointer; font-weight: bold; }
 </style>
 </head>
 <body>
 <div id="guideOverlay" class="guide-overlay" style="display: none;">
   <div class="guide-card">
     <p>🎮 <strong>歡迎來到幻獸鬥士！</strong></p>
-    <p>⚔️ 攻擊：穩定傷害<br>🔥 技能：高傷害<br>✨ 第二技能：可切換不同效果<br>😴 休息：每場1次，恢復30HP但會被偷襲<br>⚙️ 設定：調整音量、難度、裝備</p>
+    <p>⚔️ 攻擊：穩定傷害<br>🔥 技能：高傷害<br>✨ 第二技能：可切換不同效果<br>😴 休息：每場1次，恢復30HP但會被偷襲</p>
     <p>💾 每次戰鬥後會自動存檔！</p>
     <button id="closeGuideBtn">開始冒險</button>
   </div>
@@ -48,10 +59,7 @@
   <!-- 主畫面 -->
   <div id="mainPage" class="page active">
     <div class="main-title">MONSTER GAME</div>
-    <!-- 每日獎勵狀態列 -->
-    <div id="dailyRewardStatusMain" style="background: #1e293b; border-radius: 40px; padding: 8px 16px; margin: 10px auto; width: 90%; text-align: center; font-size: 0.8rem;">
-      ⭐ 載入中...
-    </div>
+    <div id="dailyRewardStatusMain" style="background:#1e293b; border-radius:40px; padding:8px 16px; margin:10px auto; width:90%; text-align:center; font-size:0.8rem;">⭐ 載入中...</div>
     <button class="play-btn" id="toGameBtn">▶ 開始遊戲</button>
     <button class="settings-btn" id="toSettingsBtn">⚙️ 設定</button>
     <button class="settings-btn" id="shopBtn">🛒 商店</button>
@@ -68,8 +76,8 @@
   <!-- 商店畫面 -->
   <div id="shopPage" class="page">
     <div class="settings-header"><button class="back-btn" id="backFromShop">← 返回</button><div class="settings-title">商店</div></div>
-    <div class="shop-panel" style="padding: 16px; text-align: center;">
-      <div id="dailyRewardStatus" style="margin-bottom: 20px; background: #1e293b; border-radius: 40px; padding: 12px;">⭐ 每日獎勵</div>
+    <div style="padding: 16px; text-align: center;">
+      <div id="dailyRewardStatus" style="margin-bottom: 20px; background:#1e293b; border-radius:40px; padding:12px;">⭐ 每日獎勵</div>
       <button id="claimDailyBtn" class="play-btn" style="width: auto; padding: 10px 20px;">🎁 領取每日獎勵</button>
       <div id="rewardMessage" style="margin-top: 20px; color: #facc15;"></div>
     </div>
@@ -78,22 +86,16 @@
   <!-- 幫助畫面 -->
   <div id="helpPage" class="page">
     <div class="settings-header"><button class="back-btn" id="backFromHelp">← 返回</button><div class="settings-title">幫助</div></div>
-    <div class="help-content">
-      <p>⚔️ 攻擊：穩定傷害</p>
-      <p>🔥 技能：高傷害</p>
-      <p>✨ 第二技能：可從設定切換 (重擊/治療/防禦)</p>
-      <p>😴 休息：每場1次，恢復30HP，會被偷襲</p>
-      <p>📈 滿50經驗升級</p>
-      <p>🎚️ 難度影響怪物強度</p>
-      <p>☁️ Google登入雲端存檔</p>
-      <p>🏆 成就自動記錄</p>
-      <p>🎁 每日獎勵：每天可領取一次獎勵</p>
+    <div class="help-content" style="background:#1e293b; border-radius:28px; padding:20px;">
+      <p>⚔️ 攻擊：穩定傷害</p><p>🔥 技能：高傷害</p><p>✨ 第二技能：可從設定切換 (重擊/治療/防禦)</p>
+      <p>😴 休息：每場1次，恢復30HP，會被偷襲</p><p>📈 滿50經驗升級</p><p>🎚️ 難度影響怪物強度</p>
+      <p>☁️ Google登入雲端存檔</p><p>🏆 成就自動記錄</p><p>🎁 每日獎勵：每天可領取一次獎勵</p>
     </div>
   </div>
 
   <!-- 遊戲畫面 -->
   <div id="gamePage" class="page">
-    <button class="back-btn" id="backFromGame">← 主選單</button>
+    <button class="back-btn" id="backFromGame" style="background:none; border:none; color:#3b82f6; cursor:pointer;">← 主選單</button>
     <div class="stats-line"><span>❤️ <span id="hpText">100/100</span></span><span>⭐ <span id="expText">0/50</span></span><span>⬆️ Lv <span id="levelText">1</span></span></div>
     <div class="bar"><div class="fillhp" id="hpBar"></div></div>
     <div class="bar"><div class="fillexp" id="expBar"></div></div>
@@ -123,11 +125,15 @@
   (function() {
     const hasSeenGuide = localStorage.getItem('guideShown');
     if (!hasSeenGuide) {
-      document.getElementById('guideOverlay').style.display = 'flex';
-      document.getElementById('closeGuideBtn').onclick = () => {
-        document.getElementById('guideOverlay').style.display = 'none';
-        localStorage.setItem('guideShown', 'true');
-      };
+      const overlay = document.getElementById('guideOverlay');
+      if (overlay) overlay.style.display = 'flex';
+      const closeBtn = document.getElementById('closeGuideBtn');
+      if (closeBtn) {
+        closeBtn.onclick = () => {
+          overlay.style.display = 'none';
+          localStorage.setItem('guideShown', 'true');
+        };
+      }
     }
   })();
 </script>
