@@ -99,7 +99,7 @@ input[type="range"]::-webkit-slider-thumb{width:18px;height:18px;border-radius:5
 </div>
 <div id="guideOverlay" class="guide-overlay" style="display:none;"><div class="guide-card"><p>🎮 <strong>歡迎！</strong></p><p>⚔️攻擊｜✨技能選單｜😴休息(每場1次)</p><p>💾自動存檔</p><button id="closeGuideBtn">開始</button></div></div>
 <script>
-// ---------- Firebase ----------
+// ---------- Firebase 配置 ----------
 const firebaseConfig = {
   apiKey: "AIzaSyDevirfNqjlg5hVkF6pgMMU9tfx7CDac4A",
   authDomain: "monster-game-f193f.firebaseapp.com",
@@ -426,7 +426,7 @@ document.getElementById('saveBtn').onclick=saveLocal;
 window.setMasterVolume=(v)=>{console.log('音量',v);};
 window.setSfxEnabled=(e)=>{console.log('音效',e);};
 
-// 初始化
+// ---------- 初始化 ----------
 loadLocal();
 if(!localStorage.getItem('guideShown')){
   let ov=document.getElementById('guideOverlay');
