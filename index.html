@@ -249,4 +249,18 @@ document.getElementById('toGameBtn').onclick=()=>showPage('gamePage');
 document.getElementById('toSettingsBtn').onclick=()=>showPage('settingsPage');
 document.getElementById('shopBtn').onclick=()=>showPage('shopPage');
 document.getElementById('helpBtn').onclick=()=>showPage('helpPage');
-document.getElementById('backFromSettings').onclick=
+document.getElementById('backFromSettings').onclick=()=>showPage('mainPage');
+document.getElementById('backFromShop').onclick=()=>showPage('mainPage');
+document.getElementById('backFromHelp').onclick=()=>showPage('mainPage');
+document.getElementById('backFromGame').onclick=()=>showPage('mainPage');
+document.getElementById('attackBtn').onclick=attack;
+document.getElementById('skillBtn').onclick=showSkillMenu;
+document.getElementById('restBtn').onclick=rest;
+document.getElementById('inventoryBtn').onclick=showBackpack;
+document.getElementById('saveBtn').onclick=saveLocal;
+window.setMasterVolume=(v)=>{console.log('音量',v);};window.setSfxEnabled=(e)=>{console.log('音效',e);};
+loadLocal();
+if(!localStorage.getItem('guideShown')){let ov=document.getElementById('guideOverlay');ov.style.display='flex';document.getElementById('closeGuideBtn').onclick=()=>{ov.style.display='none';localStorage.setItem('guideShown','true');};}
+</script>
+</body>
+</html>
