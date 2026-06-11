@@ -25,7 +25,7 @@ button:active{transform:scale(0.97)}
 .bar{background:#1e293b;border-radius:20px;height:18px;overflow:hidden;margin:8px 0}
 .fillhp{background:#ef4444;height:100%}.fillexp{background:#3b82f6;height:100%}
 .enemy-icon{font-size:56px;margin:12px;text-align:center}
-.log{background:rgba(0,0,0,0.5);border-radius:24px;padding:12px;margin:16px 0;font-size:0.85rem;color:#facc15;min-height:70px}
+.log{background:rgba(0,0,0,0.5);border-radius:24px;padding:12px;margin:16px 0;font-size:0.85rem;color:#facc15;min-height:70px;word-break:break-word}
 .buttons{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:16px}
 .game-action{padding:10px 20px;border-radius:40px;font-weight:bold;border:none;background:#334155;color:#fff;font-size:1rem;cursor:pointer}
 .attack{background:#dc2626}.skill{background:#8b5cf6}.rest{background:#16a34a}.save{background:#9333ea}.inventory{background:#eab308;color:#0f172a}
@@ -102,211 +102,342 @@ const firebaseConfig = { apiKey: "AIzaSyDevirfNqjlg5hVkF6pgMMU9tfx7CDac4A", auth
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth(), db = firebase.firestore(), provider = new firebase.auth.GoogleAuthProvider();
 let currentUser = null;
-function toast(m,e){let d=document.createElement('div');d.className='toast';d.innerText=m;d.style.color=e?'#ff8888':'#facc15';document.body.appendChild(d);setTimeout(()=>d.remove(),2000);}
-function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+const toast = (m, e) => { let d = document.createElement('div'); d.className = 'toast'; d.innerText = m; d.style.color = e ? '#ff8888' : '#facc15'; document.body.appendChild(d); setTimeout(() => d.remove(), 2000); };
+const rand = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
 
 // ========== 裝備品質 ==========
 const QUALITY = [
-  {name:'普通',color:'#9ca3af',min:1,max:3,rate:0.5},
-  {name:'優秀',color:'#4ade80',min:4,max:6,rate:0.3},
-  {name:'稀有',color:'#3b82f6',min:7,max:10,rate:0.15},
-  {name:'史詩',color:'#a855f7',min:11,max:15,rate:0.05}
+  { name: '普通', color: '#9ca3af', min: 1, max: 3, rate: 0.5 },
+  { name: '優秀', color: '#4ade80', min: 4, max: 6, rate: 0.3 },
+  { name: '稀有', color: '#3b82f6', min: 7, max: 10, rate: 0.15 },
+  { name: '史詩', color: '#a855f7', min: 11, max: 15, rate: 0.05 }
 ];
-function randomQuality(){let r=Math.random(),a=0;for(let q of QUALITY)if((a+=q.rate)>r)return q;return QUALITY[0];}
-function generateEquipment(){let t=rand(0,1)?'weapon':'armor',q=randomQuality(),b=rand(q.min,q.max);return{id:Date.now()+'-'+Math.random(),type:t,quality:q.name,color:q.color,bonus:b,name:`${q.name} ${t==='weapon'?'武器':'防具'}`,equipped:false};}
-function calcEquipBonus(){let a=0,h=0;(window.equipment||[]).forEach(e=>{if(e.equipped)e.type==='weapon'?a+=e.bonus:h+=e.bonus;});return{atk:a,hp:h};}
-function applyEquipBonus(){let b=calcEquipBonus();window.atk=window.baseAtk+b.atk;window.maxHp=window.baseHp+b.hp;if(window.hp>window.maxHp)window.hp=window.maxHp;updateUI();}
+const randomQuality = () => { let r = Math.random(), a = 0; for (let q of QUALITY) if ((a += q.rate) > r) return q; return QUALITY[0]; };
+const generateEquipment = () => {
+  let t = rand(0, 1) ? 'weapon' : 'armor';
+  let q = randomQuality();
+  let b = rand(q.min, q.max);
+  return { id: Date.now() + '-' + Math.random(), type: t, quality: q.name, color: q.color, bonus: b, name: `${q.name} ${t === 'weapon' ? '武器' : '防具'}`, equipped: false };
+};
+const calcEquipBonus = () => { let a = 0, h = 0; (window.equipment || []).forEach(e => { if (e.equipped) e.type === 'weapon' ? a += e.bonus : h += e.bonus; }); return { atk: a, hp: h }; };
+const applyEquipBonus = () => { let b = calcEquipBonus(); window.atk = window.baseAtk + b.atk; window.maxHp = window.baseHp + b.hp; if (window.hp > window.maxHp) window.hp = window.maxHp; updateUI(); };
 
 // ========== 遊戲狀態 ==========
-window.hp=100;window.maxHp=100;window.exp=0;window.lv=1;window.atk=10;window.restUsed=false;window.curMonster=null;
-window.difficulty=localStorage.getItem('difficulty')||'normal';window.deathStreak=0;window.lastDmg=0;window.equipment=[];window.baseAtk=10;window.baseHp=100;
-window.totalKills=0;window.maxDamage=0;window.maxLevel=1;
-const zones=[
-  {name:"🌳新手村",maxLv:30,mons:["🟣史萊姆","🟢哥布林","🐺森林狼"]},
-  {name:"🏜️沙漠",maxLv:90,mons:["🦂巨蠍","🧻木乃伊","🐍沙蛇"]},
-  {name:"⛰️蒼穹",maxLv:100,mons:["🐉青龍","👼天使","😈惡魔"]}
+window.hp = 100; window.maxHp = 100; window.exp = 0; window.lv = 1; window.atk = 10; window.restUsed = false; window.curMonster = null;
+window.difficulty = localStorage.getItem('difficulty') || 'normal'; window.deathStreak = 0; window.lastDmg = 0; window.equipment = []; window.baseAtk = 10; window.baseHp = 100;
+window.totalKills = 0; window.maxDamage = 0; window.maxLevel = 1;
+const zones = [
+  { name: "🌳新手村", maxLv: 30, mons: ["🟣史萊姆", "🟢哥布林", "🐺森林狼"] },
+  { name: "🏜️沙漠", maxLv: 90, mons: ["🦂巨蠍", "🧻木乃伊", "🐍沙蛇"] },
+  { name: "⛰️蒼穹", maxLv: 100, mons: ["🐉青龍", "👼天使", "😈惡魔"] }
 ];
 const monsterSkills = [
-  {name:'毒擊',effect:'🌿',dmgMod:1.2},
-  {name:'砂塵',effect:'🏜️',dmgMod:1.0},
-  {name:'龍息',effect:'🐉',dmgMod:1.5}
+  { name: '毒擊', effect: '🌿', dmgMod: 1.2 },
+  { name: '砂塵', effect: '🏜️', dmgMod: 1.0 },
+  { name: '龍息', effect: '🐉', dmgMod: 1.5 }
 ];
-function getZone(){return window.lv<=30?zones[0]:window.lv<=90?zones[1]:zones[2];}
-function getMult(){switch(window.difficulty){
-  case 'easy':return{hp:0.7,atk:0.7,exp:1.1,off:-2};
-  case 'hard':return{hp:1.5,atk:1.3,exp:0.85,off:3};
-  case 'extreme':return{hp:2.0,atk:1.6,exp:0.7,off:6};
-  default:return{hp:1,atk:1,exp:1,off:0};
-}}
-function genMonster(){
-  let zone=getZone(),mons=zone.mons,raw=mons[Math.floor(Math.random()*mons.length)];
-  let emoji=raw[0],name=raw.slice(1),m=getMult(),off=m.off;
-  if(window.deathStreak>=3&&window.difficulty!=='easy')off=Math.max(-5,off-Math.floor(window.deathStreak/2));
-  let mlv=Math.max(1,window.lv+off);
-  let baseHp=(30+mlv*2.5)*m.hp,baseAtk=(5+Math.floor(mlv/2.5))*m.atk;
-  let varf=v=>Math.floor(v*(0.6+Math.random()*0.8));
-  let skill = monsterSkills[Math.floor(Math.random()*monsterSkills.length)];
-  return{emoji,name,mlv,hp:varf(baseHp),maxHp:varf(baseHp),atk:varf(baseAtk),exp:Math.max(1,Math.floor((12+mlv*0.8)*m.exp)),skill:skill};
-}
-function monsterSkillAttack(){
-  if(!window.curMonster || !window.curMonster.skill) return;
-  let baseDmg = Math.max(1, rand(window.curMonster.atk-2, window.curMonster.atk+2));
+const getZone = () => window.lv <= 30 ? zones[0] : window.lv <= 90 ? zones[1] : zones[2];
+const getMult = () => {
+  switch (window.difficulty) {
+    case 'easy': return { hp: 0.7, atk: 0.7, exp: 1.1, off: -2 };
+    case 'hard': return { hp: 1.5, atk: 1.3, exp: 0.85, off: 3 };
+    case 'extreme': return { hp: 2.0, atk: 1.6, exp: 0.7, off: 6 };
+    default: return { hp: 1, atk: 1, exp: 1, off: 0 };
+  }
+};
+const genMonster = () => {
+  let zone = getZone(), mons = zone.mons, raw = mons[Math.floor(Math.random() * mons.length)];
+  let emoji = raw[0], name = raw.slice(1), m = getMult(), off = m.off;
+  if (window.deathStreak >= 3 && window.difficulty !== 'easy') off = Math.max(-5, off - Math.floor(window.deathStreak / 2));
+  let mlv = Math.max(1, window.lv + off);
+  let baseHp = (30 + mlv * 2.5) * m.hp, baseAtk = (5 + Math.floor(mlv / 2.5)) * m.atk;
+  let varf = v => Math.floor(v * (0.6 + Math.random() * 0.8));
+  let skill = monsterSkills[Math.floor(Math.random() * monsterSkills.length)];
+  return { emoji, name, mlv, hp: varf(baseHp), maxHp: varf(baseHp), atk: varf(baseAtk), exp: Math.max(1, Math.floor((12 + mlv * 0.8) * m.exp)), skill: skill };
+};
+const refresh = () => { window.curMonster = genMonster(); window.restUsed = false; updateUI(); log(`✨ ${window.curMonster.emoji}${window.curMonster.name} Lv.${window.curMonster.mlv} | HP${window.curMonster.hp} 攻${window.curMonster.atk}`); };
+const updateUI = () => {
+  document.getElementById('hpText').innerText = `${window.hp}/${window.maxHp}`;
+  document.getElementById('expText').innerText = `${window.exp}/50`;
+  document.getElementById('levelText').innerText = window.lv;
+  document.getElementById('atkText').innerText = window.atk;
+  document.getElementById('zoneText').innerHTML = getZone().name;
+  if (window.curMonster) {
+    document.getElementById('monsterName').innerHTML = `${window.curMonster.emoji}${window.curMonster.name}`;
+    document.getElementById('monsterEmoji').innerText = window.curMonster.emoji;
+    document.getElementById('monsterHpText').innerText = `${window.curMonster.hp}/${window.curMonster.maxHp}`;
+    document.getElementById('monsterLevelText').innerText = window.curMonster.mlv;
+    document.getElementById('monsterBar').style.width = `${(window.curMonster.hp / window.curMonster.maxHp) * 100}%`;
+  }
+  document.getElementById('hpBar').style.width = `${(window.hp / window.maxHp) * 100}%`;
+  document.getElementById('expBar').style.width = `${(window.exp / 50) * 100}%`;
+  document.getElementById('restBtn').disabled = window.restUsed;
+};
+const log = msg => { document.getElementById('logMsg').innerHTML = msg; };
+
+// ========== 存檔與雲端 ==========
+const saveLocal = () => {
+  const state = { lv: window.lv, exp: window.exp, baseAtk: window.baseAtk, baseHp: window.baseHp, hp: window.hp, maxHp: window.maxHp, atk: window.atk, restUsed: window.restUsed, difficulty: window.difficulty, equipment: window.equipment, deathStreak: window.deathStreak, lastDmg: window.lastDmg, totalKills: window.totalKills, maxDamage: window.maxDamage, maxLevel: window.maxLevel };
+  localStorage.setItem('gameSave', JSON.stringify(state)); toast('💾 本地存檔');
+  if (currentUser) db.collection('players').doc(currentUser.uid).set(state).catch(e => toast('雲端失敗', 1));
+};
+const loadLocal = () => {
+  let raw = localStorage.getItem('gameSave');
+  if (raw) {
+    try {
+      let s = JSON.parse(raw);
+      window.lv = s.lv ?? 1; window.exp = s.exp ?? 0; window.baseAtk = s.baseAtk ?? 10; window.baseHp = s.baseHp ?? 100;
+      window.hp = s.hp ?? 100; window.maxHp = s.maxHp ?? 100; window.atk = s.atk ?? 10; window.restUsed = s.restUsed ?? false;
+      window.difficulty = s.difficulty ?? 'normal'; window.equipment = Array.isArray(s.equipment) ? s.equipment : [];
+      window.deathStreak = s.deathStreak ?? 0; window.lastDmg = s.lastDmg ?? 0;
+      window.totalKills = s.totalKills ?? 0; window.maxDamage = s.maxDamage ?? 0; window.maxLevel = s.maxLevel ?? 1;
+      let ds = document.getElementById('diffSelect'); if (ds) ds.value = window.difficulty;
+    } catch (e) { }
+  }
+  applyEquipBonus(); refresh(); updateUI();
+};
+const loadCloudSave = async () => {
+  if (!currentUser) return;
+  try {
+    let doc = await db.collection('players').doc(currentUser.uid).get();
+    if (doc.exists) {
+      let d = doc.data();
+      window.lv = d.lv ?? 1; window.exp = d.exp ?? 0; window.baseAtk = d.baseAtk ?? 10; window.baseHp = d.baseHp ?? 100;
+      window.hp = d.hp ?? 100; window.maxHp = d.maxHp ?? 100; window.atk = d.atk ?? 10; window.restUsed = d.restUsed ?? false;
+      window.difficulty = d.difficulty ?? 'normal'; window.equipment = Array.isArray(d.equipment) ? d.equipment : [];
+      window.deathStreak = d.deathStreak ?? 0; window.lastDmg = d.lastDmg ?? 0;
+      window.totalKills = d.totalKills ?? 0; window.maxDamage = d.maxDamage ?? 0; window.maxLevel = d.maxLevel ?? 1;
+      applyEquipBonus(); refresh(); updateUI(); toast('☁️ 雲端同步');
+    } else loadLocal();
+  } catch (e) { toast('雲端失敗', 1); loadLocal(); }
+};
+
+// ========== Google 登入 ==========
+window.signInWithGoogle = async () => {
+  try {
+    let r = await auth.signInWithPopup(provider);
+    currentUser = r.user;
+    let btn = document.getElementById('googleLoginBtn'); if (btn) { btn.innerText = `👤 ${currentUser.displayName}`; btn.disabled = true; }
+    toast(`歡迎 ${currentUser.displayName}`);
+    await loadCloudSave();
+  } catch (e) { toast('登入失敗', 1); }
+};
+window.signOut = async () => {
+  await auth.signOut();
+  currentUser = null;
+  let btn = document.getElementById('googleLoginBtn'); if (btn) { btn.innerText = '登入 Google'; btn.disabled = false; }
+  toast('已登出'); loadLocal();
+};
+auth.onAuthStateChanged(u => {
+  currentUser = u;
+  let btn = document.getElementById('googleLoginBtn'); if (btn) {
+    if (u) { btn.innerText = `👤 ${u.displayName}`; btn.disabled = true; }
+    else { btn.innerText = '登入 Google'; btn.disabled = false; }
+  }
+});
+
+// ========== 戰鬥核心 ==========
+const levelUp = () => {
+  let up = false;
+  while (window.exp >= 50) {
+    window.exp -= 50; window.lv++; window.baseHp += 20; window.baseAtk += 5;
+    window.hp = Math.floor((window.baseHp + calcEquipBonus().hp) * 0.7);
+    up = true;
+    log(`🎉 升級 Lv${window.lv} 攻${window.baseAtk + calcEquipBonus().atk}`);
+    if (window.lv > window.maxLevel) window.maxLevel = window.lv;
+  }
+  if (up) refresh();
+  applyEquipBonus(); saveLocal();
+};
+const monsterCounter = () => {
+  if (!window.curMonster) return;
+  let d = Math.max(1, rand(window.curMonster.atk - 3, window.curMonster.atk + 2));
+  window.hp -= d;
+  log(`😈 ${window.curMonster.emoji}${window.curMonster.name} 反擊 ${d}`);
+  if (window.hp <= 0) { window.hp = window.maxHp; window.restUsed = false; window.deathStreak++; log(`💀 復活`); }
+  else window.deathStreak = 0;
+  updateUI(); saveLocal();
+  if (Math.random() < 0.4) monsterSkillAttack();
+};
+const monsterSkillAttack = () => {
+  if (!window.curMonster || !window.curMonster.skill) return;
+  let baseDmg = Math.max(1, rand(window.curMonster.atk - 2, window.curMonster.atk + 2));
   let dmg = Math.floor(baseDmg * (window.curMonster.skill.dmgMod || 1.0));
   window.hp -= dmg;
   log(`💀 ${window.curMonster.emoji}${window.curMonster.name} 發動 ${window.curMonster.skill.effect}${window.curMonster.skill.name} 造成 ${dmg} 傷害`);
-  if(window.hp<=0){window.hp=window.maxHp;window.restUsed=false;window.deathStreak++;log(`💀 復活`);}
-  updateUI();saveLocal();
-}
-function refresh(){window.curMonster=genMonster();window.restUsed=false;updateUI();log(`✨ ${window.curMonster.emoji}${window.curMonster.name} Lv.${window.curMonster.mlv} | HP${window.curMonster.hp} 攻${window.curMonster.atk}`);}
-function updateUI(){
-  document.getElementById('hpText').innerText=`${window.hp}/${window.maxHp}`;
-  document.getElementById('expText').innerText=`${window.exp}/50`;
-  document.getElementById('levelText').innerText=window.lv;
-  document.getElementById('atkText').innerText=window.atk;
-  document.getElementById('zoneText').innerHTML=getZone().name;
-  if(window.curMonster){
-    document.getElementById('monsterName').innerHTML=`${window.curMonster.emoji}${window.curMonster.name}`;
-    document.getElementById('monsterEmoji').innerText=window.curMonster.emoji;
-    document.getElementById('monsterHpText').innerText=`${window.curMonster.hp}/${window.curMonster.maxHp}`;
-    document.getElementById('monsterLevelText').innerText=window.curMonster.mlv;
-    document.getElementById('monsterBar').style.width=`${(window.curMonster.hp/window.curMonster.maxHp)*100}%`;
-  }
-  document.getElementById('hpBar').style.width=`${(window.hp/window.maxHp)*100}%`;
-  document.getElementById('expBar').style.width=`${(window.exp/50)*100}%`;
-  document.getElementById('restBtn').disabled=window.restUsed;
-}
-function log(msg){document.getElementById('logMsg').innerHTML=msg;}
-
-// ========== 存檔與雲端 ==========
-function saveLocal(){
-  const state={lv:window.lv,exp:window.exp,baseAtk:window.baseAtk,baseHp:window.baseHp,hp:window.hp,maxHp:window.maxHp,atk:window.atk,restUsed:window.restUsed,difficulty:window.difficulty,equipment:window.equipment,deathStreak:window.deathStreak,lastDmg:window.lastDmg,totalKills:window.totalKills,maxDamage:window.maxDamage,maxLevel:window.maxLevel};
-  localStorage.setItem('gameSave',JSON.stringify(state));toast('💾 本地存檔');
-  if(currentUser) db.collection('players').doc(currentUser.uid).set(state).catch(e=>toast('雲端失敗',1));
-}
-function loadLocal(){
-  let raw=localStorage.getItem('gameSave');
-  if(raw){try{let s=JSON.parse(raw);
-    window.lv=s.lv??1;window.exp=s.exp??0;window.baseAtk=s.baseAtk??10;window.baseHp=s.baseHp??100;
-    window.hp=s.hp??100;window.maxHp=s.maxHp??100;window.atk=s.atk??10;window.restUsed=s.restUsed??false;
-    window.difficulty=s.difficulty??'normal';window.equipment=Array.isArray(s.equipment)?s.equipment:[];
-    window.deathStreak=s.deathStreak??0;window.lastDmg=s.lastDmg??0;
-    window.totalKills=s.totalKills??0;window.maxDamage=s.maxDamage??0;window.maxLevel=s.maxLevel??1;
-    let ds=document.getElementById('diffSelect');if(ds)ds.value=window.difficulty;
-  }catch(e){}}applyEquipBonus();refresh();updateUI();
-}
-async function loadCloudSave(){if(!currentUser)return;try{let doc=await db.collection('players').doc(currentUser.uid).get();if(doc.exists){let d=doc.data();
-  window.lv=d.lv??1;window.exp=d.exp??0;window.baseAtk=d.baseAtk??10;window.baseHp=d.baseHp??100;
-  window.hp=d.hp??100;window.maxHp=d.maxHp??100;window.atk=d.atk??10;window.restUsed=d.restUsed??false;
-  window.difficulty=d.difficulty??'normal';window.equipment=Array.isArray(d.equipment)?d.equipment:[];
-  window.deathStreak=d.deathStreak??0;window.lastDmg=d.lastDmg??0;
-  window.totalKills=d.totalKills??0;window.maxDamage=d.maxDamage??0;window.maxLevel=d.maxLevel??1;
-  applyEquipBonus();refresh();updateUI();toast('☁️ 雲端同步');
-}else loadLocal();}catch(e){toast('雲端失敗',1);loadLocal();}}
-
-// ========== Google 登入 ==========
-window.signInWithGoogle=async()=>{try{let r=await auth.signInWithPopup(provider);currentUser=r.user;let btn=document.getElementById('googleLoginBtn');if(btn){btn.innerText=`👤 ${currentUser.displayName}`;btn.disabled=true;}toast(`歡迎 ${currentUser.displayName}`);await loadCloudSave();}catch(e){toast('登入失敗',1);}};
-window.signOut=async()=>{await auth.signOut();currentUser=null;let btn=document.getElementById('googleLoginBtn');if(btn){btn.innerText='登入 Google';btn.disabled=false;}toast('已登出');loadLocal();};
-auth.onAuthStateChanged(u=>{currentUser=u;let btn=document.getElementById('googleLoginBtn');if(btn){if(u){btn.innerText=`👤 ${u.displayName}`;btn.disabled=true;}else{btn.innerText='登入 Google';btn.disabled=false;}}});
-
-// ========== 戰鬥核心 ==========
-function levelUp(){let up=false;while(window.exp>=50){window.exp-=50;window.lv++;window.baseHp+=20;window.baseAtk+=5;window.hp=Math.floor((window.baseHp+calcEquipBonus().hp)*0.7);up=true;log(`🎉 升級 Lv${window.lv} 攻${window.baseAtk+calcEquipBonus().atk}`);if(window.lv>window.maxLevel)window.maxLevel=window.lv;}if(up)refresh();applyEquipBonus();saveLocal();}
-function monsterCounter(){
-  if(!window.curMonster)return;
-  let d=Math.max(1,rand(window.curMonster.atk-3,window.curMonster.atk+2));
-  window.hp-=d;
-  log(`😈 ${window.curMonster.emoji}${window.curMonster.name} 反擊 ${d}`);
-  if(window.hp<=0){window.hp=window.maxHp;window.restUsed=false;window.deathStreak++;log(`💀 復活`);}
-  else window.deathStreak=0;
-  updateUI();saveLocal();
-  if(Math.random()<0.4) monsterSkillAttack();
-}
-function defeat(){
-  if(!window.curMonster)return;
-  window.exp+=window.curMonster.exp;
+  if (window.hp <= 0) { window.hp = window.maxHp; window.restUsed = false; window.deathStreak++; log(`💀 復活`); }
+  updateUI(); saveLocal();
+};
+const defeat = () => {
+  if (!window.curMonster) return;
+  window.exp += window.curMonster.exp;
   log(`🎉 擊敗 +${window.curMonster.exp}EXP`);
   window.totalKills++;
-  if(window.lastDmg>window.maxDamage)window.maxDamage=window.lastDmg;
-  if(Math.random()<0.3){
-    let eq=generateEquipment();
+  if (window.lastDmg > window.maxDamage) window.maxDamage = window.lastDmg;
+  if (Math.random() < 0.3) {
+    let eq = generateEquipment();
     window.equipment.push(eq);
     toast(`🎁獲得 ${eq.name}+${eq.bonus}`);
-    if(!window.equipment.some(e=>e.type===eq.type&&e.equipped)){
-      eq.equipped=true;applyEquipBonus();
+    if (!window.equipment.some(e => e.type === eq.type && e.equipped)) {
+      eq.equipped = true; applyEquipBonus();
       toast(`✨自動裝備`);
     }
     saveLocal();
   }
-  levelUp();refresh();updateUI();saveLocal();
-}
-function attack(){if(window.hp<=0){log('無法攻擊');return;}let d=Math.max(2,rand(window.atk-3,window.atk+5));window.lastDmg=d;window.curMonster.hp-=d;log(`⚔️ ${d}傷`);if(window.curMonster.hp<=0)defeat();else monsterCounter();updateUI();saveLocal();}
-const skills=[{name:'火焰拳',dmg:atk=>rand(atk+8,atk*2+5),effect:'🔥'},{name:'水槍',dmg:atk=>rand(atk+5,atk*2+2),effect:'💧'},{name:'雷電',dmg:atk=>rand(atk+10,atk*2+8),effect:'⚡'},{name:'治癒',heal:30,effect:'💚'}];
-function showSkillMenu(){
-  let ov=document.createElement('div');ov.className='skill-menu-overlay';
-  let card=document.createElement('div');card.className='skill-menu-card';card.innerHTML='<h3>選擇技能</h3>';
-  skills.forEach(s=>{let btn=document.createElement('button');btn.innerText=s.name==='治癒'?`${s.name} (恢復${s.heal}HP)`:s.name;
-    btn.onclick=()=>{document.body.removeChild(ov);if(window.hp<=0){log('無法施放');return;}
-      if(s.name==='治癒'){window.hp=Math.min(window.maxHp,window.hp+s.heal);log(`✨恢復${s.heal}HP`);updateUI();saveLocal();}
-      else{let dmg=s.dmg(window.atk);window.lastDmg=dmg;window.curMonster.hp-=dmg;log(`✨${s.effect} ${dmg}傷`);if(window.curMonster.hp<=0)defeat();else monsterCounter();updateUI();saveLocal();}};
-    card.appendChild(btn);});
-  let cancel=document.createElement('button');cancel.innerText='取消';cancel.onclick=()=>document.body.removeChild(ov);
-  card.appendChild(cancel);ov.appendChild(card);document.body.appendChild(ov);
-}
-function rest(){if(window.restUsed){log('已休息過');return;}if(window.hp<=0){log('無法休息');return;}window.hp=Math.min(window.maxHp,window.hp+30);window.restUsed=true;log(`😴恢復30HP`);let sneak=Math.max(1,rand(window.curMonster.atk-2,window.curMonster.atk+1));window.hp-=sneak;log(`⚠️偷襲-${sneak}`);if(window.hp<=0){window.hp=window.maxHp;window.restUsed=false;log('💀復活');}updateUI();saveLocal();}
-window.toggleEquip=(id)=>{let item=window.equipment.find(e=>e.id==id);if(!item)return;
-  if(item.equipped){item.equipped=false;toast(`已卸下 ${item.name}`);}
-  else{let same=window.equipment.find(e=>e.type===item.type&&e.equipped);if(same)same.equipped=false;item.equipped=true;toast(`已裝備 ${item.name}`);}
-  applyEquipBonus();saveLocal();showBackpack();};
-function showBackpack(){
-  let ov=document.createElement('div');ov.className='backpack-overlay';
-  let card=document.createElement('div');card.className='backpack-card';card.innerHTML='<h3>🎒 裝備背包</h3>';
-  if(window.equipment.length===0)card.innerHTML+='<p>尚無裝備</p>';
-  else window.equipment.forEach(eq=>{let div=document.createElement('div');div.className='backpack-item';div.style.borderLeftColor=eq.color;
-    div.innerHTML=`<span style="color:${eq.color}">${eq.name} +${eq.bonus}</span><button data-id="${eq.id}">${eq.equipped?'卸下':'裝備'}</button>`;
-    div.querySelector('button').onclick=()=>{window.toggleEquip(eq.id);ov.remove();showBackpack();};
-    card.appendChild(div);});
-  let close=document.createElement('button');close.innerText='關閉';close.className='close-backpack';close.onclick=()=>ov.remove();
-  card.appendChild(close);ov.appendChild(card);document.body.appendChild(ov);
-}
-function checkDaily(){let last=localStorage.getItem('lastRewardDate');return last!==new Date().toDateString();}
-function claimDaily(){if(!checkDaily()){toast('今天已領過');return false;}let r=rand(1,3);if(r===1){window.exp+=20;toast('🎁20經驗');levelUp();}else if(r===2){let eq=generateEquipment();window.equipment.push(eq);toast(`🎁獲得 ${eq.name}+${eq.bonus}`);if(!window.equipment.some(e=>e.type===eq.type&&e.equipped)){eq.equipped=true;applyEquipBonus();toast('✨自動裝備');}}else{window.hp=Math.min(window.maxHp,window.hp+50);toast('🎁50HP藥水');}localStorage.setItem('lastRewardDate',new Date().toDateString());updateUI();saveLocal();return true;}
-window.renderSettings=()=>{
-  let c=document.getElementById('settingsList');if(!c)return;
-  let vol=Math.round((localStorage.getItem('volume')?parseFloat(localStorage.volume):0.7)*100);
-  let diff=window.difficulty,isMuted=localStorage.getItem('mute')==='1';
-  c.innerHTML=`<div class="setting-item"><div>🔊音量</div><input type="range" id="volSlider" min="0" max="100" value="${vol}"></div>
-    <div class="setting-item"><div>🔔音效</div><label class="switch"><input type="checkbox" id="sfxCheck" ${!isMuted?'checked':''}><span class="slider"></span></label></div>
-    <div class="setting-item"><div>⚔️難度</div><select id="diffSelect" class="difficulty-select"><option value="easy" ${diff==='easy'?'selected':''}>簡單</option><option value="normal" ${diff==='normal'?'selected':''}>普通</option><option value="hard" ${diff==='hard'?'selected':''}>困難</option><option value="extreme" ${diff==='extreme'?'selected':''}>極限</option></select></div>
+  levelUp(); refresh(); updateUI(); saveLocal();
+};
+const attack = () => {
+  if (window.hp <= 0) { log('無法攻擊'); return; }
+  let d = Math.max(2, rand(window.atk - 3, window.atk + 5));
+  window.lastDmg = d;
+  window.curMonster.hp -= d;
+  log(`⚔️ ${d}傷`);
+  if (window.curMonster.hp <= 0) defeat(); else monsterCounter();
+  updateUI(); saveLocal();
+};
+const skills = [
+  { name: '火焰拳', dmg: atk => rand(atk + 8, atk * 2 + 5), effect: '🔥' },
+  { name: '水槍', dmg: atk => rand(atk + 5, atk * 2 + 2), effect: '💧' },
+  { name: '雷電', dmg: atk => rand(atk + 10, atk * 2 + 8), effect: '⚡' },
+  { name: '治癒', heal: 30, effect: '💚' }
+];
+const showSkillMenu = () => {
+  let ov = document.createElement('div'); ov.className = 'skill-menu-overlay';
+  let card = document.createElement('div'); card.className = 'skill-menu-card'; card.innerHTML = '<h3>選擇技能</h3>';
+  skills.forEach(s => {
+    let btn = document.createElement('button');
+    btn.innerText = s.name === '治癒' ? `${s.name} (恢復${s.heal}HP)` : s.name;
+    btn.onclick = () => {
+      document.body.removeChild(ov);
+      if (window.hp <= 0) { log('無法施放'); return; }
+      if (s.name === '治癒') {
+        window.hp = Math.min(window.maxHp, window.hp + s.heal);
+        log(`✨恢復${s.heal}HP`);
+        updateUI(); saveLocal();
+      } else {
+        let dmg = s.dmg(window.atk);
+        window.lastDmg = dmg;
+        window.curMonster.hp -= dmg;
+        log(`✨${s.effect} ${dmg}傷`);
+        if (window.curMonster.hp <= 0) defeat(); else monsterCounter();
+        updateUI(); saveLocal();
+      }
+    };
+    card.appendChild(btn);
+  });
+  let cancel = document.createElement('button'); cancel.innerText = '取消'; cancel.onclick = () => document.body.removeChild(ov);
+  card.appendChild(cancel); ov.appendChild(card); document.body.appendChild(ov);
+};
+const rest = () => {
+  if (window.restUsed) { log('已休息過'); return; }
+  if (window.hp <= 0) { log('無法休息'); return; }
+  window.hp = Math.min(window.maxHp, window.hp + 30);
+  window.restUsed = true;
+  log(`😴恢復30HP`);
+  let sneak = Math.max(1, rand(window.curMonster.atk - 2, window.curMonster.atk + 1));
+  window.hp -= sneak; log(`⚠️偷襲-${sneak}`);
+  if (window.hp <= 0) { window.hp = window.maxHp; window.restUsed = false; log('💀復活'); }
+  updateUI(); saveLocal();
+};
+window.toggleEquip = (id) => {
+  let item = window.equipment.find(e => e.id == id);
+  if (!item) return;
+  if (item.equipped) {
+    item.equipped = false; toast(`已卸下 ${item.name}`);
+  } else {
+    let same = window.equipment.find(e => e.type === item.type && e.equipped);
+    if (same) same.equipped = false;
+    item.equipped = true; toast(`已裝備 ${item.name}`);
+  }
+  applyEquipBonus(); saveLocal(); showBackpack();
+};
+const showBackpack = () => {
+  let ov = document.createElement('div'); ov.className = 'backpack-overlay';
+  let card = document.createElement('div'); card.className = 'backpack-card'; card.innerHTML = '<h3>🎒 裝備背包</h3>';
+  if (window.equipment.length === 0) card.innerHTML += '<p>尚無裝備</p>';
+  else window.equipment.forEach(eq => {
+    let div = document.createElement('div'); div.className = 'backpack-item'; div.style.borderLeftColor = eq.color;
+    div.innerHTML = `<span style="color:${eq.color}">${eq.name} +${eq.bonus}</span><button data-id="${eq.id}">${eq.equipped ? '卸下' : '裝備'}</button>`;
+    div.querySelector('button').onclick = () => { window.toggleEquip(eq.id); ov.remove(); showBackpack(); };
+    card.appendChild(div);
+  });
+  let close = document.createElement('button'); close.innerText = '關閉'; close.className = 'close-backpack'; close.onclick = () => ov.remove();
+  card.appendChild(close); ov.appendChild(card); document.body.appendChild(ov);
+};
+
+// ========== 每日獎勵 ==========
+const checkDaily = () => { let last = localStorage.getItem('lastRewardDate'); return last !== new Date().toDateString(); };
+const claimDaily = () => {
+  if (!checkDaily()) { toast('今天已領過'); return false; }
+  let r = rand(1, 3);
+  if (r === 1) { window.exp += 20; toast('🎁20經驗'); levelUp(); }
+  else if (r === 2) {
+    let eq = generateEquipment();
+    window.equipment.push(eq);
+    toast(`🎁獲得 ${eq.name}+${eq.bonus}`);
+    if (!window.equipment.some(e => e.type === eq.type && e.equipped)) { eq.equipped = true; applyEquipBonus(); toast('✨自動裝備'); }
+  } else { window.hp = Math.min(window.maxHp, window.hp + 50); toast('🎁50HP藥水'); }
+  localStorage.setItem('lastRewardDate', new Date().toDateString());
+  updateUI(); saveLocal();
+  return true;
+};
+
+// ========== 設定 UI ==========
+window.renderSettings = () => {
+  let c = document.getElementById('settingsList'); if (!c) return;
+  let vol = Math.round((localStorage.getItem('volume') ? parseFloat(localStorage.volume) : 0.7) * 100);
+  let diff = window.difficulty, isMuted = localStorage.getItem('mute') === '1';
+  c.innerHTML = `
+    <div class="setting-item"><div>🔊音量</div><input type="range" id="volSlider" min="0" max="100" value="${vol}"></div>
+    <div class="setting-item"><div>🔔音效</div><label class="switch"><input type="checkbox" id="sfxCheck" ${!isMuted ? 'checked' : ''}><span class="slider"></span></label></div>
+    <div class="setting-item"><div>⚔️難度</div><select id="diffSelect" class="difficulty-select"><option value="easy" ${diff === 'easy' ? 'selected' : ''}>簡單</option><option value="normal" ${diff === 'normal' ? 'selected' : ''}>普通</option><option value="hard" ${diff === 'hard' ? 'selected' : ''}>困難</option><option value="extreme" ${diff === 'extreme' ? 'selected' : ''}>極限</option></select></div>
     <div class="setting-item"><div>🔐Google</div><div><button id="googleLoginBtn" style="background:#334155;padding:6px 12px;">登入</button> <button id="logoutBtn" style="background:#334155;padding:6px 12px;">登出</button></div></div>
     <div class="setting-item"><div>🏆成就</div><div>🐉${window.totalKills} 💥${window.maxDamage} 🏆${window.maxLevel}</div></div>`;
-  document.getElementById('volSlider')?.addEventListener('input',e=>{let v=e.target.value/100;if(window.setMasterVolume)window.setMasterVolume(v);});
-  document.getElementById('sfxCheck')?.addEventListener('change',e=>{if(window.setSfxEnabled)window.setSfxEnabled(e.target.checked);localStorage.setItem('mute',e.target.checked?'0':'1');});
-  document.getElementById('diffSelect')?.addEventListener('change',e=>{window.difficulty=e.target.value;localStorage.setItem('difficulty',window.difficulty);refresh();toast(`難度:${window.difficulty}`);});
-  document.getElementById('googleLoginBtn')?.addEventListener('click',()=>window.signInWithGoogle());
-  document.getElementById('logoutBtn')?.addEventListener('click',()=>window.signOut());
-  if(currentUser){let gb=document.getElementById('googleLoginBtn');if(gb){gb.innerText=`👤 ${currentUser.displayName}`;gb.disabled=true;}}else{let gb=document.getElementById('googleLoginBtn');if(gb){gb.innerText='登入';gb.disabled=false;}}
+  document.getElementById('volSlider')?.addEventListener('input', e => { let v = e.target.value / 100; if (window.setMasterVolume) window.setMasterVolume(v); });
+  document.getElementById('sfxCheck')?.addEventListener('change', e => { if (window.setSfxEnabled) window.setSfxEnabled(e.target.checked); localStorage.setItem('mute', e.target.checked ? '0' : '1'); });
+  document.getElementById('diffSelect')?.addEventListener('change', e => { window.difficulty = e.target.value; localStorage.setItem('difficulty', window.difficulty); refresh(); toast(`難度:${window.difficulty}`); });
+  document.getElementById('googleLoginBtn')?.addEventListener('click', () => window.signInWithGoogle());
+  document.getElementById('logoutBtn')?.addEventListener('click', () => window.signOut());
+  if (currentUser) { let gb = document.getElementById('googleLoginBtn'); if (gb) { gb.innerText = `👤 ${currentUser.displayName}`; gb.disabled = true; } }
+  else { let gb = document.getElementById('googleLoginBtn'); if (gb) { gb.innerText = '登入'; gb.disabled = false; } }
 };
-function showPage(id){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+
+// ========== 頁面切換 ==========
+const showPage = (id) => {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById(id)?.classList.add('active');
-  if(id==='settingsPage')window.renderSettings();
-  if(id==='shopPage'){let sd=document.getElementById('dailyRewardStatus');if(sd)sd.innerHTML=checkDaily()?'⭐可領取':'✅已領取';document.getElementById('claimDailyBtn').onclick=()=>{claimDaily();if(sd)sd.innerHTML=checkDaily()?'⭐可領取':'✅已領取';};}
-}
-document.getElementById('toGameBtn').onclick=()=>showPage('gamePage');
-document.getElementById('toSettingsBtn').onclick=()=>showPage('settingsPage');
-document.getElementById('shopBtn').onclick=()=>showPage('shopPage');
-document.getElementById('helpBtn').onclick=()=>showPage('helpPage');
-document.getElementById('backFromSettings').onclick=()=>showPage('mainPage');
-document.getElementById('backFromShop').onclick=()=>showPage('mainPage');
-document.getElementById('backFromHelp').onclick=()=>showPage('mainPage');
-document.getElementById('backFromGame').onclick=()=>showPage('mainPage');
-document.getElementById('attackBtn').onclick=attack;
-document.getElementById('skillBtn').onclick=showSkillMenu;
-document.getElementById('restBtn').onclick=rest;
-document.getElementById('inventoryBtn').onclick=showBackpack;
-document.getElementById('saveBtn').onclick=saveLocal;
-window.setMasterVolume=(v)=>{console.log('音量',v);};window.setSfxEnabled=(e)=>{console.log('音效',e);};
+  if (id === 'settingsPage') window.renderSettings();
+  if (id === 'shopPage') {
+    let sd = document.getElementById('dailyRewardStatus');
+    if (sd) sd.innerHTML = checkDaily() ? '⭐可領取' : '✅已領取';
+    document.getElementById('claimDailyBtn').onclick = () => { claimDaily(); if (sd) sd.innerHTML = checkDaily() ? '⭐可領取' : '✅已領取'; };
+  }
+};
+
+// ========== 事件綁定 ==========
+document.getElementById('toGameBtn').onclick = () => showPage('gamePage');
+document.getElementById('toSettingsBtn').onclick = () => showPage('settingsPage');
+document.getElementById('shopBtn').onclick = () => showPage('shopPage');
+document.getElementById('helpBtn').onclick = () => showPage('helpPage');
+document.getElementById('backFromSettings').onclick = () => showPage('mainPage');
+document.getElementById('backFromShop').onclick = () => showPage('mainPage');
+document.getElementById('backFromHelp').onclick = () => showPage('mainPage');
+document.getElementById('backFromGame').onclick = () => showPage('mainPage');
+document.getElementById('attackBtn').onclick = attack;
+document.getElementById('skillBtn').onclick = showSkillMenu;
+document.getElementById('restBtn').onclick = rest;
+document.getElementById('inventoryBtn').onclick = showBackpack;
+document.getElementById('saveBtn').onclick = saveLocal;
+window.setMasterVolume = (v) => { console.log('音量', v); };
+window.setSfxEnabled = (e) => { console.log('音效', e); };
+
+// ========== 初始化 ==========
 loadLocal();
-if(!localStorage.getItem('guideShown')){let ov=document.getElementById('guideOverlay');ov.style.display='flex';document.getElementById('closeGuideBtn').onclick=()=>{ov.style.display='none';localStorage.setItem('guideShown','true');};}
+if (!localStorage.getItem('guideShown')) {
+  let ov = document.getElementById('guideOverlay');
+  ov.style.display = 'flex';
+  document.getElementById('closeGuideBtn').onclick = () => { ov.style.display = 'none'; localStorage.setItem('guideShown', 'true'); };
+}
 </script>
 </body>
 </html>
