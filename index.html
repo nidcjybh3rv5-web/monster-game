@@ -12,11 +12,12 @@
 body{background:radial-gradient(circle at 20% 30%,#1a2a3a,#0a0f1e);font-family:system-ui,'Segoe UI Emoji','Apple Color Emoji',sans-serif;min-height:100vh;display:flex;justify-content:center;align-items:center;color:#fff;padding:16px}
 .app{width:100%;max-width:550px;background:rgba(255,255,255,0.08);backdrop-filter:blur(25px);border-radius:48px;padding:24px 20px 32px;border:1px solid rgba(255,255,255,0.2)}
 .page{display:none}.page.active{display:block}
-.main-title{font-size:2rem;font-weight:700;background:linear-gradient(135deg,#facc15,#ff8c00);-webkit-background-clip:text;background-clip:text;color:transparent;text-align:center;margin:20px 0}
+.main-title{font-size:2rem;font-weight:700;background:linear-gradient(135deg,#facc15,#ff8c00);-webkit-background-clip:text;background-clip:text;color:transparent;text-align:center;margin:20px 0 8px 0}
+.author{text-align:center;font-size:0.7rem;color:#94a3b8;margin-bottom:16px}
 .play-btn,.settings-btn{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:40px;padding:12px;font-size:1.1rem;font-weight:bold;cursor:pointer;width:80%;margin:10px auto;display:block;text-align:center;color:#fff}
 .play-btn{background:#facc15;color:#0f172a;border:none}
 button:active{transform:scale(0.97)}
-.version{text-align:center;font-size:0.7rem;color:#94a3b8;margin-top:20px}
+.footer-info{text-align:center;font-size:0.65rem;color:#475569;margin-top:20px}
 .back-btn{background:none;border:none;color:#3b82f6;font-size:1rem;cursor:pointer;display:inline-block;margin-bottom:16px}
 .settings-list{display:flex;flex-direction:column;gap:12px}
 .setting-item{background:rgba(255,255,255,0.05);border-radius:28px;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap}
@@ -57,11 +58,12 @@ input[type="range"]::-webkit-slider-thumb{width:18px;height:18px;border-radius:5
 <div class="app">
   <div id="mainPage" class="page active">
     <div class="main-title">MONSTER GAME</div>
+    <div class="author">by Disabledev</div>
     <button class="play-btn" id="toGameBtn">▶ 開始遊戲</button>
     <button class="settings-btn" id="toSettingsBtn">⚙️ 設定</button>
     <button class="settings-btn" id="shopBtn">🛒 商店</button>
     <button class="settings-btn" id="helpBtn">❓ 幫助</button>
-    <div class="version">v2.0</div>
+    <div class="footer-info">v2.0 | 706莊</div>
   </div>
   <div id="settingsPage" class="page">
     <div><button class="back-btn" id="backFromSettings">← 返回</button><span style="font-size:1.3rem;">設定</span></div>
@@ -388,56 +390,4 @@ window.renderSettings = () => {
   let vol = Math.round((localStorage.getItem('volume') ? parseFloat(localStorage.volume) : 0.7) * 100);
   let diff = window.difficulty, isMuted = localStorage.getItem('mute') === '1';
   c.innerHTML = `
-    <div class="setting-item"><div>🔊音量</div><input type="range" id="volSlider" min="0" max="100" value="${vol}"></div>
-    <div class="setting-item"><div>🔔音效</div><label class="switch"><input type="checkbox" id="sfxCheck" ${!isMuted ? 'checked' : ''}><span class="slider"></span></label></div>
-    <div class="setting-item"><div>⚔️難度</div><select id="diffSelect" class="difficulty-select"><option value="easy" ${diff === 'easy' ? 'selected' : ''}>簡單</option><option value="normal" ${diff === 'normal' ? 'selected' : ''}>普通</option><option value="hard" ${diff === 'hard' ? 'selected' : ''}>困難</option><option value="extreme" ${diff === 'extreme' ? 'selected' : ''}>極限</option></select></div>
-    <div class="setting-item"><div>🔐Google</div><div><button id="googleLoginBtn" style="background:#334155;padding:6px 12px;">登入</button> <button id="logoutBtn" style="background:#334155;padding:6px 12px;">登出</button></div></div>
-    <div class="setting-item"><div>🏆成就</div><div>🐉${window.totalKills} 💥${window.maxDamage} 🏆${window.maxLevel}</div></div>`;
-  document.getElementById('volSlider')?.addEventListener('input', e => { let v = e.target.value / 100; if (window.setMasterVolume) window.setMasterVolume(v); });
-  document.getElementById('sfxCheck')?.addEventListener('change', e => { if (window.setSfxEnabled) window.setSfxEnabled(e.target.checked); localStorage.setItem('mute', e.target.checked ? '0' : '1'); });
-  document.getElementById('diffSelect')?.addEventListener('change', e => { window.difficulty = e.target.value; localStorage.setItem('difficulty', window.difficulty); refresh(); toast(`難度:${window.difficulty}`); });
-  document.getElementById('googleLoginBtn')?.addEventListener('click', () => window.signInWithGoogle());
-  document.getElementById('logoutBtn')?.addEventListener('click', () => window.signOut());
-  if (currentUser) { let gb = document.getElementById('googleLoginBtn'); if (gb) { gb.innerText = `👤 ${currentUser.displayName}`; gb.disabled = true; } }
-  else { let gb = document.getElementById('googleLoginBtn'); if (gb) { gb.innerText = '登入'; gb.disabled = false; } }
-};
-
-// ========== 頁面切換 ==========
-const showPage = (id) => {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById(id)?.classList.add('active');
-  if (id === 'settingsPage') window.renderSettings();
-  if (id === 'shopPage') {
-    let sd = document.getElementById('dailyRewardStatus');
-    if (sd) sd.innerHTML = checkDaily() ? '⭐可領取' : '✅已領取';
-    document.getElementById('claimDailyBtn').onclick = () => { claimDaily(); if (sd) sd.innerHTML = checkDaily() ? '⭐可領取' : '✅已領取'; };
-  }
-};
-
-// ========== 事件綁定 ==========
-document.getElementById('toGameBtn').onclick = () => showPage('gamePage');
-document.getElementById('toSettingsBtn').onclick = () => showPage('settingsPage');
-document.getElementById('shopBtn').onclick = () => showPage('shopPage');
-document.getElementById('helpBtn').onclick = () => showPage('helpPage');
-document.getElementById('backFromSettings').onclick = () => showPage('mainPage');
-document.getElementById('backFromShop').onclick = () => showPage('mainPage');
-document.getElementById('backFromHelp').onclick = () => showPage('mainPage');
-document.getElementById('backFromGame').onclick = () => showPage('mainPage');
-document.getElementById('attackBtn').onclick = attack;
-document.getElementById('skillBtn').onclick = showSkillMenu;
-document.getElementById('restBtn').onclick = rest;
-document.getElementById('inventoryBtn').onclick = showBackpack;
-document.getElementById('saveBtn').onclick = saveLocal;
-window.setMasterVolume = (v) => { console.log('音量', v); };
-window.setSfxEnabled = (e) => { console.log('音效', e); };
-
-// ========== 初始化 ==========
-loadLocal();
-if (!localStorage.getItem('guideShown')) {
-  let ov = document.getElementById('guideOverlay');
-  ov.style.display = 'flex';
-  document.getElementById('closeGuideBtn').onclick = () => { ov.style.display = 'none'; localStorage.setItem('guideShown', 'true'); };
-}
-</script>
-</body>
-</html>
+    <div class="setting-item"><div>🔊音量</div><
