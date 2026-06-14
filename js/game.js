@@ -1,6 +1,6 @@
 // ========== 版本號與更新檢查 ==========
-const APP_VERSION = 'v3.6.1';
-if(localStorage.getItem('app_version') !== APP_VERSION) {
+const APP_VERSION = 'v3.6.2';
+if (localStorage.getItem('app_version') !== APP_VERSION) {
   const ov = document.createElement('div'); ov.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); backdrop-filter:blur(12px); display:flex; justify-content:center; align-items:center; z-index:10000;';
   const cd = document.createElement('div'); cd.style.cssText = 'background:rgba(30,30,35,0.9); border-radius:32px; padding:24px; width:280px; text-align:center; color:white; border:1px solid rgba(255,255,255,0.2);';
   cd.innerHTML = `<div style="font-size:48px;">✨</div><h3>發現新版本</h3><p>遊戲已更新至 ${APP_VERSION}</p><button id="updateNowBtn" style="background:#facc15; color:#0f172a; border:none; padding:10px 20px; border-radius:40px; margin-top:16px; cursor:pointer;">立即更新</button>`;
@@ -754,24 +754,34 @@ function showPage(id) {
   if (id === 'questPage') { resetDailyQuests(); updateQuestUI(); document.getElementById('claimQuestRewardBtn').onclick = claimQuestReward; }
 }
 
-// ========== 事件綁定 ==========
-document.getElementById('toGameBtn').onclick = () => showPage('gamePage');
-document.getElementById('toSettingsBtn').onclick = () => showPage('settingsPage');
-document.getElementById('shopBtn').onclick = () => showPage('shopPage');
-document.getElementById('helpBtn').onclick = () => showPage('helpPage');
-document.getElementById('backFromSettings').onclick = () => showPage('mainPage');
-document.getElementById('backFromShop').onclick = () => showPage('mainPage');
-document.getElementById('backFromHelp').onclick = () => showPage('mainPage');
-document.getElementById('backFromGame').onclick = () => showPage('mainPage');
-document.getElementById('backFromTalent').onclick = () => showPage('gamePage');
-document.getElementById('backFromQuest').onclick = () => showPage('gamePage');
-document.getElementById('attackBtn').onclick = attack;
-document.getElementById('skillBtn').onclick = showSkillMenu;
-document.getElementById('restBtn').onclick = rest;
-document.getElementById('inventoryBtn').onclick = showBackpack;
-document.getElementById('talentsBtn').onclick = () => showPage('talentPage');
-document.getElementById('questBtn').onclick = () => showPage('questPage');
-document.getElementById('saveBtn').onclick = saveGame;
+// ========== 事件綁定（確保攻擊按鈕可用）==========
+document.addEventListener('DOMContentLoaded', () => {
+  const attackBtn = document.getElementById('attackBtn');
+  if (attackBtn) attackBtn.onclick = attack;
+  const skillBtn = document.getElementById('skillBtn');
+  if (skillBtn) skillBtn.onclick = showSkillMenu;
+  const restBtn = document.getElementById('restBtn');
+  if (restBtn) restBtn.onclick = rest;
+  const inventoryBtn = document.getElementById('inventoryBtn');
+  if (inventoryBtn) inventoryBtn.onclick = showBackpack;
+  const talentsBtn = document.getElementById('talentsBtn');
+  if (talentsBtn) talentsBtn.onclick = () => showPage('talentPage');
+  const questBtn = document.getElementById('questBtn');
+  if (questBtn) questBtn.onclick = () => showPage('questPage');
+  const saveBtn = document.getElementById('saveBtn');
+  if (saveBtn) saveBtn.onclick = saveGame;
+  // 其他按鈕綁定（與原有保持一致）
+  document.getElementById('toGameBtn').onclick = () => showPage('gamePage');
+  document.getElementById('toSettingsBtn').onclick = () => showPage('settingsPage');
+  document.getElementById('shopBtn').onclick = () => showPage('shopPage');
+  document.getElementById('helpBtn').onclick = () => showPage('helpPage');
+  document.getElementById('backFromSettings').onclick = () => showPage('mainPage');
+  document.getElementById('backFromShop').onclick = () => showPage('mainPage');
+  document.getElementById('backFromHelp').onclick = () => showPage('mainPage');
+  document.getElementById('backFromGame').onclick = () => showPage('mainPage');
+  document.getElementById('backFromTalent').onclick = () => showPage('gamePage');
+  document.getElementById('backFromQuest').onclick = () => showPage('gamePage');
+});
 
 // ========== 初始啟動 ==========
 loadGame();
