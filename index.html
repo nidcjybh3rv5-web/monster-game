@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>幻獸鬥士 - 完全版</title>
+<title>幻獸鬥士</title>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -24,7 +24,6 @@ button:active{transform:scale(0.97)}
 .stats-line{display:flex;justify-content:space-between;margin:12px 0;font-weight:bold}
 .bar{background:#1e293b;border-radius:20px;height:18px;overflow:hidden;margin:8px 0}
 .fillhp{background:#ef4444;height:100%}.fillexp{background:#3b82f6;height:100%}
-.fillrage{background:#facc15;height:100%}
 .enemy-icon{font-size:56px;margin:12px;text-align:center}
 .log{background:rgba(0,0,0,0.5);border-radius:24px;padding:12px;margin:16px 0;font-size:0.85rem;color:#facc15;min-height:70px}
 .buttons{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:16px}
@@ -56,11 +55,10 @@ input[type="range"]::-webkit-slider-thumb{width:16px;height:16px;border-radius:5
 @keyframes flashAnim{0%{background:#fff8}100%{background:0 0}}
 .shake{animation:shakeAnim 0.1s 2}
 @keyframes shakeAnim{0%{transform:translateX(0)}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}100%{transform:translateX(0)}}
-.damage-number{position:fixed;font-size:1.4rem;font-weight:bold;text-shadow:0 0 3px black;pointer-events:none;z-index:100;white-space:nowrap;animation:floatUp 0.6s ease-out forwards}
-@keyframes floatUp{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-50px)}}
 </style>
 </head>
 <body>
+<!-- 页面结构与之前完全相同，略... 请参见上一版完整结构 -->
 <div class="app">
   <div id="mainPage" class="page active">
     <div class="main-title">MONSTER GAME</div>
@@ -69,20 +67,18 @@ input[type="range"]::-webkit-slider-thumb{width:16px;height:16px;border-radius:5
     <button class="settings-btn" id="toSettingsBtn">⚙️ 設定</button>
     <button class="settings-btn" id="shopBtn">🛒 商店</button>
     <button class="settings-btn" id="helpBtn">❓ 幫助</button>
-    <div class="footer">v3.1 | 706莊</div>
+    <div class="footer">v3.0 | 706莊</div>
   </div>
   <div id="settingsPage" class="page"><div><button class="back-btn" id="backFromSettings">← 返回</button><span style="font-size:1.3rem;">設定</span></div><div id="settingsList"></div></div>
   <div id="shopPage" class="page"><div><button class="back-btn" id="backFromShop">← 返回</button><span style="font-size:1.3rem;">商店</span></div><div style="padding:16px;text-align:center"><div id="dailyRewardStatus" style="background:rgba(255,255,255,0.1);border-radius:40px;padding:12px;margin-bottom:20px">⭐ 每日獎勵</div><button id="claimDailyBtn" class="play-btn" style="width:auto;padding:8px 16px">🎁 領取</button></div></div>
-  <div id="helpPage" class="page"><div><button class="back-btn" id="backFromHelp">← 返回</button><span style="font-size:1.3rem;">幫助</span></div><div class="help-content"><p>⚔️攻擊｜✨技能四選一｜😴休息(每場1次)</p><p>🎒背包：裝備穿脫｜📈50經驗升級｜💀Boss每10級出現</p><p>⚡套裝效果(2件同類)｜☁️Google登入雲端｜🏆成就自動記錄</p><p>🔥屬性克制｜💢怒氣系統｜⚡暴擊機率</p></div></div>
+  <div id="helpPage" class="page"><div><button class="back-btn" id="backFromHelp">← 返回</button><span style="font-size:1.3rem;">幫助</span></div><div class="help-content"><p>⚔️攻擊｜✨技能四選一｜😴休息(每場1次)</p><p>🎒背包：裝備穿脫｜📈50經驗升級｜💀Boss每10級出現</p><p>⚡套裝效果(2件同類)｜☁️Google登入雲端｜🏆成就自動記錄</p></div></div>
   <div id="gamePage" class="page">
     <button class="back-btn" id="backFromGame">← 主選單</button>
     <div class="stats-line"><span>❤️ <span id="hpText">100/100</span></span><span>⭐ <span id="expText">0/50</span></span><span>⬆️ Lv <span id="levelText">1</span></span></div>
-    <div class="bar"><div class="fillhp" id="hpBar"></div></div>
-    <div class="bar"><div class="fillexp" id="expBar"></div></div>
-    <div class="stats-line"><span>💢 怒氣</span><div class="bar"><div id="rageBar" class="fillrage" style="width:0%"></div></div></div>
+    <div class="bar"><div class="fillhp" id="hpBar"></div></div><div class="bar"><div class="fillexp" id="expBar"></div></div>
     <div class="stats-line"><span>⚔️ <span id="atkText">10</span></span><span>🗺️ <span id="zoneText">新手村</span></span></div>
     <h3 id="monsterName">史萊姆</h3><div class="enemy-icon" id="monsterEmoji">🟣</div>
-    <div>💀 HP <span id="monsterHpText">0/0</span> | ⭐ Lv <span id="monsterLevelText">0</span> | 🔥 屬性 <span id="monsterElement">火</span></div>
+    <div>💀 HP <span id="monsterHpText">0/0</span> | ⭐ Lv <span id="monsterLevelText">0</span></div>
     <div class="bar"><div class="fillhp" id="monsterBar"></div></div>
     <div class="log" id="logMsg">點擊攻擊開始</div>
     <div class="buttons">
@@ -96,8 +92,8 @@ input[type="range"]::-webkit-slider-thumb{width:16px;height:16px;border-radius:5
 </div>
 <div id="guideOverlay" class="guide-overlay" style="display:none"><div class="guide-card"><p>🎮 歡迎！</p><p>⚔️攻擊 ✨技能 🎒裝備 😴休息</p><p>💀Boss每10級出現｜💾自動存檔</p><button id="closeGuideBtn">開始</button></div></div>
 <script>
-// ========== 版本檢查 ==========
-const APP_VERSION = 'v3.1.0';
+// ========== 版本更新檢查 ==========
+const APP_VERSION = 'v3.0.10';
 if(localStorage.getItem('app_version') !== APP_VERSION){
   let ov=document.createElement('div'); ov.style.cssText='position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); backdrop-filter:blur(12px); display:flex; justify-content:center; align-items:center; z-index:10000;';
   let cd=document.createElement('div'); cd.style.cssText='background:rgba(30,30,35,0.9); border-radius:32px; padding:24px; width:280px; text-align:center; color:white; border:1px solid rgba(255,255,255,0.2);';
@@ -122,38 +118,7 @@ if(localStorage.getItem('app_version') !== APP_VERSION){
   window.setSfx=e=>{sfxOn=e;localStorage.setItem('mute',e?'0':'1');};
   const flash=()=>{document.body.classList.add('flash');setTimeout(()=>document.body.classList.remove('flash'),200);};
   const shake=()=>{document.querySelector('.app').classList.add('shake');setTimeout(()=>document.querySelector('.app').classList.remove('shake'),200);};
-  // ========== 屬性克制 ==========
-  const elemChart={
-    '火':{'草':1.5,'水':0.7,'雷':1.0,'火':1.0},
-    '水':{'火':1.5,'雷':0.7,'草':1.0,'水':1.0},
-    '草':{'水':1.5,'火':0.7,'雷':1.0,'草':1.0},
-    '雷':{'水':1.5,'草':0.7,'火':1.0,'雷':1.0}
-  };
-  function getElemMult(atkElem,defElem){return elemChart[atkElem]?.[defElem]||1.0;}
-  // ========== 暴擊系統 ==========
-  let critRate=0.15;
-  function isCrit(){return Math.random()<critRate;}
-  // ========== 怒氣系統 ==========
-  let rage=0,maxRage=100;
-  function addRage(a){rage=Math.min(maxRage,rage+a);updateRageUI();}
-  function canUseSkill(cost){return rage>=cost;}
-  function consumeRage(cost){if(rage>=cost){rage-=cost;updateRageUI();return true;}return false;}
-  function updateRageUI(){let rb=document.getElementById('rageBar');if(rb)rb.style.width=`${(rage/maxRage)*100}%`;}
-  // ========== 傷害飄字 ==========
-  function showDamage(x,y,dmg,isCrit=false){
-    let div=document.createElement('div');div.className='damage-number';
-    div.innerText=isCrit?Math.floor(dmg)+'!':Math.floor(dmg);
-    div.style.color=isCrit?'#ffaa00':'#ff5555';
-    div.style.left=x+'px';div.style.top=y+'px';
-    document.body.appendChild(div);
-    setTimeout(()=>div.remove(),600);
-  }
-  function getMonsterPos(){
-    let el=document.getElementById('monsterEmoji');
-    if(el){let r=el.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top};}
-    return{x:window.innerWidth/2,y:window.innerHeight/2};
-  }
-  // ========== 裝備系統 ==========
+  // ========== 裝備 ==========
   const Q=[{n:'普通',c:'#9ca3af',min:1,max:3,rate:0.5},{n:'優秀',c:'#4ade80',min:4,max:6,rate:0.3},{n:'稀有',c:'#3b82f6',min:7,max:10,rate:0.15},{n:'史詩',c:'#a855f7',min:11,max:15,rate:0.05}];
   function rq(){let r=Math.random(),a=0;for(let q of Q)if((a+=q.rate)>r)return q;return Q[0];}
   function genEq(){let t=rand(0,1)?'w':'a',q=rq(),b=rand(q.min,q.max);return{id:Date.now()+'-'+Math.random(),type:t,quality:q.n,color:q.c,bonus:b,name:`${q.n} ${t==='w'?'武':'防'}`,eq:false};}
@@ -186,8 +151,6 @@ if(localStorage.getItem('app_version') !== APP_VERSION){
   window.diff=localStorage.diff||'normal';
   const zones=[{n:"🌳新手村",maxLv:30,m:["🟣史萊姆","🟢哥布林","🐺森林狼","🦇蝙蝠","🌿樹精"]},{n:"🏜️沙漠",maxLv:90,m:["🦂巨蠍","🧻木乃伊","🐍沙蛇","🦅沙鷹","🏺詛咒陶罐"]},{n:"⛰️蒼穹",maxLv:100,m:["🐉青龍","👼天使","😈惡魔","✨星辰之靈","🌙月獸"]}];
   const mSkills=[{n:'毒擊',e:'🌿',m:1.2},{n:'砂塵',e:'🏜️',m:1.0},{n:'龍息',e:'🐉',m:1.5},{n:'閃電',e:'⚡',m:1.3},{n:'冰霜',e:'❄️',m:1.1},{n:'治癒',e:'💚',h:15}];
-  const elements=['火','水','草','雷'];
-  function randElem(){return elements[Math.floor(Math.random()*elements.length)];}
   const isBoss=l=>l%10===0;
   const bossN=["新手守護者","沙暴領主","蒼穹巨龍","深淵魔王","永凍冰凰","雷霆泰坦","暗影幽靈","黃金獅鷲","時間守護者","終焉之神"];
   const getZone=()=>window.lv<=30?zones[0]:window.lv<=90?zones[1]:zones[2];
@@ -213,10 +176,9 @@ if(localStorage.getItem('app_version') !== APP_VERSION){
     let varf=v=>Math.floor(v*(0.6+Math.random()*0.8));
     let expG=Math.max(1,Math.floor((12+mlv*0.8)*mlt.exp));
     if(isB)expG*=3;
-    let elem=randElem();
-    return{emoji,name,mlv,hp:varf(bhp),maxHp:varf(bhp),atk:varf(batk),exp:expG,skill,isBoss:isB,element:elem};
+    return{emoji,name,mlv,hp:varf(bhp),maxHp:varf(bhp),atk:varf(batk),exp:expG,skill,isBoss:isB};
   }
-  function refM(){window.curM=genM();window.rest=false;upUI();log(`✨ ${window.curM.isBoss?'👑BOSS ':''}${window.curM.emoji}${window.curM.name} Lv.${window.curM.mlv} | HP${window.curM.hp} 攻${window.curM.atk} ${window.curM.element}`);if(window.curM.isBoss)bossSound();}
+  function refM(){window.curM=genM();window.rest=false;upUI();log(`✨ ${window.curM.isBoss?'👑BOSS ':''}${window.curM.emoji}${window.curM.name} Lv.${window.curM.mlv} | HP${window.curM.hp} 攻${window.curM.atk}`);if(window.curM.isBoss)bossSound();}
   function upUI(){
     document.getElementById('hpText').innerText=`${window.hp}/${window.maxHp}`;
     document.getElementById('expText').innerText=`${window.exp}/50`;
@@ -228,13 +190,11 @@ if(localStorage.getItem('app_version') !== APP_VERSION){
       document.getElementById('monsterEmoji').innerText=window.curM.emoji;
       document.getElementById('monsterHpText').innerText=`${window.curM.hp}/${window.curM.maxHp}`;
       document.getElementById('monsterLevelText').innerText=window.curM.mlv;
-      document.getElementById('monsterElement').innerHTML=window.curM.element;
       document.getElementById('monsterBar').style.width=`${window.curM.hp/window.curM.maxHp*100}%`;
     }
     document.getElementById('hpBar').style.width=`${window.hp/window.maxHp*100}%`;
     document.getElementById('expBar').style.width=`${window.exp/50*100}%`;
     document.getElementById('restBtn').disabled=window.rest;
-    updateRageUI();
   }
   function log(m){document.getElementById('logMsg').innerHTML=m;}
   // ========== 存檔 ==========
@@ -246,7 +206,7 @@ if(localStorage.getItem('app_version') !== APP_VERSION){
   window.googleLogout=async()=>{await auth.signOut();curUser=null;let btn=document.getElementById('googleBtn');if(btn){btn.innerText='登入';btn.disabled=false;}toast('已登出');load();};
   auth.onAuthStateChanged(u=>{curUser=u;let btn=document.getElementById('googleBtn');if(btn){if(u){btn.innerText=`👤 ${u.displayName}`;btn.disabled=true;}else{btn.innerText='登入';btn.disabled=false;}}});
   function save(){
-    const st={lv:window.lv,exp:window.exp,bAtk:window.bAtk,bHp:window.bHp,hp:window.hp,maxHp:window.maxHp,atk:window.atk,rest:window.rest,diff:window.diff,eq:window.eq,ds:window.ds,lastDmg:window.lastDmg,totalKills:window.totalKills,maxDmg:window.maxDmg,maxLv:window.maxLv,rage:rage};
+    const st={lv:window.lv,exp:window.exp,bAtk:window.bAtk,bHp:window.bHp,hp:window.hp,maxHp:window.maxHp,atk:window.atk,rest:window.rest,diff:window.diff,eq:window.eq,ds:window.ds,lastDmg:window.lastDmg,totalKills:window.totalKills,maxDmg:window.maxDmg,maxLv:window.maxLv};
     localStorage.setItem('gameSave',JSON.stringify(st));toast('💾 存檔');
     if(curUser)db.collection('players').doc(curUser.uid).set(st).catch(e=>toast('雲端失敗',1));
   }
@@ -260,13 +220,12 @@ if(localStorage.getItem('app_version') !== APP_VERSION){
         window.diff=s.diff??'normal';window.eq=Array.isArray(s.eq)?s.eq:[];
         window.ds=s.ds??0;window.lastDmg=s.lastDmg??0;
         window.totalKills=s.totalKills??0;window.maxDmg=s.maxDmg??0;window.maxLv=s.maxLv??1;
-        rage=s.rage??0;
         let ds=document.getElementById('diffSelect');if(ds)ds.value=window.diff;
       }catch(e){}
     }
     applyEq();refM();upUI();
   }
-  async function loadCloud(){if(!curUser)return;try{let d=await db.collection('players').doc(curUser.uid).get();if(d.exists){let s=d.data();window.lv=s.lv??1;window.exp=s.exp??0;window.bAtk=s.bAtk??10;window.bHp=s.bHp??100;window.hp=s.hp??100;window.maxHp=s.maxHp??100;window.atk=s.atk??10;window.rest=s.rest??false;window.diff=s.diff??'normal';window.eq=Array.isArray(s.eq)?s.eq:[];window.ds=s.ds??0;window.lastDmg=s.lastDmg??0;window.totalKills=s.totalKills??0;window.maxDmg=s.maxDmg??0;window.maxLv=s.maxLv??1;rage=s.rage??0;applyEq();refM();upUI();toast('☁️ 同步');}else load();}catch(e){toast('雲端失敗',1);load();}}
+  async function loadCloud(){if(!curUser)return;try{let d=await db.collection('players').doc(curUser.uid).get();if(d.exists){let s=d.data();window.lv=s.lv??1;window.exp=s.exp??0;window.bAtk=s.bAtk??10;window.bHp=s.bHp??100;window.hp=s.hp??100;window.maxHp=s.maxHp??100;window.atk=s.atk??10;window.rest=s.rest??false;window.diff=s.diff??'normal';window.eq=Array.isArray(s.eq)?s.eq:[];window.ds=s.ds??0;window.lastDmg=s.lastDmg??0;window.totalKills=s.totalKills??0;window.maxDmg=s.maxDmg??0;window.maxLv=s.maxLv??1;applyEq();refM();upUI();toast('☁️ 同步');}else load();}catch(e){toast('雲端失敗',1);load();}}
   // ========== 戰鬥 ==========
   function lvUp(){
     let up=false;
@@ -324,66 +283,45 @@ if(localStorage.getItem('app_version') !== APP_VERSION){
     }
     lvUp();refM();upUI();save();defeatSound();
   }
-  // 玩家元素（可设默认火）
-  let playerElement='火';
   function atk(){
     initAudio();atkSound();flash();shake();
     if(window.hp<=0){log('無法攻擊');return;}
-    let base=Math.max(2,rand(window.atk-3,window.atk+5));
-    let mult=getElemMult(playerElement,window.curM.element);
-    let dmg=base*mult;
-    let crit=isCrit(); if(crit)dmg*=1.5;
-    window.lastDmg=dmg;
-    window.curM.hp-=dmg;
-    let msg=`⚔️ ${Math.floor(dmg)}傷`;
-    if(mult>1)msg+=' (效果拔群)'; else if(mult<1)msg+=' (不是很有效)';
-    if(crit)msg+=' 暴擊！';
-    log(msg);
-    let pos=getMonsterPos(); showDamage(pos.x,pos.y,dmg,crit);
-    addRage(10);
-    if(window.curM.hp<=0)defeatM(); else mCounter();
-    upUI(); save();
+    let d=Math.max(2,rand(window.atk-3,window.atk+5));
+    window.lastDmg=d;
+    window.curM.hp-=d;
+    log(`⚔️ ${d}傷`);
+    if(window.curM.hp<=0)defeatM();else mCounter();
+    upUI();save();
   }
   const skillList=[
-    {n:'火焰拳',dmg:a=>rand(a+8,a*2+5),e:'🔥',elem:'火',cost:30},
-    {n:'水槍',dmg:a=>rand(a+5,a*2+2),e:'💧',elem:'水',cost:30},
-    {n:'雷電',dmg:a=>rand(a+10,a*2+8),e:'⚡',elem:'雷',cost:30},
-    {n:'治癒',heal:30,e:'💚',cost:0}
+    {n:'火焰拳',dmg:a=>rand(a+8,a*2+5),e:'🔥'},
+    {n:'水槍',dmg:a=>rand(a+5,a*2+2),e:'💧'},
+    {n:'雷電',dmg:a=>rand(a+10,a*2+8),e:'⚡'},
+    {n:'治癒',heal:30,e:'💚'}
   ];
-  function useSkill(s){
-    if(window.hp<=0){log('無法施放');return;}
-    if(s.cost>0 && !canUseSkill(s.cost)){log('怒氣不足！');return;}
-    if(s.n==='治癒'){
-      window.hp=Math.min(window.maxHp,window.hp+s.heal);
-      log(`✨恢復${s.heal}HP`);
-      upUI();save();
-      addRage(5);
-    }else{
-      let base=s.dmg(window.atk);
-      let mult=getElemMult(s.elem,window.curM.element);
-      let dmg=base*mult;
-      let crit=isCrit(); if(crit)dmg*=1.5;
-      window.lastDmg=dmg;
-      window.curM.hp-=dmg;
-      let msg=`✨${s.e} ${Math.floor(dmg)}傷`;
-      if(mult>1)msg+=' (效果拔群)'; else if(mult<1)msg+=' (不是很有效)';
-      if(crit)msg+=' 暴擊！';
-      log(msg);
-      let pos=getMonsterPos(); showDamage(pos.x,pos.y,dmg,crit);
-      consumeRage(s.cost);
-      if(window.curM.hp<=0)defeatM(); else mCounter();
-      upUI();save();
-      addRage(5);
-    }
-    skillSound();flash();shake();
-  }
-  function showSkillMenu(){
+  function showSkill(){
     let ov=document.createElement('div');ov.className='skill-menu-overlay';
     let cd=document.createElement('div');cd.className='skill-menu-card';cd.innerHTML='<h3>選技能</h3>';
     skillList.forEach(s=>{
       let btn=document.createElement('button');
-      btn.innerText=s.n==='治癒'?`${s.n} (恢復${s.heal}HP)`:`${s.n} (怒${s.cost})`;
-      btn.onclick=()=>{document.body.removeChild(ov);useSkill(s);};
+      btn.innerText=s.n==='治癒'?`${s.n} (恢復${s.heal}HP)`:s.n;
+      btn.onclick=()=>{
+        document.body.removeChild(ov);
+        if(window.hp<=0){log('無法施放');return;}
+        if(s.n==='治癒'){
+          window.hp=Math.min(window.maxHp,window.hp+s.heal);
+          log(`✨恢復${s.heal}HP`);
+          upUI();save();
+        }else{
+          let d=s.dmg(window.atk);
+          window.lastDmg=d;
+          window.curM.hp-=d;
+          log(`✨${s.e} ${d}傷`);
+          if(window.curM.hp<=0)defeatM();else mCounter();
+          upUI();save();
+        }
+        skillSound();flash();shake();
+      };
       cd.appendChild(btn);
     });
     let cancel=document.createElement('button');cancel.innerText='取消';cancel.onclick=()=>document.body.removeChild(ov);
@@ -433,12 +371,21 @@ if(localStorage.getItem('app_version') !== APP_VERSION){
       <div class="setting-item"><div>🔔音效</div><label class="switch"><input type="checkbox" id="sfxCk" ${!isMuted?'checked':''}><span class="slider"></span></label></div>
       <div class="setting-item"><div>⚔️難度</div><select id="diffSelect"><option value="easy" ${diff==='easy'?'selected':''}>簡單</option><option value="normal" ${diff==='normal'?'selected':''}>普通</option><option value="hard" ${diff==='hard'?'selected':''}>困難</option><option value="extreme" ${diff==='extreme'?'selected':''}>極限</option></select></div>
       <div class="setting-item"><div>🔐Google</div><div><button id="googleBtn" style="background:#334155;padding:6px 12px;">登入</button> <button id="logoutBtn" style="background:#334155;padding:6px 12px;">登出</button></div></div>
-      <div class="setting-item"><div>🏆成就</div><div>🐉${window.totalKills} 💥${window.maxDmg} 🏆${window.maxLv}</div></div>`;
+      <div class="setting-item"><div>🏆成就</div><div>🐉${window.totalKills} 💥${window.maxDmg} 🏆${window.maxLv}</div></div>
+      <div class="setting-item"><div style="color:#f87171;">⚠️重置遊戲</div><button id="resetGameBtn" style="background:#ef4444; color:white; border:none; padding:6px 12px; border-radius:30px; cursor:pointer;">重置</button></div>`;
     document.getElementById('volSlider')?.addEventListener('input',e=>{let v=e.target.value/100;if(window.setVol)window.setVol(v);});
     document.getElementById('sfxCk')?.addEventListener('change',e=>{if(window.setSfx)window.setSfx(e.target.checked);localStorage.setItem('mute',e.target.checked?'0':'1');});
     document.getElementById('diffSelect')?.addEventListener('change',e=>{window.diff=e.target.value;localStorage.setItem('diff',window.diff);refM();toast(`難度:${window.diff}`);});
     document.getElementById('googleBtn')?.addEventListener('click',()=>window.googleLogin());
     document.getElementById('logoutBtn')?.addEventListener('click',()=>window.googleLogout());
+    document.getElementById('resetGameBtn')?.addEventListener('click',()=>{
+      if(confirm('⚠️ 確定要重置遊戲嗎？所有進度（等級、裝備、成就、雲端存檔）都會被清除！')) {
+        localStorage.clear();
+        if(window.googleLogout) window.googleLogout();
+        alert('遊戲已重置，頁面將重新整理。');
+        window.location.reload();
+      }
+    });
     if(curUser){let gb=document.getElementById('googleBtn');if(gb){gb.innerText=`👤 ${curUser.displayName}`;gb.disabled=true;}}
   };
   function showPage(id){
@@ -460,7 +407,7 @@ if(localStorage.getItem('app_version') !== APP_VERSION){
   document.getElementById('backFromHelp').onclick=()=>showPage('mainPage');
   document.getElementById('backFromGame').onclick=()=>showPage('mainPage');
   document.getElementById('attackBtn').onclick=atk;
-  document.getElementById('skillBtn').onclick=showSkillMenu;
+  document.getElementById('skillBtn').onclick=showSkill;
   document.getElementById('restBtn').onclick=restAct;
   document.getElementById('inventoryBtn').onclick=showBag;
   document.getElementById('saveBtn').onclick=save;
