@@ -294,4 +294,120 @@ if(localStorage.getItem('app_version') !== APP_VERSION){
   }
   const skillList=[
     {n:'火焰拳',dmg:a=>rand(a+8,a*2+5),e:'🔥'},
-    {n:'水槍',dmg:a=>rand(a+5,a*
+    {n:'水槍',dmg:a=>rand(a+5,a*2+2),e:'💧'},
+    {n:'雷電',dmg:a=>rand(a+10,a*2+8),e:'⚡'},
+    {n:'治癒',heal:30,e:'💚'}
+  ];
+  function showSkill(){
+    let ov=document.createElement('div');ov.className='skill-menu-overlay';
+    let cd=document.createElement('div');cd.className='skill-menu-card';cd.innerHTML='<h3>選技能</h3>';
+    skillList.forEach(s=>{
+      let btn=document.createElement('button');
+      btn.innerText=s.n==='治癒'?`${s.n} (恢復${s.heal}HP)`:s.n;
+      btn.onclick=()=>{
+        document.body.removeChild(ov);
+        if(window.hp<=0){log('無法施放');return;}
+        if(s.n==='治癒'){
+          window.hp=Math.min(window.maxHp,window.hp+s.heal);
+          log(`✨恢復${s.heal}HP`);
+          upUI();save();
+        }else{
+          let d=s.dmg(window.atk);
+          window.lastDmg=d;
+          window.curM.hp-=d;
+          log(`✨${s.e} ${d}傷`);
+          if(window.curM.hp<=0)defeatM();else mCounter();
+          upUI();save();
+        }
+        skillSound();flash();shake();
+      };
+      cd.appendChild(btn);
+    });
+    let cancel=document.createElement('button');cancel.innerText='取消';cancel.onclick=()=>document.body.removeChild(ov);
+    cd.appendChild(cancel);ov.appendChild(cd);document.body.appendChild(ov);
+  }
+  function restAct(){
+    initAudio();
+    if(window.rest){log('已休息過');return;}
+    if(window.hp<=0){log('無法休息');return;}
+    window.hp=Math.min(window.maxHp,window.hp+30);
+    window.rest=true;
+    log(`😴恢復30HP`);
+    let sneak=Math.max(1,rand(window.curM.atk-2,window.curM.atk+1));
+    window.hp=Math.max(0,window.hp-sneak);
+    log(`⚠️偷襲-${sneak}`);
+    if(window.hp<=0){window.hp=window.maxHp;window.rest=false;log('💀復活');}
+    upUI();save();hurtSound();
+  }
+  // ========== 每日 ==========
+  function canDaily(){let last=localStorage.getItem('lastDaily');return last!==new Date().toDateString();}
+  function claimDaily(){
+    if(!canDaily()){toast('今日已領');return false;}
+    let r=rand(1,3);
+    if(r===1){window.exp+=20;toast('🎁20經驗');lvUp();}
+    else if(r===2){
+      let eq=genEq();
+      window.eq.push(eq);
+      toast(`🎁獲得 ${eq.name}+${eq.bonus}`);
+      if(!window.eq.some(e=>e.type===eq.type&&e.eq)){eq.eq=true;applyEq();toast('✨自動裝');}
+      upUI();
+    }else{
+      window.hp=Math.min(window.maxHp,window.hp+50);
+      toast('🎁50HP藥水');
+      upUI();
+    }
+    localStorage.setItem('lastDaily',new Date().toDateString());
+    save();
+    return true;
+  }
+  // ========== UI設定 ==========
+  window.renderSet=()=>{
+    let c=document.getElementById('settingsList');if(!c)return;
+    let vol=Math.round((localStorage.volume?parseFloat(localStorage.volume):0.7)*100);
+    let diff=window.diff,isMuted=localStorage.mute==='1';
+    c.innerHTML=`
+      <div class="setting-item"><div>🔊音量</div><input type="range" id="volSlider" min="0" max="100" value="${vol}"></div>
+      <div class="setting-item"><div>🔔音效</div><label class="switch"><input type="checkbox" id="sfxCk" ${!isMuted?'checked':''}><span class="slider"></span></label></div>
+      <div class="setting-item"><div>⚔️難度</div><select id="diffSelect"><option value="easy" ${diff==='easy'?'selected':''}>簡單</option><option value="normal" ${diff==='normal'?'selected':''}>普通</option><option value="hard" ${diff==='hard'?'selected':''}>困難</option><option value="extreme" ${diff==='extreme'?'selected':''}>極限</option></select></div>
+      <div class="setting-item"><div>🔐Google</div><div><button id="googleBtn" style="background:#334155;padding:6px 12px;">登入</button> <button id="logoutBtn" style="background:#334155;padding:6px 12px;">登出</button></div></div>
+      <div class="setting-item"><div>🏆成就</div><div>🐉${window.totalKills} 💥${window.maxDmg} 🏆${window.maxLv}</div></div>`;
+    document.getElementById('volSlider')?.addEventListener('input',e=>{let v=e.target.value/100;if(window.setVol)window.setVol(v);});
+    document.getElementById('sfxCk')?.addEventListener('change',e=>{if(window.setSfx)window.setSfx(e.target.checked);localStorage.setItem('mute',e.target.checked?'0':'1');});
+    document.getElementById('diffSelect')?.addEventListener('change',e=>{window.diff=e.target.value;localStorage.setItem('diff',window.diff);refM();toast(`難度:${window.diff}`);});
+    document.getElementById('googleBtn')?.addEventListener('click',()=>window.googleLogin());
+    document.getElementById('logoutBtn')?.addEventListener('click',()=>window.googleLogout());
+    if(curUser){let gb=document.getElementById('googleBtn');if(gb){gb.innerText=`👤 ${curUser.displayName}`;gb.disabled=true;}}
+  };
+  function showPage(id){
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById(id)?.classList.add('active');
+    if(id==='settingsPage')window.renderSet();
+    if(id==='shopPage'){
+      let sd=document.getElementById('dailyRewardStatus');
+      if(sd)sd.innerHTML=canDaily()?'⭐可領取':'✅已領';
+      document.getElementById('claimDailyBtn').onclick=()=>{claimDaily();if(sd)sd.innerHTML=canDaily()?'⭐可領取':'✅已領';};
+    }
+  }
+  document.getElementById('toGameBtn').onclick=()=>showPage('gamePage');
+  document.getElementById('toSettingsBtn').onclick=()=>showPage('settingsPage');
+  document.getElementById('shopBtn').onclick=()=>showPage('shopPage');
+  document.getElementById('helpBtn').onclick=()=>showPage('helpPage');
+  document.getElementById('backFromSettings').onclick=()=>showPage('mainPage');
+  document.getElementById('backFromShop').onclick=()=>showPage('mainPage');
+  document.getElementById('backFromHelp').onclick=()=>showPage('mainPage');
+  document.getElementById('backFromGame').onclick=()=>showPage('mainPage');
+  document.getElementById('attackBtn').onclick=atk;
+  document.getElementById('skillBtn').onclick=showSkill;
+  document.getElementById('restBtn').onclick=restAct;
+  document.getElementById('inventoryBtn').onclick=showBag;
+  document.getElementById('saveBtn').onclick=save;
+  load();
+  if(!localStorage.getItem('guideShown')){
+    let ov=document.getElementById('guideOverlay');
+    ov.style.display='flex';
+    document.getElementById('closeGuideBtn').onclick=()=>{ov.style.display='none';localStorage.setItem('guideShown','true');};
+  }
+}
+</script>
+</body>
+</html>
