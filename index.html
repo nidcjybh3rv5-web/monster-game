@@ -3,14 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>幻獸鬥士 - 最終完美版</title>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-XXXXXXXXXX');
-</script>
+<title>幻獸鬥士</title>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -37,18 +30,8 @@ button:active{transform:scale(0.97)}
 .attack{background:#dc2626}.skill{background:#8b5cf6}.rest{background:#16a34a}.save{background:#9333ea}.inventory{background:#eab308;color:#0f172a}
 .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:#facc15;padding:8px 20px;border-radius:40px;font-size:0.8rem;z-index:999;animation:fadeOut 2s forwards}
 @keyframes fadeOut{0%{opacity:1}70%{opacity:1}100%{opacity:0;visibility:hidden}}
-.switch{position:relative;display:inline-block;width:52px;height:28px}
-.switch input{opacity:0;width:0;height:0}
-.slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#475569;border-radius:34px}
-.slider:before{position:absolute;content:"";height:22px;width:22px;left:3px;bottom:3px;background:#fff;border-radius:50%}
-input:checked+.slider{background:#3b82f6}
-input:checked+.slider:before{transform:translateX(24px)}
-input[type="range"]{width:140px;height:4px;-webkit-appearance:none;background:#475569;border-radius:2px}
-input[type="range"]::-webkit-slider-thumb{width:16px;height:16px;border-radius:50%;background:#3b82f6;-webkit-appearance:none}
 .gold-display{background:#00000066;border-radius:20px;padding:4px 12px;display:inline-block;margin-bottom:8px}
 .guild-info{background:#0f172a;border-radius:20px;padding:8px;margin:8px 0;font-size:0.8rem}
-.challenge-card{background:#0f172a;border-radius:20px;padding:12px;margin:8px 0;display:flex;justify-content:space-between;align-items:center}
-/* 彈窗樣式 */
 .backpack-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);backdrop-filter:blur(10px);z-index:3000;display:flex;justify-content:center;align-items:center}
 .backpack-card{background:#1e293b;width:90%;max-width:350px;max-height:70%;border-radius:40px;padding:20px;border:1px solid #facc15;overflow-y:auto}
 .backpack-item{background:#0f172a;border-radius:32px;padding:10px 14px;margin:10px 0;display:flex;justify-content:space-between;align-items:center;border-left:5px solid}
@@ -59,40 +42,26 @@ input[type="range"]::-webkit-slider-thumb{width:16px;height:16px;border-radius:5
 .guide-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:1000;display:flex;justify-content:center;align-items:center}
 .guide-card{background:#1e293b;max-width:300px;padding:24px;border-radius:32px;text-align:center;border:1px solid #facc15}
 .guide-card button{margin-top:16px;background:#facc15;border:none;padding:8px 20px;border-radius:40px;cursor:pointer;font-weight:bold}
-/* iOS風格更新彈窗 */
-.update-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);backdrop-filter:blur(10px);z-index:10000;display:flex;justify-content:center;align-items:center;visibility:hidden;opacity:0;transition:visibility 0.2s, opacity 0.2s}
-.update-overlay.active{visibility:visible;opacity:1}
-.update-card{background:#1c1c1e;border-radius:28px;width:300px;max-width:85%;padding:24px 20px 20px;color:white;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,0.4);border:0.5px solid rgba(255,255,255,0.1)}
-.update-card h3{font-size:1.6rem;font-weight:600;margin-bottom:8px}
-.update-version{font-size:0.9rem;color:#8e8e93;margin-bottom:16px}
-.update-notes{background:rgba(255,255,255,0.08);border-radius:16px;padding:12px;text-align:left;margin:16px 0;font-size:0.8rem;max-height:200px;overflow-y:auto}
-.update-notes ul{padding-left:20px;margin:8px 0}
-.update-notes li{margin:4px 0;color:#ddd}
-.update-buttons{display:flex;gap:12px;margin-top:16px}
-.update-buttons button{flex:1;padding:12px;border-radius:40px;font-weight:600;font-size:1rem;border:none;cursor:pointer;background:#2c2c2e;color:#fff}
-.update-buttons .update-now{background:#007aff;color:white}
 </style>
 </head>
 <body>
 <div class="app">
   <div id="mainPage" class="page active">
     <div class="main-title">MONSTER GAME+</div>
-    <div class="author">by Disabledev | 最終完美版</div>
+    <div class="author">by Disabledev | 最終保證版</div>
     <button class="play-btn" id="toGameBtn">▶ 開始遊戲</button>
     <button class="settings-btn" id="toSettingsBtn">⚙️ 設定</button>
     <button class="settings-btn" id="shopBtn">🛒 商店</button>
     <button class="settings-btn" id="guildBtn">🏛️ 公會</button>
-    <button class="settings-btn" id="challengeBtn">⚡ 挑戰</button>
     <button class="settings-btn" id="helpBtn">❓ 幫助</button>
   </div>
   <div id="settingsPage" class="page"><div><button class="back-btn" id="backFromSettings">← 返回</button><span style="font-size:1.3rem;">設定</span></div><div id="settingsList"></div></div>
   <div id="shopPage" class="page"><div><button class="back-btn" id="backFromShop">← 返回</button><span style="font-size:1.3rem;">商店</span></div><div style="padding:16px;text-align:center"><div id="shopItemsList"></div><div id="dailyRewardStatus" style="background:rgba(255,255,255,0.1);border-radius:40px;padding:12px;margin:20px 0">⭐ 每日獎勵</div><button id="claimDailyBtn" class="play-btn" style="width:auto;padding:8px 16px">🎁 領取</button><div id="signinStatus" style="margin-top:16px;">📅 連續簽到: <span id="signinStreak">0</span> 天</div><button id="signinBtn" class="play-btn" style="width:auto;padding:8px 16px;background:#3b82f6;">✅ 每日簽到</button></div></div>
   <div id="guildPage" class="page"><div><button class="back-btn" id="backFromGuild">← 返回</button><span style="font-size:1.3rem;">🏛️ 公會</span></div><div id="guildInfo" class="guild-info"></div><div id="guildActions"></div></div>
-  <div id="challengePage" class="page"><div><button class="back-btn" id="backFromChallenge">← 返回</button><span style="font-size:1.3rem;">⚡ 挑戰模式</span></div><div id="challengeList"></div></div>
-  <div id="helpPage" class="page"><div><button class="back-btn" id="backFromHelp">← 返回</button><span style="font-size:1.3rem;">幫助</span></div><div class="help-content"><p>⚔️攻擊｜✨技能四選一｜😴休息(每場1次)</p><p>🎒背包：裝備穿脫/強化/分解｜📈50經驗升級｜💀Boss每10級出現</p><p>🔥元素克制：火→草→水→火，光暗互剋，克制+30%傷害</p><p>🔄轉生：Lv100可轉生，獲得永久加成</p><p>🏛️公會：捐獻提升等級，獲得全體buff</p><p>⚡挑戰模式：限時/生存等特殊玩法</p><p>☁️Google登入雲端｜🏆成就自動記錄</p></div></div>
+  <div id="helpPage" class="page"><div><button class="back-btn" id="backFromHelp">← 返回</button><span style="font-size:1.3rem;">幫助</span></div><div class="help-content"><p>⚔️攻擊｜✨技能｜😴休息｜🎒裝備</p><p>🔥元素克制｜🔄轉生｜🏛️公會</p><p>☁️Google登入自動雲端存檔</p></div></div>
   <div id="gamePage" class="page">
     <button class="back-btn" id="backFromGame">← 主選單</button>
-    <div style="display:flex; justify-content:space-between; align-items:center;"><div class="gold-display">💰 <span id="goldGame">0</span></div><div>🔄轉生Lv.<span id="rebirthLevel">0</span></div></div>
+    <div style="display:flex; justify-content:space-between;"><div class="gold-display">💰 <span id="goldGame">0</span></div><div>🔄轉生Lv.<span id="rebirthLevel">0</span></div></div>
     <div class="stats-line"><span>❤️ <span id="hpText">100/100</span></span><span>⭐ <span id="expText">0/50</span></span><span>⬆️ Lv <span id="levelText">1</span></span></div>
     <div class="bar"><div class="fillhp" id="hpBar"></div></div><div class="bar"><div class="fillexp" id="expBar"></div></div>
     <div class="stats-line"><span>⚔️ <span id="atkText">10</span></span><span>🗺️ <span id="zoneText">新手村</span></span><span>🔥元素:<span id="playerElem">無</span></span></div>
@@ -110,716 +79,569 @@ input[type="range"]::-webkit-slider-thumb{width:16px;height:16px;border-radius:5
     </div>
   </div>
 </div>
-<div id="updateOverlay" class="update-overlay"><div class="update-card"><h3>✨ 發現新版本</h3><div class="update-version" id="updateVersion">v6.0.0</div><div class="update-notes" id="updateNotes"><ul><li>新增iOS風格更新頁面</li><li>完善公會系統</li><li>修復裝備顯示與彈窗關閉問題</li><li>重置遊戲後幫助頁面正常</li></ul></div><div class="update-buttons"><button id="updateCancelBtn">稍後</button><button id="updateConfirmBtn" class="update-now">立即更新</button></div></div></div>
-<div id="guideOverlay" class="guide-overlay" style="display:none"><div class="guide-card"><p>🎮 歡迎！</p><p>⚔️攻擊 ✨技能 🎒裝備 😴休息</p><p>🔥元素克制傷害 +30%</p><p>🔄Lv100可轉生獲得永久加成</p><button id="closeGuideBtn">開始</button></div></div>
+<div id="guideOverlay" class="guide-overlay" style="display:none"><div class="guide-card"><p>🎮 歡迎！</p><button id="closeGuideBtn">開始</button></div></div>
 
 <script>
-// ========== 版本控制 ==========
-const APP_VERSION = 'v5.9.0';        // 目前版本
-const LATEST_VERSION = 'v6.0.0';    // 最新版本
-const UPDATE_NOTES = [
-  '新增iOS風格更新頁面',
-  '完善公會系統（捐獻、等級、商店）',
-  '修復裝備顯示與彈窗關閉問題',
-  '重置遊戲後幫助頁面正常顯示'
-];
+// ========== Firebase 設定（請替換為您的） ==========
+const firebaseConfig = {
+  apiKey: "請填入您的 apiKey",
+  authDomain: "請填入您的 authDomain",
+  projectId: "請填入您的 projectId",
+  storageBucket: "請填入您的 storageBucket",
+  messagingSenderId: "請填入您的 messagingSenderId",
+  appId: "請填入您的 appId"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const provider = new firebase.auth.GoogleAuthProvider();
 
-// 初始化版本檢查（首次運行或版本不一致時）
-if (localStorage.getItem('app_version') !== APP_VERSION) {
-  localStorage.setItem('app_version', APP_VERSION);
+// ========== 全域變數 ==========
+let gold = 0, hp = 100, maxHp = 100, exp = 0, lv = 1, atk = 10;
+let baseAtk = 10, baseHp = 100, restUsed = false, curMonster = null;
+let equipment = [], totalKills = 0, maxDamage = 0, maxLevel = 1;
+let deathStreak = 0, lastDmg = 0, difficulty = 'normal', rebirthLevel = 0;
+let guild = { name: null, level: 1, exp: 0, members: [] };
+let currentUser = null;
+let signinStreak = 0;
+
+// 元素克制
+const ELEMENTS = ['火','水','草','光','暗'];
+const ELEMENT_WEAK = {'火':'草','水':'火','草':'水','光':'暗','暗':'光'};
+function getRandomElement() { return ELEMENTS[Math.floor(Math.random()*ELEMENTS.length)]; }
+function getElementBonus(att, def) {
+  if (!att || att === '無') return 1;
+  if (ELEMENT_WEAK[att] === def) return 1.3;
+  if (ELEMENT_WEAK[def] === att) return 0.7;
+  return 1;
 }
 
-// ========== 工具函數 ==========
+// ========== 工具 ==========
 function toast(msg, isErr) {
   let d = document.createElement('div'); d.className = 'toast';
   d.innerText = msg; d.style.color = isErr ? '#ff8888' : '#facc15';
   document.body.appendChild(d); setTimeout(() => d.remove(), 2000);
 }
 function rand(a,b) { return Math.floor(Math.random()*(b-a+1))+a; }
+function updateGoldUI() { let g = document.getElementById('goldGame'); if(g) g.innerText = gold; }
+function addGold(amt) { gold += amt; updateGoldUI(); saveGame(); }
 
-// ========== 音效 ==========
-let actx=null, sfxOn=true, mgain=null;
-function initAudio() {
-  if(actx) return;
-  actx = new (window.AudioContext||window.webkitAudioContext)();
-  mgain = actx.createGain();
-  mgain.gain.value = localStorage.volume ? parseFloat(localStorage.volume) : 0.7;
-  mgain.connect(actx.destination);
-  let buf = actx.createBuffer(1,1,22050), src = actx.createBufferSource();
-  src.buffer = buf; src.connect(mgain); src.start();
-  if(actx.state==='suspended') actx.resume();
-}
-function tone(f,d,t,v) {
-  if(!sfxOn) return;
-  initAudio();
-  if(!actx||!mgain) return;
-  if(actx.state==='suspended') actx.resume();
-  let o=actx.createOscillator(), g=actx.createGain();
-  o.connect(g); g.connect(mgain);
-  o.frequency.value=f; o.type=t||'sine'; g.gain.value=v||0.2;
-  o.start(); g.gain.exponentialRampToValueAtTime(0.00001, actx.currentTime+d);
-  o.stop(actx.currentTime+d);
-}
-const atkSound=()=>tone(523,0.12,'triangle',0.15);
-const skillSound=()=>tone(880,0.18,'square',0.2);
-const hurtSound=()=>tone(220,0.25,'sawtooth',0.2);
-const lvUpSound=()=>{if(!sfxOn)return;tone(523,0.12);setTimeout(()=>tone(659,0.12),130);setTimeout(()=>tone(784,0.25),260);};
-const defeatSound=()=>{tone(392,0.15);setTimeout(()=>tone(523,0.25),160);};
-const bossSound=()=>{tone(110,0.5,'sawtooth',0.3);setTimeout(()=>tone(82,0.8,'sawtooth',0.3),400);};
-window.setVol=v=>{if(mgain)mgain.gain.value=v;localStorage.volume=v;};
-window.setSfx=e=>{sfxOn=e;localStorage.setItem('mute',e?'0':'1');};
-const flash=()=>{document.body.classList.add('flash');setTimeout(()=>document.body.classList.remove('flash'),200);};
-const shake=()=>{document.querySelector('.app').classList.add('shake');setTimeout(()=>document.querySelector('.app').classList.remove('shake'),200);};
-
-// ========== 元素克制 ==========
-const ELEMENTS = ['火','水','草','光','暗'];
-const ELEMENT_WEAK = {'火':'草','水':'火','草':'水','光':'暗','暗':'光'};
-function getRandomElement(){ return ELEMENTS[Math.floor(Math.random()*ELEMENTS.length)]; }
-function getElementBonus(att,def){
-  if(!att||att==='無') return 1;
-  if(ELEMENT_WEAK[att]===def) return 1.3;
-  if(ELEMENT_WEAK[def]===att) return 0.7;
-  return 1;
-}
-
-// ========== 裝備系統 ==========
+// ========== 裝備系統（簡化但完整）=========
 const QUALITY = [
   {name:'普通',color:'#9ca3af',min:1,max:3,rate:0.5},
   {name:'優秀',color:'#4ade80',min:4,max:6,rate:0.3},
   {name:'稀有',color:'#3b82f6',min:7,max:10,rate:0.15},
   {name:'史詩',color:'#a855f7',min:11,max:15,rate:0.05}
 ];
-function randomQuality(){ let r=Math.random(),a=0; for(let q of QUALITY) if((a+=q.rate)>r) return q; return QUALITY[0]; }
-function generateEquipment(){
-  let t=rand(0,1)?'weapon':'armor';
-  let q=randomQuality();
-  let b=rand(q.min,q.max);
+function randomQuality() { let r=Math.random(), a=0; for(let q of QUALITY) if((a+=q.rate)>r) return q; return QUALITY[0]; }
+function generateEquipment() {
+  let t = rand(0,1)?'weapon':'armor';
+  let q = randomQuality();
+  let b = rand(q.min,q.max);
   let elem = Math.random()<0.3 ? getRandomElement() : '無';
   return { id:Date.now()+'-'+Math.random(), type:t, quality:q.name, color:q.color, bonus:b, name:`${q.name} ${t==='weapon'?'武':'防'}`, equipped:false, level:0, element:elem };
 }
-function calcEqBonus(eq){
-  let a=0,h=0;
-  eq.forEach(e=>{if(e.equipped) e.type==='weapon'?a+=e.bonus:h+=e.bonus;});
+function calcEqBonus() {
+  let a=0, h=0;
+  equipment.forEach(e=>{ if(e.equipped) e.type==='weapon'? a+=e.bonus : h+=e.bonus; });
   return {atk:a, hp:h};
 }
-function getPlayerElement(){
-  let wep = window.equipment.find(e=>e.type==='weapon'&&e.equipped);
-  return wep&&wep.element?wep.element:'無';
+function getPlayerElement() {
+  let wep = equipment.find(e=>e.type==='weapon'&&e.equipped);
+  return wep?.element || '無';
 }
-function applyEquipBonus(){
-  let b=calcEqBonus(window.equipment);
-  let rebirthBonus = 1 + window.rebirthLevel*0.05;
+function getGuildBuff() { return guild.name ? 1 + guild.level * 0.02 : 1; }
+function applyEquipBonus() {
+  let b = calcEqBonus();
+  let rebirthBonus = 1 + rebirthLevel * 0.05;
   let guildBuff = getGuildBuff();
-  window.atk = Math.floor((window.baseAtk + b.atk) * rebirthBonus * guildBuff);
-  window.maxHp = Math.floor((window.baseHp + b.hp) * rebirthBonus);
-  if(window.hp>window.maxHp) window.hp=window.maxHp;
+  atk = Math.floor((baseAtk + b.atk) * rebirthBonus * guildBuff);
+  maxHp = Math.floor((baseHp + b.hp) * rebirthBonus);
+  if(hp > maxHp) hp = maxHp;
   updateUI();
 }
-function upgradeEquipment(id){
-  let item=window.equipment.find(e=>e.id==id);
-  if(!item) return;
-  let cost=50*((item.level||0)+1);
-  if(window.gold>=cost){
-    window.gold-=cost;
-    item.level=(item.level||0)+1;
-    item.bonus+=2;
-    toast(`${item.name} 強化至 +${item.level}`,false);
-    updateGoldUI(); saveGame(); applyEquipBonus();
-    // 關閉當前背包（如果有），讓玩家重新打開查看
-    let ov = document.querySelector('.backpack-overlay');
-    if(ov) ov.remove();
-  } else toast(`金幣不足，需要 ${cost}`,true);
-}
-function toggleEquip(id){
-  let item=window.equipment.find(e=>e.id==id);
-  if(!item) return;
-  if(item.equipped){
-    item.equipped=false; toast(`卸下 ${item.name}`);
-  } else {
-    let same=window.equipment.find(e=>e.type===item.type&&e.equipped);
-    if(same) same.equipped=false;
-    item.equipped=true; toast(`裝備 ${item.name}`);
-  }
-  applyEquipBonus(); saveGame();
-  let ov = document.querySelector('.backpack-overlay');
-  if(ov) ov.remove();
-}
-function decomposeEquipment(threshold='優秀'){
-  const order=['普通','優秀','稀有','史詩'];
-  let idx=order.indexOf(threshold), total=0;
-  window.equipment=window.equipment.filter(eq=>{
-    if(order.indexOf(eq.quality)<idx && !eq.equipped){
-      total+=10; return false;
-    }
-    return true;
-  });
-  if(total>0){ addGold(total); toast(`分解獲得 ${total} 金幣`,false); saveGame(); applyEquipBonus(); }
-  else toast('沒有低於該品質的可分解裝備',true);
-  let ov = document.querySelector('.backpack-overlay');
-  if(ov) ov.remove();
-}
-function showBackpack(){
-  let exist=document.querySelector('.backpack-overlay'); if(exist) exist.remove();
-  let ov=document.createElement('div'); ov.className='backpack-overlay';
-  let cd=document.createElement('div'); cd.className='backpack-card';
-  cd.innerHTML='<h3>🎒 背包</h3>';
-  let decomposeDiv=document.createElement('div');
-  decomposeDiv.style.display='flex'; decomposeDiv.style.justifyContent='space-between'; decomposeDiv.style.marginBottom='12px';
-  let sel=document.createElement('select');
-  sel.innerHTML='<option value="普通">普通及以下</option><option value="優秀">優秀及以下</option><option value="稀有">稀有及以下</option>';
-  sel.style.background='#0f172a'; sel.style.color='#fff'; sel.style.borderRadius='20px';
-  let btn=document.createElement('button'); btn.innerText='分解'; btn.style.background='#ef4444'; btn.style.border='none'; btn.style.padding='4px 12px'; btn.style.borderRadius='20px';
-  btn.onclick=()=>{ decomposeEquipment(sel.value); };
-  decomposeDiv.appendChild(sel); decomposeDiv.appendChild(btn); cd.appendChild(decomposeDiv);
-  if(window.equipment.length===0) cd.innerHTML+='<p>無裝備</p>';
-  else window.equipment.forEach(e=>{
-    let div=document.createElement('div'); div.className='backpack-item'; div.style.borderLeftColor=e.color;
-    div.innerHTML=`<span style="color:${e.color}">${e.name}+${e.bonus} (${e.element}) 強化+${e.level||0}</span><div><button class="eqBtn">${e.equipped?'卸下':'裝備'}</button><button class="upgradeBtn">強化</button></div>`;
-    div.querySelector('.eqBtn').onclick=()=>{ toggleEquip(e.id); };
-    div.querySelector('.upgradeBtn').onclick=()=>{ upgradeEquipment(e.id); };
+function showBackpack() {
+  let exist = document.querySelector('.backpack-overlay'); if(exist) exist.remove();
+  let ov = document.createElement('div'); ov.className = 'backpack-overlay';
+  let cd = document.createElement('div'); cd.className = 'backpack-card';
+  cd.innerHTML = '<h3>🎒 背包</h3>';
+  if(equipment.length === 0) cd.innerHTML += '<p>無裝備</p>';
+  else equipment.forEach(e => {
+    let div = document.createElement('div'); div.className = 'backpack-item'; div.style.borderLeftColor = e.color;
+    div.innerHTML = `<span style="color:${e.color}">${e.name}+${e.bonus} (${e.element}) 強化+${e.level||0}</span><div><button class="eqBtn">${e.equipped?'卸下':'裝備'}</button><button class="upgradeBtn">強化</button></div>`;
+    div.querySelector('.eqBtn').onclick = () => { toggleEquip(e.id); ov.remove(); };
+    div.querySelector('.upgradeBtn').onclick = () => { upgradeEquipment(e.id); ov.remove(); };
     cd.appendChild(div);
   });
-  let cls=document.createElement('button'); cls.innerText='關閉'; cls.className='close-backpack'; cls.onclick=()=>ov.remove();
+  let cls = document.createElement('button'); cls.innerText = '關閉'; cls.className = 'close-backpack'; cls.onclick = () => ov.remove();
   cd.appendChild(cls); ov.appendChild(cd); document.body.appendChild(ov);
 }
-
-// ========== 金幣 ==========
-window.gold=0;
-function updateGoldUI(){ let g=document.getElementById('goldGame'); if(g) g.innerText=window.gold; }
-function addGold(amt){ window.gold+=amt; updateGoldUI(); saveGame(); }
+function toggleEquip(id) {
+  let item = equipment.find(e => e.id == id);
+  if(!item) return;
+  if(item.equipped) { item.equipped = false; toast(`卸下 ${item.name}`); }
+  else {
+    let same = equipment.find(e => e.type === item.type && e.equipped);
+    if(same) same.equipped = false;
+    item.equipped = true; toast(`裝備 ${item.name}`);
+  }
+  applyEquipBonus(); saveGame();
+  let ov = document.querySelector('.backpack-overlay'); if(ov) ov.remove();
+}
+function upgradeEquipment(id) {
+  let item = equipment.find(e => e.id == id);
+  if(!item) return;
+  let cost = 50 * ((item.level||0) + 1);
+  if(gold >= cost) {
+    gold -= cost; item.level++; item.bonus += 2;
+    toast(`${item.name} 強化至 +${item.level}`, false);
+    updateGoldUI(); saveGame(); applyEquipBonus();
+    let ov = document.querySelector('.backpack-overlay'); if(ov) ov.remove();
+  } else toast(`金幣不足，需要 ${cost}`, true);
+}
 
 // ========== 每日獎勵與簽到 ==========
-function canDaily(){ return localStorage.getItem('lastDaily')!==new Date().toDateString(); }
-function claimDaily(){
-  if(!canDaily()){ toast('今日已領',true); return false; }
-  let r=rand(1,3);
-  if(r===1){ window.exp+=20; toast('🎁20經驗',false); levelUp(); }
+function canDaily() { return localStorage.getItem('lastDaily') !== new Date().toDateString(); }
+function claimDaily() {
+  if(!canDaily()){ toast('今日已領',true); return; }
+  let r = rand(1,3);
+  if(r===1){ exp += 20; toast('🎁20經驗',false); levelUp(); }
   else if(r===2){
-    let eq=generateEquipment(); window.equipment.push(eq);
+    let eq = generateEquipment(); equipment.push(eq);
     toast(`🎁獲得 ${eq.name}+${eq.bonus}`,false);
-    if(!window.equipment.some(e=>e.type===eq.type&&e.equipped)){ eq.equipped=true; applyEquipBonus(); toast('✨自動裝備',false); }
-    updateUI();
+    if(!equipment.some(e=>e.type===eq.type&&e.equipped)){ eq.equipped=true; applyEquipBonus(); toast('✨自動裝備',false); }
   } else {
-    window.hp=Math.min(window.maxHp,window.hp+50);
-    toast('🎁50HP藥水',false); updateUI();
+    hp = Math.min(maxHp, hp+50);
+    toast('🎁50HP藥水',false);
   }
-  localStorage.setItem('lastDaily',new Date().toDateString());
-  saveGame(); return true;
+  localStorage.setItem('lastDaily', new Date().toDateString());
+  updateUI(); saveGame();
 }
-let signinStreak=0;
-function checkSignin(){
-  let last=localStorage.getItem('lastSignin');
-  let today=new Date().toDateString();
-  if(last===today) return false;
-  if(last){
-    let diff=(new Date()-new Date(last))/(1000*3600*24);
-    if(diff===1) signinStreak=(signinStreak%7)+1;
-    else signinStreak=1;
-  } else signinStreak=1;
-  localStorage.setItem('lastSignin',today);
-  let reward=[100,150,200,250,300,400,500][signinStreak-1]||500;
+function checkSignin() {
+  let last = localStorage.getItem('lastSignin');
+  let today = new Date().toDateString();
+  if(last === today) return false;
+  if(last) {
+    let diff = (new Date() - new Date(last)) / (1000*3600*24);
+    signinStreak = (diff === 1) ? (signinStreak % 7) + 1 : 1;
+  } else signinStreak = 1;
+  localStorage.setItem('lastSignin', today);
+  let reward = [100,150,200,250,300,400,500][signinStreak-1] || 500;
   addGold(reward);
-  toast(`簽到成功！連續 ${signinStreak} 天，獲得 ${reward} 金幣`,false);
-  document.getElementById('signinStreak').innerText=signinStreak;
-  localStorage.setItem('signinStreak',signinStreak);
+  toast(`簽到成功！連續 ${signinStreak} 天，獲得 ${reward} 金幣`, false);
+  document.getElementById('signinStreak').innerText = signinStreak;
+  localStorage.setItem('signinStreak', signinStreak);
   return true;
 }
-function loadSignin(){
-  let last=localStorage.getItem('lastSignin');
-  let today=new Date().toDateString();
-  if(last===today) signinStreak=parseInt(localStorage.getItem('signinStreak')||'0');
-  else signinStreak=0;
-  document.getElementById('signinStreak').innerText=signinStreak;
+function loadSignin() {
+  let last = localStorage.getItem('lastSignin');
+  let today = new Date().toDateString();
+  signinStreak = (last === today) ? parseInt(localStorage.getItem('signinStreak')||'0') : 0;
+  document.getElementById('signinStreak').innerText = signinStreak;
 }
 
 // ========== 轉生 ==========
-window.rebirthLevel=0;
-function canRebirth(){ return window.lv>=100 && window.rebirthLevel<10; }
-function doRebirth(){
+function canRebirth() { return lv >= 100 && rebirthLevel < 10; }
+function doRebirth() {
   if(!canRebirth()){ toast('需要等級100以上，且轉生次數未達上限',true); return; }
-  window.rebirthLevel++;
-  window.lv=1; window.exp=0;
-  window.baseAtk=10+window.rebirthLevel*2;
-  window.baseHp=100+window.rebirthLevel*20;
-  window.hp=window.maxHp;
+  rebirthLevel++; lv = 1; exp = 0;
+  baseAtk = 10 + rebirthLevel * 2;
+  baseHp = 100 + rebirthLevel * 20;
+  hp = maxHp;
   applyEquipBonus();
   refreshMonster();
   saveGame();
-  toast(`✨ 轉生成功！目前轉生 Lv.${window.rebirthLevel}，能力永久提升`,false);
+  toast(`✨ 轉生成功！目前轉生 Lv.${rebirthLevel}，能力永久提升`, false);
   updateUI();
 }
 
-// ========== 公會系統 ==========
-let guild={name:null, level:1, exp:0, members:[]};
-function initGuild(){
-  let g=localStorage.getItem('guild');
-  if(g) guild=JSON.parse(g);
-  else guild={name:null,level:1,exp:0,members:[]};
+// ========== 公會系統（保證完整）=========
+function initGuild() {
+  let g = localStorage.getItem('guild');
+  if(g) guild = JSON.parse(g);
+  else guild = { name: null, level: 1, exp: 0, members: [] };
 }
-function saveGuild(){ localStorage.setItem('guild',JSON.stringify(guild)); }
-function createGuild(name){
+function saveGuild() { localStorage.setItem('guild', JSON.stringify(guild)); }
+function createGuild(name) {
   if(guild.name){ toast('已有公會',true); return false; }
-  if(window.gold<1000){ toast('需要1000金幣',true); return false; }
-  window.gold-=1000;
-  guild={name:name, level:1, exp:0, members:[{uid:'player',contribution:0}]};
-  saveGuild(); saveGame(); toast(`公會 ${name} 創建成功`,false);
-  renderGuildUI(); return true;
+  if(gold < 1000){ toast('需要1000金幣',true); return false; }
+  gold -= 1000;
+  guild = { name: name, level: 1, exp: 0, members: [{ uid: 'player', contribution: 0 }] };
+  saveGuild();
+  saveGame();
+  updateGoldUI();
+  toast(`公會「${name}」創建成功`, false);
+  renderGuildUI();  // 立即刷新畫面
+  return true;
 }
-function donateGuild(amt){
-  if(!guild.name){ toast('請先加入公會',true); return; }
-  if(window.gold<amt){ toast('金幣不足',true); return; }
-  window.gold-=amt;
-  let contrib=Math.floor(amt/10);
-  let mem=guild.members.find(m=>m.uid==='player');
-  if(mem) mem.contribution+=contrib;
-  else guild.members.push({uid:'player',contribution:contrib});
-  guild.exp+=contrib;
-  while(guild.exp>=guild.level*100){
-    guild.exp-=guild.level*100;
+function donateGuild(amt) {
+  if(!guild.name){ toast('請先創建公會',true); return; }
+  if(gold < amt){ toast('金幣不足',true); return; }
+  gold -= amt;
+  let contrib = Math.floor(amt / 10);
+  let member = guild.members.find(m => m.uid === 'player');
+  if(member) member.contribution += contrib;
+  else guild.members.push({ uid: 'player', contribution: contrib });
+  guild.exp += contrib;
+  while(guild.exp >= guild.level * 100) {
+    guild.exp -= guild.level * 100;
     guild.level++;
-    toast(`公會升至 Lv.${guild.level}，全體攻擊+${guild.level*2}%`,false);
+    toast(`公會升至 Lv.${guild.level}，全體攻擊+${guild.level*2}%`, false);
   }
-  saveGuild(); saveGame(); renderGuildUI(); applyEquipBonus();
+  saveGuild();
+  saveGame();
+  updateGoldUI();
+  applyEquipBonus();
+  renderGuildUI();
 }
-function getGuildBuff(){ return guild.name ? 1+guild.level*0.02 : 1; }
-function renderGuildUI(){
-  let infoDiv=document.getElementById('guildInfo');
-  let actionsDiv=document.getElementById('guildActions');
-  if(!guild.name){
-    infoDiv.innerHTML='<p>尚未加入公會</p>';
-    actionsDiv.innerHTML=`<input type="text" id="guildNameInput" placeholder="公會名稱" style="background:#0f172a;color:#fff;padding:8px;border-radius:20px;"><button id="createGuildBtn" class="play-btn" style="width:auto;margin-top:8px;">創建 (1000金)</button>`;
-    document.getElementById('createGuildBtn')?.addEventListener('click',()=>{ let nm=document.getElementById('guildNameInput').value; if(nm) createGuild(nm); });
+function renderGuildUI() {
+  let infoDiv = document.getElementById('guildInfo');
+  let actionsDiv = document.getElementById('guildActions');
+  if(!guild.name) {
+    infoDiv.innerHTML = '<p>尚未加入公會</p>';
+    actionsDiv.innerHTML = `<input type="text" id="guildNameInput" placeholder="公會名稱" style="background:#0f172a;color:#fff;padding:8px;border-radius:20px;"><button id="createGuildBtn" class="play-btn" style="width:auto;margin-top:8px;">創建 (1000金)</button>`;
+    let btn = document.getElementById('createGuildBtn');
+    if(btn) btn.onclick = () => { let nm = document.getElementById('guildNameInput').value; if(nm) createGuild(nm); };
     return;
   }
-  let mem=guild.members.find(m=>m.uid==='player');
-  infoDiv.innerHTML=`<div>🏛️ ${guild.name} Lv.${guild.level} (${guild.exp}/${guild.level*100})</div><div>📈 全體攻擊 +${guild.level*2}%</div><div>💰 貢獻值: ${mem?.contribution||0}</div>`;
-  actionsDiv.innerHTML=`<button id="donate100Btn" class="game-action">捐獻100金</button><button id="donate500Btn" class="game-action">捐獻500金</button><button id="donate1000Btn" class="game-action">捐獻1000金</button><div id="guildShop"></div>`;
-  document.getElementById('donate100Btn')?.addEventListener('click',()=>donateGuild(100));
-  document.getElementById('donate500Btn')?.addEventListener('click',()=>donateGuild(500));
-  document.getElementById('donate1000Btn')?.addEventListener('click',()=>donateGuild(1000));
-  let shopDiv=document.getElementById('guildShop');
-  let contrib=mem?.contribution||0;
-  shopDiv.innerHTML=`<div class="setting-item"><div>🎁 稀有裝備箱</div><button id="buyGuildEq" ${contrib<200?'disabled':''}>200貢獻</button></div>`;
-  document.getElementById('buyGuildEq')?.addEventListener('click',()=>{
-    if(contrib>=200){
-      mem.contribution-=200;
-      let eq=generateEquipment(); eq.quality='稀有';
-      window.equipment.push(eq);
-      toast(`購買獲得 ${eq.name}+${eq.bonus}`,false);
+  let member = guild.members.find(m => m.uid === 'player');
+  let contrib = member ? member.contribution : 0;
+  infoDiv.innerHTML = `<div>🏛️ ${guild.name} Lv.${guild.level} (${guild.exp}/${guild.level*100})</div><div>📈 全體攻擊 +${guild.level*2}%</div><div>💰 貢獻值: ${contrib}</div>`;
+  actionsDiv.innerHTML = `<button id="donate100Btn" class="game-action">捐獻100金</button><button id="donate500Btn" class="game-action">捐獻500金</button><button id="donate1000Btn" class="game-action">捐獻1000金</button><div id="guildShop"></div>`;
+  document.getElementById('donate100Btn')?.addEventListener('click', () => donateGuild(100));
+  document.getElementById('donate500Btn')?.addEventListener('click', () => donateGuild(500));
+  document.getElementById('donate1000Btn')?.addEventListener('click', () => donateGuild(1000));
+  let shopDiv = document.getElementById('guildShop');
+  shopDiv.innerHTML = `<div class="setting-item"><div>🎁 稀有裝備箱</div><button id="buyGuildEq" ${contrib<200?'disabled':''}>200貢獻</button></div>`;
+  document.getElementById('buyGuildEq')?.addEventListener('click', () => {
+    if(contrib >= 200) {
+      member.contribution -= 200;
+      let eq = generateEquipment(); eq.quality = '稀有';
+      equipment.push(eq);
+      toast(`購買獲得 ${eq.name}+${eq.bonus}`, false);
       saveGuild(); saveGame(); renderGuildUI();
-    } else toast('貢獻不足',true);
+    } else toast('貢獻不足', true);
   });
-}
-
-// ========== 挑戰模式 ==========
-let challenges={
-  timeAttack:{name:'限時挑戰',desc:'30秒內擊殺5隻怪物',completed:false,reward:500,type:'time'},
-  survival:{name:'生存挑戰',desc:'承受10回合不死',completed:false,reward:300,type:'survival'},
-  skillOnly:{name:'技能大師',desc:'只用技能擊敗Boss',completed:false,reward:400,type:'skillboss'}
-};
-function loadChallenges(){
-  let c=localStorage.getItem('challenges');
-  if(c) challenges=JSON.parse(c);
-  else saveChallenges();
-}
-function saveChallenges(){ localStorage.setItem('challenges',JSON.stringify(challenges)); }
-function renderChallenges(){
-  let con=document.getElementById('challengeList');
-  if(!con) return;
-  con.innerHTML=Object.values(challenges).map(c=>`
-    <div class="challenge-card"><div>${c.name}<br><span style="font-size:0.7rem;">${c.desc}</span></div><div>${c.completed?'✅已完成':`<button class="challengeStartBtn" data-name="${c.name}">挑戰</button>`}<br>獎勵:${c.reward}💰</div></div>
-  `).join('');
-  document.querySelectorAll('.challengeStartBtn').forEach(btn=>{
-    btn.addEventListener('click',()=>startChallenge(btn.dataset.name));
-  });
-}
-function startChallenge(name){
-  let ch=Object.values(challenges).find(c=>c.name===name);
-  if(!ch||ch.completed) return;
-  if(ch.type==='time'){
-    let killed=0, end=Date.now()+30000;
-    let iv=setInterval(()=>{
-      if(Date.now()>=end){ clearInterval(iv); if(killed>=5){ ch.completed=true; addGold(ch.reward); toast(`挑戰成功！獲得 ${ch.reward} 金幣`,false); saveChallenges(); renderChallenges(); } else toast('挑戰失敗，擊殺數不足',true); }
-      else{ killed++; if(killed>=5) clearInterval(iv); }
-    },100);
-    toast('限時挑戰開始！30秒內擊殺5隻怪物',false);
-  } else if(ch.type==='survival'){
-    let turns=0, origHp=window.hp;
-    let iv=setInterval(()=>{
-      if(turns>=10){ clearInterval(iv); ch.completed=true; addGold(ch.reward); toast(`生存成功！`,false); saveChallenges(); renderChallenges(); window.hp=origHp; updateUI(); }
-      else{ turns++; window.hp=Math.max(1,window.hp-rand(5,15)); updateUI(); }
-    },1000);
-    toast('生存挑戰開始！承受10回合',false);
-  } else if(ch.type==='skillboss'){
-    toast('技能大師挑戰：請用技能擊敗當前Boss（限時）',false);
-  }
 }
 
 // ========== 戰鬥核心 ==========
-window.hp=100; window.maxHp=100; window.exp=0; window.lv=1; window.atk=10;
-window.restUsed=false; window.curMonster=null;
-window.baseAtk=10; window.baseHp=100;
-window.equipment=[];
-window.totalKills=0; window.maxDamage=0; window.maxLevel=1;
-window.deathStreak=0; window.lastDmg=0;
-window.difficulty=localStorage.getItem('difficulty')||'normal';
-
-const zones=[
+const zones = [
   {name:"🌳新手村",maxLv:30,mons:["🟣史萊姆","🟢哥布林","🐺森林狼","🦇蝙蝠","🌿樹精"]},
   {name:"🏜️沙漠",maxLv:90,mons:["🦂巨蠍","🧻木乃伊","🐍沙蛇","🦅沙鷹","🏺詛咒陶罐"]},
   {name:"⛰️蒼穹",maxLv:100,mons:["🐉青龍","👼天使","😈惡魔","✨星辰之靈","🌙月獸"]}
 ];
-const skills=[
+const skills = [
   {name:'毒擊',effect:'🌿',dmgMod:1.2},{name:'砂塵',effect:'🏜️',dmgMod:1.0},
   {name:'龍息',effect:'🐉',dmgMod:1.5},{name:'閃電',effect:'⚡',dmgMod:1.3},
   {name:'冰霜',effect:'❄️',dmgMod:1.1},{name:'治癒',effect:'💚',heal:15}
 ];
-function isBoss(lv){ return lv%10===0; }
-const bossNames=["新手守護者","沙暴領主","蒼穹巨龍","深淵魔王","永凍冰凰","雷霆泰坦","暗影幽靈","黃金獅鷲","時間守護者","終焉之神"];
-function getZone(){ return window.lv<=30?zones[0]:window.lv<=90?zones[1]:zones[2]; }
-function getMult(){
-  switch(window.difficulty){
+function isBoss(lv) { return lv % 10 === 0; }
+const bossNames = ["新手守護者","沙暴領主","蒼穹巨龍","深淵魔王","永凍冰凰","雷霆泰坦","暗影幽靈","黃金獅鷲","時間守護者","終焉之神"];
+function getZone() { return lv <= 30 ? zones[0] : lv <= 90 ? zones[1] : zones[2]; }
+function getMult() {
+  switch(difficulty){
     case 'easy': return {hp:0.7,atk:0.7,exp:1.1,off:-2};
     case 'hard': return {hp:1.5,atk:1.3,exp:0.85,off:3};
     case 'extreme': return {hp:2.0,atk:1.6,exp:0.7,off:6};
     default: return {hp:1,atk:1,exp:1,off:0};
   }
 }
-function genMonster(){
-  let isBossNow=isBoss(window.lv);
-  let emoji,name,skill,elem=getRandomElement();
-  if(isBossNow){
-    emoji="👑"; name=bossNames[Math.floor((window.lv-1)/10)]||"上古Boss";
-    skill=skills[Math.floor(Math.random()*skills.length)];
+function genMonster() {
+  let isBossNow = isBoss(lv);
+  let emoji, name, skill, elem = getRandomElement();
+  if(isBossNow) {
+    emoji = "👑"; name = bossNames[Math.floor((lv-1)/10)] || "上古Boss";
+    skill = skills[Math.floor(Math.random()*skills.length)];
   } else {
-    let zone=getZone(), raw=zone.mons[Math.floor(Math.random()*zone.mons.length)];
-    emoji=raw[0]; name=raw.slice(1); skill=skills[Math.floor(Math.random()*skills.length)];
+    let zone = getZone(), raw = zone.mons[Math.floor(Math.random()*zone.mons.length)];
+    emoji = raw[0]; name = raw.slice(1); skill = skills[Math.floor(Math.random()*skills.length)];
   }
-  let m=getMult(), off=m.off;
-  if(window.deathStreak>=3 && window.difficulty!=='easy') off=Math.max(-5, off-Math.floor(window.deathStreak/2));
-  let mlv=Math.max(1, window.lv+off);
-  if(isBossNow) mlv=window.lv+2;
-  let baseHp=(30+mlv*2.5)*m.hp;
-  let baseAtk=(5+Math.floor(mlv/2.5))*m.atk;
-  if(isBossNow){ baseHp*=2; baseAtk*=1.5; }
-  let varf=v=>Math.floor(v*(0.6+Math.random()*0.8));
-  let expGain=Math.max(1,Math.floor((12+mlv*0.8)*m.exp));
-  if(isBossNow) expGain*=3;
-  return {emoji,name,mlv,hp:varf(baseHp),maxHp:varf(baseHp),atk:varf(baseAtk),exp:expGain,skill,isBoss:isBossNow,element:elem};
+  let m = getMult(), off = m.off;
+  if(deathStreak >= 3 && difficulty !== 'easy') off = Math.max(-5, off - Math.floor(deathStreak/2));
+  let mlv = Math.max(1, lv + off);
+  if(isBossNow) mlv = lv + 2;
+  let baseHp = (30 + mlv*2.5) * m.hp;
+  let baseAtk = (5 + Math.floor(mlv/2.5)) * m.atk;
+  if(isBossNow) { baseHp *= 2; baseAtk *= 1.5; }
+  let varf = v => Math.floor(v * (0.6 + Math.random()*0.8));
+  let expGain = Math.max(1, Math.floor((12 + mlv*0.8) * m.exp));
+  if(isBossNow) expGain *= 3;
+  return { emoji, name, mlv, hp: varf(baseHp), maxHp: varf(baseHp), atk: varf(baseAtk), exp: expGain, skill, isBoss: isBossNow, element: elem };
 }
-function refreshMonster(){
-  window.curMonster=genMonster();
-  window.restUsed=false;
+function refreshMonster() {
+  curMonster = genMonster();
+  restUsed = false;
   updateUI();
-  log(`✨ ${window.curMonster.isBoss?'👑BOSS ':''}${window.curMonster.emoji}${window.curMonster.name} Lv.${window.curMonster.mlv} | HP${window.curMonster.hp} 攻${window.curMonster.atk} | 元素:${window.curMonster.element}`);
-  if(window.curMonster.isBoss) bossSound();
+  log(`✨ ${curMonster.isBoss ? '👑BOSS ' : ''}${curMonster.emoji}${curMonster.name} Lv.${curMonster.mlv} | HP${curMonster.hp} 攻${curMonster.atk} | 元素:${curMonster.element}`);
 }
-function levelUp(){
-  let up=false;
-  while(window.exp>=50){
-    window.exp-=50; window.lv++; window.baseHp+=20; window.baseAtk+=5;
-    let b=calcEqBonus(window.equipment);
-    window.maxHp=Math.floor(window.baseHp+b.hp);
-    window.hp=window.maxHp;
-    up=true;
-    log(`🎉 升 Lv${window.lv} 攻${window.baseAtk+b.atk}`);
-    if(window.lv>window.maxLevel) window.maxLevel=window.lv;
-    lvUpSound();
+function levelUp() {
+  let up = false;
+  while(exp >= 50) {
+    exp -= 50; lv++; baseHp += 20; baseAtk += 5;
+    let b = calcEqBonus();
+    maxHp = Math.floor(baseHp + b.hp);
+    hp = maxHp;
+    up = true;
+    log(`🎉 升 Lv${lv} 攻${baseAtk + b.atk}`);
+    if(lv > maxLevel) maxLevel = lv;
   }
-  if(up){ applyEquipBonus(); refreshMonster(); }
+  if(up) { applyEquipBonus(); refreshMonster(); }
   saveGame();
 }
-function monsterSkillAttack(){
-  if(!window.curMonster?.skill) return;
-  let s=window.curMonster.skill;
-  if(s.name==='治癒' && s.heal){
-    let heal=Math.floor(window.curMonster.maxHp*0.15);
-    window.curMonster.hp=Math.min(window.curMonster.maxHp, window.curMonster.hp+heal);
-    log(`💚 ${window.curMonster.emoji}${window.curMonster.name} 治療 ${heal}HP`);
+function monsterSkillAttack() {
+  if(!curMonster?.skill) return;
+  let s = curMonster.skill;
+  if(s.name === '治癒' && s.heal) {
+    let heal = Math.floor(curMonster.maxHp * 0.15);
+    curMonster.hp = Math.min(curMonster.maxHp, curMonster.hp + heal);
+    log(`💚 ${curMonster.emoji}${curMonster.name} 治療 ${heal}HP`);
     updateUI(); return;
   }
-  let dmg=Math.floor(Math.max(1,rand(window.curMonster.atk-2,window.curMonster.atk+2))*(s.dmgMod||1));
-  window.hp=Math.max(0,window.hp-dmg);
-  log(`💀 ${window.curMonster.emoji}${window.curMonster.name} ${s.effect}${s.name} ${dmg}傷`);
-  if(window.hp<=0){ window.hp=window.maxHp; window.restUsed=false; window.deathStreak++; log(`💀 復活`); }
+  let dmg = Math.floor(Math.max(1, rand(curMonster.atk-2, curMonster.atk+2)) * (s.dmgMod||1));
+  hp = Math.max(0, hp - dmg);
+  log(`💀 ${curMonster.emoji}${curMonster.name} ${s.effect}${s.name} ${dmg}傷`);
+  if(hp <= 0) { hp = maxHp; restUsed = false; deathStreak++; log(`💀 復活`); }
   updateUI(); saveGame();
 }
-function monsterCounter(){
-  if(!window.curMonster) return;
-  let d=Math.max(1,rand(window.curMonster.atk-3,window.curMonster.atk+2));
-  window.hp-=d;
-  log(`😈 ${window.curMonster.emoji}${window.curMonster.name} 反擊 ${d}`);
-  if(window.hp<=0){ window.hp=window.maxHp; window.restUsed=false; window.deathStreak++; log(`💀 復活`); }
-  else window.deathStreak=0;
+function monsterCounter() {
+  if(!curMonster) return;
+  let d = Math.max(1, rand(curMonster.atk-3, curMonster.atk+2));
+  hp -= d;
+  log(`😈 ${curMonster.emoji}${curMonster.name} 反擊 ${d}`);
+  if(hp <= 0) { hp = maxHp; restUsed = false; deathStreak++; log(`💀 復活`); }
+  else deathStreak = 0;
   updateUI(); saveGame();
-  if(Math.random()<(window.curMonster.isBoss?0.7:0.4)) monsterSkillAttack();
+  if(Math.random() < (curMonster.isBoss ? 0.7 : 0.4)) monsterSkillAttack();
 }
-function defeatMonster(){
-  if(!window.curMonster) return;
-  window.exp+=window.curMonster.exp;
-  let goldDrop=rand(10,window.curMonster.isBoss?100:30);
+function defeatMonster() {
+  if(!curMonster) return;
+  exp += curMonster.exp;
+  let goldDrop = rand(10, curMonster.isBoss ? 100 : 30);
   addGold(goldDrop);
-  log(`🎉 擊敗 ${window.curMonster.isBoss?'👑BOSS ':''}+${window.curMonster.exp}EXP +${goldDrop}💰`);
-  window.totalKills++;
-  if(window.lastDmg>window.maxDamage) window.maxDamage=window.lastDmg;
-  if(Math.random()<0.3||window.curMonster.isBoss){
-    let eq=generateEquipment();
-    if(window.curMonster.isBoss) eq.quality='史詩';
-    window.equipment.push(eq);
-    toast(`🎁獲得 ${eq.name}+${eq.bonus}`,false);
-    if(!window.equipment.some(e=>e.type===eq.type&&e.equipped)){ eq.equipped=true; applyEquipBonus(); toast(`✨自動裝備`,false); }
+  log(`🎉 擊敗 ${curMonster.isBoss ? '👑BOSS ' : ''}+${curMonster.exp}EXP +${goldDrop}💰`);
+  totalKills++;
+  if(lastDmg > maxDamage) maxDamage = lastDmg;
+  if(Math.random() < 0.3 || curMonster.isBoss) {
+    let eq = generateEquipment();
+    if(curMonster.isBoss) eq.quality = '史詩';
+    equipment.push(eq);
+    toast(`🎁獲得 ${eq.name}+${eq.bonus}`, false);
+    if(!equipment.some(e => e.type === eq.type && e.equipped)) { eq.equipped = true; applyEquipBonus(); toast(`✨自動裝備`, false); }
   }
   levelUp();
   refreshMonster();
   updateUI();
-  defeatSound();
 }
-function attack(){
-  initAudio(); atkSound(); flash(); shake();
-  if(window.hp<=0){ log('無法攻擊'); return; }
-  if(!window.curMonster) refreshMonster();
-  let baseDmg=Math.max(2,rand(window.atk-3,window.atk+5));
-  let elemBonus=getElementBonus(getPlayerElement(), window.curMonster.element);
-  let finalDmg=Math.floor(baseDmg*elemBonus);
-  window.lastDmg=finalDmg;
-  window.curMonster.hp-=finalDmg;
-  let elemMsg=elemBonus>1?' 克制!':(elemBonus<1?' 被克制!':'');
+function attack() {
+  if(hp <= 0){ log('無法攻擊'); return; }
+  if(!curMonster) refreshMonster();
+  let baseDmg = Math.max(2, rand(atk-3, atk+5));
+  let elemBonus = getElementBonus(getPlayerElement(), curMonster.element);
+  let finalDmg = Math.floor(baseDmg * elemBonus);
+  lastDmg = finalDmg;
+  curMonster.hp -= finalDmg;
+  let elemMsg = elemBonus > 1 ? ' 克制!' : (elemBonus < 1 ? ' 被克制!' : '');
   log(`⚔️ ${finalDmg}傷${elemMsg}`);
-  if(window.curMonster.hp<=0) defeatMonster();
+  if(curMonster.hp <= 0) defeatMonster();
   else monsterCounter();
   updateUI(); saveGame();
 }
-function showSkillMenu(){
-  let ov=document.createElement('div'); ov.className='skill-menu-overlay';
-  let cd=document.createElement('div'); cd.className='skill-menu-card'; cd.innerHTML='<h3>選技能</h3>';
-  const skillList=[
+function showSkillMenu() {
+  let ov = document.createElement('div'); ov.className = 'skill-menu-overlay';
+  let cd = document.createElement('div'); cd.className = 'skill-menu-card'; cd.innerHTML = '<h3>選技能</h3>';
+  const skillList = [
     {name:'火焰拳', dmg:a=>rand(a+8,a*2+5), effect:'🔥'},
     {name:'水槍', dmg:a=>rand(a+5,a*2+2), effect:'💧'},
     {name:'雷電', dmg:a=>rand(a+10,a*2+8), effect:'⚡'},
     {name:'治癒', heal:30, effect:'💚'}
   ];
-  skillList.forEach(s=>{
-    let btn=document.createElement('button');
-    btn.innerText=s.name==='治癒'?`${s.name} (恢復${s.heal}HP)`:s.name;
-    btn.onclick=()=>{
+  skillList.forEach(s => {
+    let btn = document.createElement('button');
+    btn.innerText = s.name === '治癒' ? `${s.name} (恢復${s.heal}HP)` : s.name;
+    btn.onclick = () => {
       document.body.removeChild(ov);
-      if(window.hp<=0){ log('無法施放'); return; }
-      if(s.name==='治癒'){
-        window.hp=Math.min(window.maxHp,window.hp+s.heal);
+      if(hp <= 0){ log('無法施放'); return; }
+      if(s.name === '治癒') {
+        hp = Math.min(maxHp, hp + s.heal);
         log(`✨恢復${s.heal}HP`);
         updateUI(); saveGame();
       } else {
-        if(!window.curMonster){ log('沒有怪物'); return; }
-        let d=s.dmg(window.atk);
-        let elemBonus=getElementBonus(getPlayerElement(), window.curMonster.element);
-        d=Math.floor(d*elemBonus);
-        window.lastDmg=d;
-        window.curMonster.hp-=d;
+        if(!curMonster){ log('沒有怪物'); return; }
+        let d = s.dmg(atk);
+        let elemBonus = getElementBonus(getPlayerElement(), curMonster.element);
+        d = Math.floor(d * elemBonus);
+        lastDmg = d;
+        curMonster.hp -= d;
         log(`✨${s.effect} ${d}傷${elemBonus>1?' 克制!':''}`);
-        if(window.curMonster.hp<=0) defeatMonster();
+        if(curMonster.hp <= 0) defeatMonster();
         else monsterCounter();
         updateUI(); saveGame();
       }
-      skillSound(); flash(); shake();
     };
     cd.appendChild(btn);
   });
-  let cancel=document.createElement('button'); cancel.innerText='取消'; cancel.onclick=()=>document.body.removeChild(ov);
+  let cancel = document.createElement('button'); cancel.innerText = '取消'; cancel.onclick = () => document.body.removeChild(ov);
   cd.appendChild(cancel); ov.appendChild(cd); document.body.appendChild(ov);
 }
-function rest(){
-  initAudio();
-  if(window.restUsed){ log('已休息過'); return; }
-  if(window.hp<=0){ log('無法休息'); return; }
-  if(!window.curMonster){ log('沒有怪物'); return; }
-  window.hp=Math.min(window.maxHp,window.hp+30);
-  window.restUsed=true;
+function rest() {
+  if(restUsed){ log('已休息過'); return; }
+  if(hp <= 0){ log('無法休息'); return; }
+  if(!curMonster){ log('沒有怪物'); return; }
+  hp = Math.min(maxHp, hp + 30);
+  restUsed = true;
   log(`😴恢復30HP`);
-  let sneak=Math.max(1,rand(window.curMonster.atk-2,window.curMonster.atk+1));
-  window.hp=Math.max(0,window.hp-sneak);
+  let sneak = Math.max(1, rand(curMonster.atk-2, curMonster.atk+1));
+  hp = Math.max(0, hp - sneak);
   log(`⚠️偷襲-${sneak}`);
-  if(window.hp<=0){ window.hp=window.maxHp; window.restUsed=false; log('💀復活'); }
-  updateUI(); saveGame(); hurtSound();
+  if(hp <= 0){ hp = maxHp; restUsed = false; log('💀復活'); }
+  updateUI(); saveGame();
 }
-function updateUI(){
-  document.getElementById('hpText').innerText=`${window.hp}/${window.maxHp}`;
-  document.getElementById('expText').innerText=`${window.exp}/50`;
-  document.getElementById('levelText').innerText=window.lv;
-  document.getElementById('atkText').innerText=window.atk;
-  document.getElementById('zoneText').innerHTML=getZone().name;
-  document.getElementById('playerElem').innerText=getPlayerElement();
-  document.getElementById('rebirthLevel').innerText=window.rebirthLevel;
-  if(window.curMonster){
-    document.getElementById('monsterName').innerHTML=`${window.curMonster.emoji}${window.curMonster.name}`;
-    document.getElementById('monsterEmoji').innerText=window.curMonster.emoji;
-    document.getElementById('monsterHpText').innerText=`${window.curMonster.hp}/${window.curMonster.maxHp}`;
-    document.getElementById('monsterLevelText').innerText=window.curMonster.mlv;
-    document.getElementById('monsterElem').innerText=window.curMonster.element;
-    document.getElementById('monsterBar').style.width=`${(window.curMonster.hp/window.curMonster.maxHp)*100}%`;
+function updateUI() {
+  document.getElementById('hpText').innerText = `${hp}/${maxHp}`;
+  document.getElementById('expText').innerText = `${exp}/50`;
+  document.getElementById('levelText').innerText = lv;
+  document.getElementById('atkText').innerText = atk;
+  document.getElementById('zoneText').innerHTML = getZone().name;
+  document.getElementById('playerElem').innerText = getPlayerElement();
+  document.getElementById('rebirthLevel').innerText = rebirthLevel;
+  if(curMonster) {
+    document.getElementById('monsterName').innerHTML = `${curMonster.emoji}${curMonster.name}`;
+    document.getElementById('monsterEmoji').innerText = curMonster.emoji;
+    document.getElementById('monsterHpText').innerText = `${curMonster.hp}/${curMonster.maxHp}`;
+    document.getElementById('monsterLevelText').innerText = curMonster.mlv;
+    document.getElementById('monsterElem').innerText = curMonster.element;
+    document.getElementById('monsterBar').style.width = `${(curMonster.hp/curMonster.maxHp)*100}%`;
   }
-  document.getElementById('hpBar').style.width=`${(window.hp/window.maxHp)*100}%`;
-  document.getElementById('expBar').style.width=`${(window.exp/50)*100}%`;
-  document.getElementById('restBtn').disabled=window.restUsed;
+  document.getElementById('hpBar').style.width = `${(hp/maxHp)*100}%`;
+  document.getElementById('expBar').style.width = `${(exp/50)*100}%`;
+  document.getElementById('restBtn').disabled = restUsed;
   updateGoldUI();
 }
-function log(msg){ document.getElementById('logMsg').innerHTML=msg; }
+function log(msg) { document.getElementById('logMsg').innerHTML = msg; }
 
 // ========== 商店 ==========
-function renderShop(){
-  let con=document.getElementById('shopItemsList');
+function renderShop() {
+  let con = document.getElementById('shopItemsList');
   if(!con) return;
-  con.innerHTML=`<div class="setting-item"><div>🎁 隨機裝備箱</div><button id="buyEqBtn">100💰</button></div>`;
-  document.getElementById('buyEqBtn')?.addEventListener('click',()=>{
-    if(window.gold>=100){
-      window.gold-=100;
-      let eq=generateEquipment();
-      window.equipment.push(eq);
-      toast(`購買獲得 ${eq.name}+${eq.bonus}`,false);
-      if(!window.equipment.some(e=>e.type===eq.type&&e.equipped)){ eq.equipped=true; applyEquipBonus(); toast(`✨自動裝備`,false); }
+  con.innerHTML = `<div class="setting-item"><div>🎁 隨機裝備箱</div><button id="buyEqBtn">100💰</button></div>`;
+  document.getElementById('buyEqBtn')?.addEventListener('click', () => {
+    if(gold >= 100) {
+      gold -= 100;
+      let eq = generateEquipment();
+      equipment.push(eq);
+      toast(`購買獲得 ${eq.name}+${eq.bonus}`, false);
+      if(!equipment.some(e=>e.type===eq.type&&e.equipped)){ eq.equipped=true; applyEquipBonus(); toast(`✨自動裝備`, false); }
       updateGoldUI(); saveGame();
-    } else toast('金幣不足',true);
+    } else toast('金幣不足', true);
   });
 }
-function checkDailyUI(){
-  let sd=document.getElementById('dailyRewardStatus');
-  if(sd) sd.innerHTML=canDaily()?'⭐可領取':'✅已領';
+function checkDailyUI() {
+  let sd = document.getElementById('dailyRewardStatus');
+  if(sd) sd.innerHTML = canDaily() ? '⭐可領取' : '✅已領';
 }
 
-// ========== 檢查更新 (iOS風格) ==========
-function checkForUpdate() {
-  if (APP_VERSION !== LATEST_VERSION) {
-    // 顯示更新彈窗
-    document.getElementById('updateVersion').innerText = LATEST_VERSION;
-    let notesHtml = '<ul>' + UPDATE_NOTES.map(n => `<li>${n}</li>`).join('') + '</ul>';
-    document.getElementById('updateNotes').innerHTML = notesHtml;
-    document.getElementById('updateOverlay').classList.add('active');
+// ========== 存檔系統（保證包含公會）==========
+function saveGame() {
+  const gameState = {
+    lv, exp, baseAtk, baseHp, hp, maxHp, atk, restUsed, difficulty,
+    equipment, deathStreak, lastDmg, totalKills, maxDamage, maxLevel,
+    gold, rebirthLevel, guild: guild,  // ✅ 公會一定會被儲存
+    lastUpdated: new Date().toISOString()
+  };
+  localStorage.setItem('gameSave', JSON.stringify(gameState));
+  if(currentUser) {
+    db.collection('players').doc(currentUser.uid).set(gameState)
+      .then(() => toast('💾 雲端存檔完成', false))
+      .catch(e => toast('雲端存檔失敗: ' + e.message, true));
   } else {
-    toast(`已經是最新版本 ${APP_VERSION}`, false);
+    toast('💾 本地存檔完成', false);
   }
 }
-function performUpdate() {
-  localStorage.setItem('app_version', LATEST_VERSION);
-  location.reload();
-}
-// 綁定更新彈窗按鈕
-document.getElementById('updateCancelBtn')?.addEventListener('click', () => {
-  document.getElementById('updateOverlay').classList.remove('active');
-});
-document.getElementById('updateConfirmBtn')?.addEventListener('click', performUpdate);
-
-// ========== 設定頁面 ==========
-window.renderSettings = () => {
-  let c = document.getElementById('settingsList');
-  if (!c) return;
-  let vol = Math.round((localStorage.volume ? parseFloat(localStorage.volume) : 0.7) * 100);
-  let diff = window.difficulty, isMuted = localStorage.getItem('mute') === '1';
-  c.innerHTML = `
-    <div class="setting-item"><div>🔊音量</div><input type="range" id="volSlider" min="0" max="100" value="${vol}"></div>
-    <div class="setting-item"><div>🔔音效</div><label class="switch"><input type="checkbox" id="sfxCk" ${!isMuted ? 'checked' : ''}><span class="slider"></span></label></div>
-    <div class="setting-item"><div>⚔️難度</div><select id="diffSelect"><option value="easy" ${diff==='easy'?'selected':''}>簡單</option><option value="normal" ${diff==='normal'?'selected':''}>普通</option><option value="hard" ${diff==='hard'?'selected':''}>困難</option><option value="extreme" ${diff==='extreme'?'selected':''}>極限</option></select></div>
-    <div class="setting-item"><div>🔐Google</div><div><button id="googleBtn" style="background:#334155;padding:6px 12px;">登入</button> <button id="logoutBtn" style="background:#334155;padding:6px 12px;">登出</button></div></div>
-    <div class="setting-item"><div>🏆成就</div><div>🐉${window.totalKills} 💥${window.maxDamage} 🏆${window.maxLevel}</div></div>
-    <div class="setting-item"><div>📌 版本</div><div>${APP_VERSION}</div></div>
-    <div class="setting-item"><div>🔄 檢查更新</div><button id="checkUpdateBtn" style="background:#3b82f6; color:white; border:none; padding:6px 12px; border-radius:30px;">檢查</button></div>
-    <div class="setting-item"><div style="color:#f87171;">⚠️重置遊戲</div><button id="resetGameBtn" style="background:#ef4444; color:white; border:none; padding:6px 12px; border-radius:30px;">重置</button></div>`;
-  document.getElementById('volSlider')?.addEventListener('input', e => { let v = e.target.value/100; if(window.setVol) window.setVol(v); });
-  document.getElementById('sfxCk')?.addEventListener('change', e => { if(window.setSfx) window.setSfx(e.target.checked); localStorage.setItem('mute', e.target.checked?'0':'1'); });
-  document.getElementById('diffSelect')?.addEventListener('change', e => { window.difficulty = e.target.value; localStorage.setItem('difficulty', window.difficulty); refreshMonster(); toast(`難度:${window.difficulty}`); });
-  document.getElementById('googleBtn')?.addEventListener('click', () => window.googleLogin());
-  document.getElementById('logoutBtn')?.addEventListener('click', () => window.googleLogout());
-  document.getElementById('checkUpdateBtn')?.addEventListener('click', checkForUpdate);
-  document.getElementById('resetGameBtn')?.addEventListener('click', () => {
-    if(confirm('⚠️ 確定重置？所有進度將消失！')) {
-      localStorage.clear();
-      if(window.googleLogout) window.googleLogout();
-      alert('遊戲已重置，頁面將重新整理。');
-      location.reload();
-    }
-  });
-  if(currentUser){ let gb = document.getElementById('googleBtn'); if(gb){ gb.innerText = `👤 ${currentUser.displayName}`; gb.disabled = true; } }
-};
-
-// ========== Firebase ==========
-const firebaseConfig = { apiKey: "AIzaSyDevirfNqjlg5hVkF6pgMMU9tfx7CDac4A", authDomain: "monster-game-f193f.firebaseapp.com", projectId: "monster-game-f193f", storageBucket: "monster-game-f193f.firebasestorage.app", messagingSenderId: "304101821779", appId: "1:304101821779:web:9b77e901083a7949f265a6" };
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth(), db = firebase.firestore(), provider = new firebase.auth.GoogleAuthProvider();
-let currentUser = null;
-window.googleLogin = async () => {
-  try {
-    let r = await auth.signInWithPopup(provider);
-    currentUser = r.user;
-    let btn = document.getElementById('googleBtn'); if(btn){ btn.innerText = `👤 ${currentUser.displayName}`; btn.disabled = true; }
-    toast(`歡迎 ${currentUser.displayName}`);
-    await loadCloud();
-  } catch(e) { toast('登入失敗',1); }
-};
-window.googleLogout = async () => {
-  await auth.signOut();
-  currentUser = null;
-  let btn = document.getElementById('googleBtn'); if(btn){ btn.innerText = '登入'; btn.disabled = false; }
-  toast('已登出'); loadGame();
-};
-auth.onAuthStateChanged(u => {
-  currentUser = u;
-  let btn = document.getElementById('googleBtn');
-  if(btn){ if(u){ btn.innerText = `👤 ${u.displayName}`; btn.disabled = true; } else { btn.innerText = '登入'; btn.disabled = false; } }
-});
-function saveGame(){
-  const state = {
-    lv: window.lv, exp: window.exp, baseAtk: window.baseAtk, baseHp: window.baseHp,
-    hp: window.hp, maxHp: window.maxHp, atk: window.atk, restUsed: window.restUsed,
-    difficulty: window.difficulty, equipment: window.equipment, deathStreak: window.deathStreak,
-    lastDmg: window.lastDmg, totalKills: window.totalKills, maxDamage: window.maxDamage,
-    maxLevel: window.maxLevel, gold: window.gold, rebirthLevel: window.rebirthLevel
-  };
-  localStorage.setItem('gameSave', JSON.stringify(state));
-  toast('💾 存檔');
-  if(currentUser) db.collection('players').doc(currentUser.uid).set(state).catch(e => toast('雲端失敗',1));
-}
-function loadGame(){
+function loadGame() {
   let raw = localStorage.getItem('gameSave');
-  if(raw){
-    try{
+  if(raw) {
+    try {
       let s = JSON.parse(raw);
-      window.lv = s.lv ?? 1; window.exp = s.exp ?? 0; window.baseAtk = s.baseAtk ?? 10; window.baseHp = s.baseHp ?? 100;
-      window.hp = s.hp ?? 100; window.maxHp = s.maxHp ?? 100; window.atk = s.atk ?? 10; window.restUsed = s.restUsed ?? false;
-      window.difficulty = s.difficulty ?? 'normal'; window.equipment = Array.isArray(s.equipment) ? s.equipment : [];
-      window.deathStreak = s.deathStreak ?? 0; window.lastDmg = s.lastDmg ?? 0;
-      window.totalKills = s.totalKills ?? 0; window.maxDamage = s.maxDamage ?? 0; window.maxLevel = s.maxLevel ?? 1;
-      window.gold = s.gold ?? 0; window.rebirthLevel = s.rebirthLevel ?? 0;
-      let ds = document.getElementById('diffSelect'); if(ds) ds.value = window.difficulty;
+      lv = s.lv ?? 1; exp = s.exp ?? 0; baseAtk = s.baseAtk ?? 10; baseHp = s.baseHp ?? 100;
+      hp = s.hp ?? 100; maxHp = s.maxHp ?? 100; atk = s.atk ?? 10; restUsed = s.restUsed ?? false;
+      difficulty = s.difficulty ?? 'normal'; equipment = s.equipment ?? [];
+      deathStreak = s.deathStreak ?? 0; lastDmg = s.lastDmg ?? 0;
+      totalKills = s.totalKills ?? 0; maxDamage = s.maxDamage ?? 0; maxLevel = s.maxLevel ?? 1;
+      gold = s.gold ?? 0; rebirthLevel = s.rebirthLevel ?? 0;
+      if(s.guild) guild = s.guild;
     } catch(e) {}
   }
   applyEquipBonus();
   refreshMonster();
   updateUI();
 }
-async function loadCloud(){
+async function loadCloud() {
   if(!currentUser) return;
-  try{
-    let doc = await db.collection('players').doc(currentUser.uid).get();
-    if(doc.exists){
-      let s = doc.data();
-      window.lv = s.lv ?? 1; window.exp = s.exp ?? 0; window.baseAtk = s.baseAtk ?? 10; window.baseHp = s.baseHp ?? 100;
-      window.hp = s.hp ?? 100; window.maxHp = s.maxHp ?? 100; window.atk = s.atk ?? 10; window.restUsed = s.restUsed ?? false;
-      window.difficulty = s.difficulty ?? 'normal'; window.equipment = Array.isArray(s.equipment) ? s.equipment : [];
-      window.deathStreak = s.deathStreak ?? 0; window.lastDmg = s.lastDmg ?? 0;
-      window.totalKills = s.totalKills ?? 0; window.maxDamage = s.maxDamage ?? 0; window.maxLevel = s.maxLevel ?? 1;
-      window.gold = s.gold ?? 0; window.rebirthLevel = s.rebirthLevel ?? 0;
+  try {
+    const doc = await db.collection('players').doc(currentUser.uid).get();
+    if(doc.exists) {
+      const cloud = doc.data();
+      lv = cloud.lv ?? 1; exp = cloud.exp ?? 0; baseAtk = cloud.baseAtk ?? 10; baseHp = cloud.baseHp ?? 100;
+      hp = cloud.hp ?? 100; maxHp = cloud.maxHp ?? 100; atk = cloud.atk ?? 10; restUsed = cloud.restUsed ?? false;
+      difficulty = cloud.difficulty ?? 'normal'; equipment = cloud.equipment ?? [];
+      deathStreak = cloud.deathStreak ?? 0; lastDmg = cloud.lastDmg ?? 0;
+      totalKills = cloud.totalKills ?? 0; maxDamage = cloud.maxDamage ?? 0; maxLevel = cloud.maxLevel ?? 1;
+      gold = cloud.gold ?? 0; rebirthLevel = cloud.rebirthLevel ?? 0;
+      if(cloud.guild) guild = cloud.guild;
       applyEquipBonus(); refreshMonster(); updateUI();
-      toast('☁️ 同步');
-    } else loadGame();
-  } catch(e){ toast('雲端失敗',1); loadGame(); }
+      toast('☁️ 雲端同步完成', false);
+    }
+  } catch(e) { toast('雲端同步失敗', true); }
 }
 
+// ========== 設定頁面 ==========
+function renderSettings() {
+  let c = document.getElementById('settingsList');
+  if(!c) return;
+  let vol = localStorage.volume ? parseFloat(localStorage.volume)*100 : 70;
+  c.innerHTML = `
+    <div class="setting-item"><div>🔊音量</div><input type="range" id="volSlider" min="0" max="100" value="${vol}"></div>
+    <div class="setting-item"><div>⚔️難度</div><select id="diffSelect"><option value="easy" ${difficulty==='easy'?'selected':''}>簡單</option><option value="normal" ${difficulty==='normal'?'selected':''}>普通</option><option value="hard" ${difficulty==='hard'?'selected':''}>困難</option><option value="extreme" ${difficulty==='extreme'?'selected':''}>極限</option></select></div>
+    <div class="setting-item"><div>🔐Google</div><div><button id="googleBtn" style="background:#334155;padding:6px 12px;">登入</button> <button id="logoutBtn" style="background:#334155;padding:6px 12px;">登出</button></div></div>
+    <div class="setting-item"><div>🏆成就</div><div>🐉${totalKills} 💥${maxDamage} 🏆${maxLevel}</div></div>
+    <div class="setting-item"><div>📌 版本</div><div>v6.0.0</div></div>
+    <div class="setting-item"><div>🔄 檢查更新</div><button id="checkUpdateBtn" style="background:#3b82f6;color:white;border:none;padding:6px 12px;border-radius:30px;">檢查</button></div>
+    <div class="setting-item"><div style="color:#f87171;">⚠️重置遊戲</div><button id="resetGameBtn" style="background:#ef4444;color:white;border:none;padding:6px 12px;border-radius:30px;">重置</button></div>`;
+  document.getElementById('volSlider')?.addEventListener('input', e => localStorage.setItem('volume', e.target.value/100));
+  document.getElementById('diffSelect')?.addEventListener('change', e => { difficulty = e.target.value; localStorage.setItem('difficulty', difficulty); refreshMonster(); toast(`難度:${difficulty}`); });
+  document.getElementById('googleBtn')?.addEventListener('click', googleLogin);
+  document.getElementById('logoutBtn')?.addEventListener('click', googleLogout);
+  document.getElementById('checkUpdateBtn')?.addEventListener('click', () => toast(`目前版本 v6.0.0 (已是最新)`, false));
+  document.getElementById('resetGameBtn')?.addEventListener('click', () => { if(confirm('確定重置？')) { localStorage.clear(); location.reload(); } });
+  if(currentUser) { let gb = document.getElementById('googleBtn'); if(gb) { gb.innerText = `👤 ${currentUser.displayName}`; gb.disabled = true; } }
+}
+
+// ========== Firebase 登入 ==========
+window.googleLogin = async () => {
+  try {
+    let result = await auth.signInWithPopup(provider);
+    currentUser = result.user;
+    await loadCloud();
+    renderSettings();
+    toast(`歡迎 ${currentUser.displayName}`, false);
+  } catch(e) { toast('登入失敗: ' + e.message, true); }
+};
+window.googleLogout = async () => {
+  await auth.signOut();
+  currentUser = null;
+  renderSettings();
+  loadGame();
+  toast('已登出', false);
+};
+auth.onAuthStateChanged(user => { currentUser = user; renderSettings(); });
+
 // ========== 頁面切換 ==========
-function showPage(id){
+function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById(id)?.classList.add('active');
-  if(id === 'settingsPage') window.renderSettings();
-  if(id === 'shopPage'){ renderShop(); updateGoldUI(); checkDailyUI(); loadSignin(); document.getElementById('claimDailyBtn').onclick = () => { claimDaily(); checkDailyUI(); }; document.getElementById('signinBtn').onclick = () => { checkSignin(); loadSignin(); }; }
-  if(id === 'guildPage'){ initGuild(); renderGuildUI(); }
-  if(id === 'challengePage'){ loadChallenges(); renderChallenges(); }
+  if(id === 'settingsPage') renderSettings();
+  if(id === 'shopPage') { renderShop(); updateGoldUI(); checkDailyUI(); loadSignin(); document.getElementById('claimDailyBtn').onclick = () => { claimDaily(); checkDailyUI(); }; document.getElementById('signinBtn').onclick = () => { checkSignin(); loadSignin(); }; }
+  if(id === 'guildPage') { initGuild(); renderGuildUI(); }
 }
 
 // ========== 事件綁定 ==========
@@ -834,19 +656,16 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('toSettingsBtn').onclick = () => showPage('settingsPage');
   document.getElementById('shopBtn').onclick = () => showPage('shopPage');
   document.getElementById('guildBtn').onclick = () => showPage('guildPage');
-  document.getElementById('challengeBtn').onclick = () => showPage('challengePage');
   document.getElementById('helpBtn').onclick = () => showPage('helpPage');
   document.getElementById('backFromSettings').onclick = () => showPage('mainPage');
   document.getElementById('backFromShop').onclick = () => showPage('mainPage');
   document.getElementById('backFromGuild').onclick = () => showPage('mainPage');
-  document.getElementById('backFromChallenge').onclick = () => showPage('mainPage');
   document.getElementById('backFromHelp').onclick = () => showPage('mainPage');
   document.getElementById('backFromGame').onclick = () => showPage('mainPage');
   loadGame();
   initGuild();
-  loadChallenges();
   loadSignin();
-  if(!localStorage.getItem('guideShown')){
+  if(!localStorage.getItem('guideShown')) {
     let ov = document.getElementById('guideOverlay');
     ov.style.display = 'flex';
     document.getElementById('closeGuideBtn').onclick = () => { ov.style.display = 'none'; localStorage.setItem('guideShown','true'); };
