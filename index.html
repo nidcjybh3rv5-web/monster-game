@@ -16,7 +16,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <style>
-/* 樣式保持不變，省略重複 */
 *{margin:0;padding:0;box-sizing:border-box;user-select:none}
 body{background:radial-gradient(circle at 20% 30%,#1a2a3a,#0a0f1e);font-family:system-ui;min-height:100vh;display:flex;justify-content:center;align-items:center;color:#fff;padding:16px}
 .app{width:100%;max-width:550px;background:rgba(255,255,255,0.08);backdrop-filter:blur(25px);border-radius:48px;padding:24px 20px 32px;border:1px solid rgba(255,255,255,0.2)}
@@ -52,6 +51,7 @@ input[type="range"]::-webkit-slider-thumb{width:16px;height:16px;border-radius:5
 </head>
 <body>
 <div class="app">
+  <!-- 主選單 -->
   <div id="mainPage" class="page active">
     <div class="main-title">MONSTER GAME</div>
     <div class="author">by Disabledev | 精簡版</div>
@@ -61,16 +61,45 @@ input[type="range"]::-webkit-slider-thumb{width:16px;height:16px;border-radius:5
     <button class="settings-btn" id="helpBtn">❓ 幫助</button>
     <div class="footer"></div>
   </div>
-  <div id="settingsPage" class="page"><div><button class="back-btn" id="backFromSettings">← 返回</button><span style="font-size:1.3rem;">設定</span></div><div id="settingsList"></div></div>
-  <div id="shopPage" class="page"><div><button class="back-btn" id="backFromShop">← 返回</button><span style="font-size:1.3rem;">商店</span></div><div style="padding:16px;text-align:center"><div id="shopItemsList"></div><div id="dailyRewardStatus" style="background:rgba(255,255,255,0.1);border-radius:40px;padding:12px;margin:20px 0">⭐ 每日獎勵</div><button id="claimDailyBtn" class="play-btn" style="width:auto;padding:8px 16px">🎁 領取</button></div></div>
-  <div id="helpPage" class="page"><div><button class="back-btn" id="backFromHelp">← 返回</button><span style="font-size:1.3rem;">幫助</span></div><div class="help-content"><p>⚔️攻擊｜✨技能四選一｜😴休息(每場1次)</p><p>🎒背包：裝備穿脫/強化/分解｜📈50經驗升級｜💀Boss每10級出現</p><p>☁️Google登入雲端｜🏆成就自動記錄</p></div></div>
+
+  <!-- 設定頁面 -->
+  <div id="settingsPage" class="page">
+    <div><button class="back-btn" id="backFromSettings">← 返回</button><span style="font-size:1.3rem;">設定</span></div>
+    <div id="settingsList"></div>
+  </div>
+
+  <!-- 商店頁面 -->
+  <div id="shopPage" class="page">
+    <div><button class="back-btn" id="backFromShop">← 返回</button><span style="font-size:1.3rem;">商店</span></div>
+    <div style="padding:16px;text-align:center">
+      <div id="shopItemsList"></div>
+      <div id="dailyRewardStatus" style="background:rgba(255,255,255,0.1);border-radius:40px;padding:12px;margin:20px 0">⭐ 每日獎勵</div>
+      <button id="claimDailyBtn" class="play-btn" style="width:auto;padding:8px 16px">🎁 領取</button>
+    </div>
+  </div>
+
+  <!-- 幫助頁面 -->
+  <div id="helpPage" class="page">
+    <div><button class="back-btn" id="backFromHelp">← 返回</button><span style="font-size:1.3rem;">幫助</span></div>
+    <div class="help-content">
+      <p>⚔️攻擊｜✨技能四選一｜😴休息(每場1次)</p>
+      <p>🎒背包：裝備穿脫/強化/分解｜📈50經驗升級｜💀Boss每10級出現</p>
+      <p>☁️Google登入雲端｜🏆成就自動記錄</p>
+    </div>
+  </div>
+
+  <!-- 遊戲主頁面 -->
   <div id="gamePage" class="page">
     <button class="back-btn" id="backFromGame">← 主選單</button>
-    <div style="display:flex; justify-content:space-between; align-items:center;"><div class="gold-display">💰 <span id="goldGame">0</span></div></div>
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <div class="gold-display">💰 <span id="goldGame">0</span></div>
+    </div>
     <div class="stats-line"><span>❤️ <span id="hpText">100/100</span></span><span>⭐ <span id="expText">0/50</span></span><span>⬆️ Lv <span id="levelText">1</span></span></div>
-    <div class="bar"><div class="fillhp" id="hpBar"></div></div><div class="bar"><div class="fillexp" id="expBar"></div></div>
+    <div class="bar"><div class="fillhp" id="hpBar"></div></div>
+    <div class="bar"><div class="fillexp" id="expBar"></div></div>
     <div class="stats-line"><span>⚔️ <span id="atkText">10</span></span><span>🗺️ <span id="zoneText">新手村</span></span></div>
-    <h3 id="monsterName">史萊姆</h3><div class="enemy-icon" id="monsterEmoji">🟣</div>
+    <h3 id="monsterName">史萊姆</h3>
+    <div class="enemy-icon" id="monsterEmoji">🟣</div>
     <div>💀 HP <span id="monsterHpText">0/0</span> | ⭐ Lv <span id="monsterLevelText">0</span></div>
     <div class="bar"><div class="fillhp" id="monsterBar"></div></div>
     <div class="log" id="logMsg">點擊攻擊開始</div>
@@ -83,95 +112,17 @@ input[type="range"]::-webkit-slider-thumb{width:16px;height:16px;border-radius:5
     </div>
   </div>
 </div>
-<div id="guideOverlay" class="guide-overlay" style="display:none"><div class="guide-card"><p>🎮 歡迎！</p><p>⚔️攻擊 ✨技能 🎒裝備 😴休息</p><p>💀Boss每10級出現｜💾自動存檔</p><button id="closeGuideBtn">開始</button></div></div>
-<script src="game.js"></script>
-</body>
-</html><!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>幻獸鬥士 - 精簡版</title>
-<!-- Google Analytics 請替換為您的評估 ID -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-XXXXXXXXXX');
-</script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-<style>
-/* 樣式保持不變，省略重複 */
-*{margin:0;padding:0;box-sizing:border-box;user-select:none}
-body{background:radial-gradient(circle at 20% 30%,#1a2a3a,#0a0f1e);font-family:system-ui;min-height:100vh;display:flex;justify-content:center;align-items:center;color:#fff;padding:16px}
-.app{width:100%;max-width:550px;background:rgba(255,255,255,0.08);backdrop-filter:blur(25px);border-radius:48px;padding:24px 20px 32px;border:1px solid rgba(255,255,255,0.2)}
-.page{display:none}.page.active{display:block}
-.main-title{font-size:2rem;font-weight:700;background:linear-gradient(135deg,#facc15,#ff8c00);-webkit-background-clip:text;background-clip:text;color:transparent;text-align:center;margin:20px 0 5px}
-.author{text-align:center;font-size:0.7rem;color:#94a3b8;margin-bottom:16px}
-.play-btn,.settings-btn{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:40px;padding:12px;font-size:1.1rem;font-weight:bold;cursor:pointer;width:80%;margin:10px auto;display:block;text-align:center;color:#fff}
-.play-btn{background:#facc15;color:#0f172a;border:none}
-button:active{transform:scale(0.97)}
-.back-btn{background:none;border:none;color:#3b82f6;font-size:1rem;cursor:pointer;margin-bottom:16px}
-.setting-item{background:rgba(255,255,255,0.05);border-radius:28px;padding:12px 20px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
-.help-content{background:rgba(255,255,255,0.05);border-radius:28px;padding:20px;line-height:2}
-.stats-line{display:flex;justify-content:space-between;margin:12px 0;font-weight:bold}
-.bar{background:#1e293b;border-radius:20px;height:18px;overflow:hidden;margin:8px 0}
-.fillhp{background:#ef4444;height:100%}.fillexp{background:#3b82f6;height:100%}
-.enemy-icon{font-size:56px;margin:12px;text-align:center}
-.log{background:rgba(0,0,0,0.5);border-radius:24px;padding:12px;margin:16px 0;font-size:0.85rem;color:#facc15;min-height:70px}
-.buttons{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:16px}
-.game-action{padding:10px 18px;border-radius:40px;font-weight:bold;border:none;background:#334155;color:#fff;cursor:pointer}
-.attack{background:#dc2626}.skill{background:#8b5cf6}.rest{background:#16a34a}.save{background:#9333ea}.inventory{background:#eab308;color:#0f172a}
-.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:#facc15;padding:8px 20px;border-radius:40px;font-size:0.8rem;z-index:999;animation:fadeOut 2s forwards}
-@keyframes fadeOut{0%{opacity:1}70%{opacity:1}100%{opacity:0;visibility:hidden}}
-.switch{position:relative;display:inline-block;width:52px;height:28px}
-.switch input{opacity:0;width:0;height:0}
-.slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#475569;border-radius:34px}
-.slider:before{position:absolute;content:"";height:22px;width:22px;left:3px;bottom:3px;background:#fff;border-radius:50%}
-input:checked+.slider{background:#3b82f6}
-input:checked+.slider:before{transform:translateX(24px)}
-input[type="range"]{width:140px;height:4px;-webkit-appearance:none;background:#475569;border-radius:2px}
-input[type="range"]::-webkit-slider-thumb{width:16px;height:16px;border-radius:50%;background:#3b82f6;-webkit-appearance:none}
-.gold-display{background:#00000066;border-radius:20px;padding:4px 12px;display:inline-block;margin-bottom:8px}
-</style>
-</head>
-<body>
-<div class="app">
-  <div id="mainPage" class="page active">
-    <div class="main-title">MONSTER GAME</div>
-    <div class="author">by Disabledev | 精簡版</div>
-    <button class="play-btn" id="toGameBtn">▶ 開始遊戲</button>
-    <button class="settings-btn" id="toSettingsBtn">⚙️ 設定</button>
-    <button class="settings-btn" id="shopBtn">🛒 商店</button>
-    <button class="settings-btn" id="helpBtn">❓ 幫助</button>
-    <div class="footer"></div>
-  </div>
-  <div id="settingsPage" class="page"><div><button class="back-btn" id="backFromSettings">← 返回</button><span style="font-size:1.3rem;">設定</span></div><div id="settingsList"></div></div>
-  <div id="shopPage" class="page"><div><button class="back-btn" id="backFromShop">← 返回</button><span style="font-size:1.3rem;">商店</span></div><div style="padding:16px;text-align:center"><div id="shopItemsList"></div><div id="dailyRewardStatus" style="background:rgba(255,255,255,0.1);border-radius:40px;padding:12px;margin:20px 0">⭐ 每日獎勵</div><button id="claimDailyBtn" class="play-btn" style="width:auto;padding:8px 16px">🎁 領取</button></div></div>
-  <div id="helpPage" class="page"><div><button class="back-btn" id="backFromHelp">← 返回</button><span style="font-size:1.3rem;">幫助</span></div><div class="help-content"><p>⚔️攻擊｜✨技能四選一｜😴休息(每場1次)</p><p>🎒背包：裝備穿脫/強化/分解｜📈50經驗升級｜💀Boss每10級出現</p><p>☁️Google登入雲端｜🏆成就自動記錄</p></div></div>
-  <div id="gamePage" class="page">
-    <button class="back-btn" id="backFromGame">← 主選單</button>
-    <div style="display:flex; justify-content:space-between; align-items:center;"><div class="gold-display">💰 <span id="goldGame">0</span></div></div>
-    <div class="stats-line"><span>❤️ <span id="hpText">100/100</span></span><span>⭐ <span id="expText">0/50</span></span><span>⬆️ Lv <span id="levelText">1</span></span></div>
-    <div class="bar"><div class="fillhp" id="hpBar"></div></div><div class="bar"><div class="fillexp" id="expBar"></div></div>
-    <div class="stats-line"><span>⚔️ <span id="atkText">10</span></span><span>🗺️ <span id="zoneText">新手村</span></span></div>
-    <h3 id="monsterName">史萊姆</h3><div class="enemy-icon" id="monsterEmoji">🟣</div>
-    <div>💀 HP <span id="monsterHpText">0/0</span> | ⭐ Lv <span id="monsterLevelText">0</span></div>
-    <div class="bar"><div class="fillhp" id="monsterBar"></div></div>
-    <div class="log" id="logMsg">點擊攻擊開始</div>
-    <div class="buttons">
-      <button class="game-action attack" id="attackBtn">⚔️</button>
-      <button class="game-action skill" id="skillBtn">✨</button>
-      <button class="game-action rest" id="restBtn">😴</button>
-      <button class="game-action inventory" id="inventoryBtn">🎒</button>
-      <button class="game-action save" id="saveBtn">💾</button>
-    </div>
+
+<!-- 新手引導 -->
+<div id="guideOverlay" class="guide-overlay" style="display:none">
+  <div class="guide-card">
+    <p>🎮 歡迎！</p>
+    <p>⚔️攻擊 ✨技能 🎒裝備 😴休息</p>
+    <p>💀Boss每10級出現｜💾自動存檔</p>
+    <button id="closeGuideBtn">開始</button>
   </div>
 </div>
-<div id="guideOverlay" class="guide-overlay" style="display:none"><div class="guide-card"><p>🎮 歡迎！</p><p>⚔️攻擊 ✨技能 🎒裝備 😴休息</p><p>💀Boss每10級出現｜💾自動存檔</p><button id="closeGuideBtn">開始</button></div></div>
+
 <script src="game.js"></script>
 </body>
 </html>
