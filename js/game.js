@@ -1,5 +1,5 @@
 // ========== 版本號與更新檢查 ==========
-const APP_VERSION = 'v3.6.2';
+const APP_VERSION = 'v3.7.1';
 if (localStorage.getItem('app_version') !== APP_VERSION) {
   const ov = document.createElement('div'); ov.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); backdrop-filter:blur(12px); display:flex; justify-content:center; align-items:center; z-index:10000;';
   const cd = document.createElement('div'); cd.style.cssText = 'background:rgba(30,30,35,0.9); border-radius:32px; padding:24px; width:280px; text-align:center; color:white; border:1px solid rgba(255,255,255,0.2);';
@@ -61,7 +61,24 @@ window.setSfx = e => { sfxOn = e; localStorage.setItem('mute', e ? '0' : '1'); }
 const flash = () => { document.body.classList.add('flash'); setTimeout(() => document.body.classList.remove('flash'), 200); };
 const shake = () => { document.querySelector('.app').classList.add('shake'); setTimeout(() => document.querySelector('.app').classList.remove('shake'), 200); };
 
-// ========== 裝備強化 ==========
+// ========== 戰鬥加速 ==========
+let combatSpeed = parseInt(localStorage.getItem('combatSpeed') || '1');
+window.setCombatSpeed = (speed) => { combatSpeed = speed; localStorage.setItem('combatSpeed', speed); };
+
+// ========== 裝備系統 ==========
+const QUALITY = [
+  { name: '普通', color: '#9ca3af', min: 1, max: 3, rate: 0.5 },
+  { name: '優秀', color: '#4ade80', min: 4, max: 6, rate: 0.3 },
+  { name: '稀有', color: '#3b82f6', min: 7, max: 10, rate: 0.15 },
+  { name: '史詩', color: '#a855f7', min: 11, max: 15, rate: 0.05 }
+];
+function randomQuality() { let r = Math.random(), a = 0; for (let q of QUALITY) if ((a += q.rate) > r) return q; return QUALITY[0]; }
+function generateEquipment() {
+  let t = rand(0, 1) ? 'weapon' : 'armor';
+  let q = randomQuality();
+  let b = rand(q.min, q.max);
+  return { id: Date.now() + '-' + Math.random(), type: t, quality: q.name, color: q.color, bonus: b, name: `${q.name} ${t === 'weapon' ? '武器' : '防具'}`, equipped: false, level: 0 };
+}
 function calcEqBonus(eq) {
   let a = 0, h = 0;
   eq.forEach(e => { if (e.equipped) e.type === 'weapon' ? a += e.bonus : h += e.bonus; });
@@ -97,40 +114,8 @@ function upgradeEquipment(id) {
     updateGoldUI();
     saveGame();
     applyEquipBonus();
-    showBackpack();
+    window.showBackpack();
   } else toast(`金幣不足，需要 ${cost}`, true);
-}
-
-// ========== 裝備系統基礎 ==========
-const QUALITY = [
-  { name: '普通', color: '#9ca3af', min: 1, max: 3, rate: 0.5 },
-  { name: '優秀', color: '#4ade80', min: 4, max: 6, rate: 0.3 },
-  { name: '稀有', color: '#3b82f6', min: 7, max: 10, rate: 0.15 },
-  { name: '史詩', color: '#a855f7', min: 11, max: 15, rate: 0.05 }
-];
-function randomQuality() { let r = Math.random(), a = 0; for (let q of QUALITY) if ((a += q.rate) > r) return q; return QUALITY[0]; }
-function generateEquipment() {
-  let t = rand(0, 1) ? 'weapon' : 'armor';
-  let q = randomQuality();
-  let b = rand(q.min, q.max);
-  return { id: Date.now() + '-' + Math.random(), type: t, quality: q.name, color: q.color, bonus: b, name: `${q.name} ${t === 'weapon' ? '武器' : '防具'}`, equipped: false, level: 0 };
-}
-function showBackpack() {
-  let ov = document.createElement('div'); ov.className = 'backpack-overlay';
-  let cd = document.createElement('div'); cd.className = 'backpack-card'; cd.innerHTML = '<h3>🎒 背包</h3>';
-  if (window.equipment.length === 0) cd.innerHTML += '<p>無裝備</p>';
-  else {
-    window.equipment.forEach(e => {
-      let level = e.level || 0;
-      let div = document.createElement('div'); div.className = 'backpack-item'; div.style.borderLeftColor = e.color;
-      div.innerHTML = `<span style="color:${e.color}">${e.name}+${e.bonus} (強化+${level})</span><button data-id="${e.id}" class="eqBtn">${e.equipped ? '卸下' : '裝備'}</button><button data-id="${e.id}" class="upgradeBtn">強化</button>`;
-      div.querySelector('.eqBtn').onclick = () => { toggleEquip(e.id); ov.remove(); showBackpack(); };
-      div.querySelector('.upgradeBtn').onclick = () => { upgradeEquipment(e.id); ov.remove(); showBackpack(); };
-      cd.appendChild(div);
-    });
-  }
-  let cls = document.createElement('button'); cls.innerText = '關閉'; cls.onclick = () => ov.remove();
-  cd.appendChild(cls); ov.appendChild(cd); document.body.appendChild(ov);
 }
 function toggleEquip(id) {
   let item = window.equipment.find(e => e.id == id);
@@ -146,8 +131,64 @@ function toggleEquip(id) {
   }
   applyEquipBonus();
   saveGame();
-  showBackpack();
+  window.showBackpack();
 }
+
+// ========== 批量分解 ==========
+function decomposeEquipment(qualityThreshold = '優秀') {
+  const qualityOrder = ['普通', '優秀', '稀有', '史詩'];
+  const thresholdIndex = qualityOrder.indexOf(qualityThreshold);
+  if (thresholdIndex === -1) return;
+  let totalGold = 0;
+  window.equipment = window.equipment.filter(eq => {
+    const idx = qualityOrder.indexOf(eq.quality);
+    if (idx < thresholdIndex && !eq.equipped) {
+      totalGold += 10;
+      return false;
+    }
+    return true;
+  });
+  if (totalGold > 0) {
+    addGold(totalGold);
+    toast(`分解獲得 ${totalGold} 金幣`, false);
+    saveGame();
+    applyEquipBonus();
+    window.showBackpack();
+  } else {
+    toast('沒有低於該品質的可分解裝備', true);
+  }
+}
+
+// ========== 增強背包（含分解） ==========
+window.showBackpack = function() {
+  let ov = document.createElement('div'); ov.className = 'backpack-overlay';
+  let cd = document.createElement('div'); cd.className = 'backpack-card'; cd.style.maxWidth = '350px';
+  cd.innerHTML = '<h3>🎒 背包</h3>';
+  // 分解工具條
+  let decomposeDiv = document.createElement('div');
+  decomposeDiv.style.display = 'flex'; decomposeDiv.style.justifyContent = 'space-between'; decomposeDiv.style.marginBottom = '12px';
+  let qualitySelect = document.createElement('select');
+  qualitySelect.innerHTML = '<option value="普通">普通及以下</option><option value="優秀">優秀及以下</option><option value="稀有">稀有及以下</option>';
+  qualitySelect.style.background = '#0f172a'; qualitySelect.style.color = '#fff'; qualitySelect.style.borderRadius = '20px'; qualitySelect.style.padding = '4px 8px';
+  let decomposeBtn = document.createElement('button'); decomposeBtn.innerText = '分解'; decomposeBtn.style.background = '#ef4444'; decomposeBtn.style.border = 'none'; decomposeBtn.style.padding = '4px 12px'; decomposeBtn.style.borderRadius = '20px'; decomposeBtn.style.cursor = 'pointer';
+  decomposeBtn.onclick = () => { decomposeEquipment(qualitySelect.value); ov.remove(); window.showBackpack(); };
+  decomposeDiv.appendChild(qualitySelect); decomposeDiv.appendChild(decomposeBtn);
+  cd.appendChild(decomposeDiv);
+  // 裝備列表
+  if (window.equipment.length === 0) cd.innerHTML += '<p>無裝備</p>';
+  else {
+    window.equipment.forEach(e => {
+      let level = e.level || 0;
+      let div = document.createElement('div'); div.className = 'backpack-item'; div.style.borderLeftColor = e.color;
+      div.innerHTML = `<span style="color:${e.color}">${e.name}+${e.bonus} (強化+${level})</span><button data-id="${e.id}" class="eqBtn">${e.equipped ? '卸下' : '裝備'}</button><button data-id="${e.id}" class="upgradeBtn">強化</button>`;
+      div.querySelector('.eqBtn').onclick = () => { toggleEquip(e.id); ov.remove(); window.showBackpack(); };
+      div.querySelector('.upgradeBtn').onclick = () => { upgradeEquipment(e.id); ov.remove(); window.showBackpack(); };
+      cd.appendChild(div);
+    });
+  }
+  let cls = document.createElement('button'); cls.innerText = '關閉'; cls.onclick = () => ov.remove();
+  cd.appendChild(cls); ov.appendChild(cd); document.body.appendChild(ov);
+};
 
 // ========== 寵物系統 ==========
 let ownedPets = [];
@@ -181,6 +222,8 @@ function buyPet(petId) {
     saveGame();
     renderShop();
     updatePetUI();
+    // 檢查全寵物隱藏成就
+    if (ownedPets.length === 3 && !window.hiddenAchievements?.fullPet?.achieved) grantHiddenAchievement('fullPet');
     toast(`成功購買 ${pet.name}！`, false);
   } else toast(`金幣不足，需要 ${pet.price}`, true);
 }
@@ -346,6 +389,198 @@ window.critRate = 0.15;
 window.expMultiplier = 1;
 window.goldMultiplier = 1;
 
+// 隱藏成就（彩蛋）
+window.hiddenAchievements = {
+  fiveCrit: { name: '暴擊連發', desc: '連續5次暴擊', achieved: false, reward: 500 },
+  oneHitKill: { name: '一擊必殺', desc: '單次傷害超過500', achieved: false, reward: 800 },
+  fullPet: { name: '寵物收藏家', desc: '獲得全部3隻寵物', achieved: false, reward: 1000 }
+};
+function grantHiddenAchievement(id) {
+  if (!window.hiddenAchievements[id].achieved) {
+    window.hiddenAchievements[id].achieved = true;
+    addGold(window.hiddenAchievements[id].reward);
+    toast(`🏆 隱藏成就達成：${window.hiddenAchievements[id].name}！獎勵 ${window.hiddenAchievements[id].reward} 金幣`, false);
+    saveGame();
+  }
+}
+
+// ========== 戰鬥邏輯 ==========
+let consecutiveCrit = 0;
+function levelUp() {
+  let up = false;
+  while (window.exp >= 50) {
+    window.exp -= 50; window.lv++; window.baseHp += 20; window.baseAtk += 5;
+    let bonus = calcEqBonus(window.equipment);
+    window.hp = Math.floor((window.baseHp + bonus.hp) * 0.7);
+    up = true;
+    log(`🎉 升 Lv${window.lv} 攻${window.baseAtk + bonus.atk}`);
+    if (window.lv > window.maxLevel) window.maxLevel = window.lv;
+    lvUpSound();
+    addTalentPoint();
+  }
+  if (up) refreshMonster();
+  applyEquipBonus();
+  saveGame();
+}
+function monsterSkillAttack() {
+  if (!window.curMonster || !window.curMonster.skill) return;
+  let s = window.curMonster.skill;
+  if (s.name === '治癒' && s.heal) {
+    let heal = Math.floor(window.curMonster.maxHp * 0.15);
+    window.curMonster.hp = Math.min(window.curMonster.maxHp, window.curMonster.hp + heal);
+    log(`💚 ${window.curMonster.emoji}${window.curMonster.name} 治療 ${heal}HP`);
+    updateUI();
+    return;
+  }
+  let baseDmg = Math.max(1, rand(window.curMonster.atk - 2, window.curMonster.atk + 2));
+  let dmg = Math.floor(baseDmg * (s.dmgMod || 1));
+  window.hp = Math.max(0, window.hp - dmg);
+  log(`💀 ${window.curMonster.emoji}${window.curMonster.name} ${s.effect}${s.name} ${dmg}傷`);
+  if (window.hp <= 0) { window.hp = window.maxHp; window.restUsed = false; window.deathStreak++; log(`💀 復活`); }
+  updateUI();
+  saveGame();
+}
+function monsterCounter() {
+  if (!window.curMonster) return;
+  let d = Math.max(1, rand(window.curMonster.atk - 3, window.curMonster.atk + 2));
+  window.hp -= d;
+  log(`😈 ${window.curMonster.emoji}${window.curMonster.name} 反擊 ${d}`);
+  if (window.hp <= 0) { window.hp = window.maxHp; window.restUsed = false; window.deathStreak++; log(`💀 復活`); }
+  else window.deathStreak = 0;
+  updateUI();
+  saveGame();
+  let skillChance = window.curMonster.isBoss ? 0.7 : 0.4;
+  if (Math.random() < skillChance) monsterSkillAttack();
+  if (window.curMonster.isBoss && window.curMonster.hp <= window.curMonster.maxHp * 0.3) {
+    window.curMonster.atk = Math.floor(window.curMonster.atk * 1.5);
+    log(`💢 Boss 狂暴！攻擊力提升 50%！`);
+    const monsterBar = document.getElementById('monsterBar');
+    if (monsterBar) monsterBar.style.backgroundColor = '#ff8800';
+  }
+}
+function defeatMonster() {
+  if (!window.curMonster) return;
+  let expGain = Math.floor(window.curMonster.exp * (window.expMultiplier || 1));
+  window.exp += expGain;
+  let goldDrop = rand(10, window.curMonster.isBoss ? 100 : 30);
+  addGold(goldDrop);
+  log(`🎉 擊敗 ${window.curMonster.isBoss ? '👑BOSS ' : ''}+${expGain}EXP +${goldDrop}💰`);
+  window.totalKills++;
+  if (window.lastDmg > window.maxDamage) window.maxDamage = window.lastDmg;
+  if (window.lastDmg >= 500 && !window.hiddenAchievements.oneHitKill.achieved) grantHiddenAchievement('oneHitKill');
+  updateQuestProgress('kill');
+  if (Math.random() < 0.3 || window.curMonster.isBoss) {
+    let eq = generateEquipment();
+    if (window.curMonster.isBoss) eq.quality = '史詩';
+    window.equipment.push(eq);
+    updateQuestProgress('equip');
+    toast(`🎁獲得 ${eq.name}+${eq.bonus}`);
+    if (!window.equipment.some(e => e.type === eq.type && e.equipped)) {
+      eq.equipped = true;
+      applyEquipBonus();
+      toast(`✨自動裝備`);
+    }
+    saveGame();
+  }
+  levelUp();
+  refreshMonster();
+  updateUI();
+  defeatSound();
+  // 重置Boss血条颜色
+  const monsterBar = document.getElementById('monsterBar');
+  if (monsterBar) monsterBar.style.backgroundColor = '';
+}
+function attack() {
+  initAudio();
+  atkSound();
+  flash();
+  shake();
+  if (window.hp <= 0) { log('無法攻擊'); return; }
+  if (!window.curMonster) { refreshMonster(); return; }
+  let baseDmg = Math.max(2, rand(window.atk - 3, window.atk + 5));
+  let isCrit = Math.random() < (window.critRate || 0.15);
+  let finalDmg = isCrit ? Math.floor(baseDmg * 1.5) : baseDmg;
+  window.lastDmg = finalDmg;
+  window.curMonster.hp -= finalDmg;
+  let critMsg = isCrit ? ' 暴擊！' : '';
+  log(`⚔️ ${finalDmg}傷${critMsg}`);
+  if (isCrit) {
+    consecutiveCrit++;
+    if (consecutiveCrit >= 5 && !window.hiddenAchievements.fiveCrit.achieved) grantHiddenAchievement('fiveCrit');
+  } else consecutiveCrit = 0;
+  if (window.curMonster.hp <= 0) defeatMonster();
+  else monsterCounter();
+  updateUI();
+  saveGame();
+}
+function showSkillMenu() {
+  let ov = document.createElement('div');
+  ov.className = 'skill-menu-overlay';
+  let cd = document.createElement('div');
+  cd.className = 'skill-menu-card';
+  cd.innerHTML = '<h3>選技能</h3>';
+  const skillList = [
+    { name: '火焰拳', dmg: atk => rand(atk + 8, atk * 2 + 5), effect: '🔥' },
+    { name: '水槍', dmg: atk => rand(atk + 5, atk * 2 + 2), effect: '💧' },
+    { name: '雷電', dmg: atk => rand(atk + 10, atk * 2 + 8), effect: '⚡' },
+    { name: '治癒', heal: 30, effect: '💚' }
+  ];
+  skillList.forEach(s => {
+    let btn = document.createElement('button');
+    btn.innerText = s.name === '治癒' ? `${s.name} (恢復${s.heal}HP)` : s.name;
+    btn.onclick = () => {
+      document.body.removeChild(ov);
+      if (window.hp <= 0) { log('無法施放'); return; }
+      if (!window.curMonster && s.name !== '治癒') { log('沒有怪物'); return; }
+      if (s.name === '治癒') {
+        window.hp = Math.min(window.maxHp, window.hp + s.heal);
+        log(`✨恢復${s.heal}HP`);
+        updateUI();
+        saveGame();
+        updateQuestProgress('skill');
+      } else {
+        let dmg = s.dmg(window.atk);
+        let isCrit = Math.random() < (window.critRate || 0.15);
+        if (isCrit) dmg = Math.floor(dmg * 1.5);
+        window.lastDmg = dmg;
+        window.curMonster.hp -= dmg;
+        log(`✨${s.effect} ${dmg}傷${isCrit ? ' 暴擊！' : ''}`);
+        if (window.curMonster.hp <= 0) defeatMonster();
+        else monsterCounter();
+        updateUI();
+        saveGame();
+        updateQuestProgress('skill');
+      }
+      skillSound();
+      flash();
+      shake();
+    };
+    cd.appendChild(btn);
+  });
+  let cancel = document.createElement('button');
+  cancel.innerText = '取消';
+  cancel.onclick = () => document.body.removeChild(ov);
+  cd.appendChild(cancel);
+  ov.appendChild(cd);
+  document.body.appendChild(ov);
+}
+function rest() {
+  initAudio();
+  if (window.restUsed) { log('已休息過'); return; }
+  if (window.hp <= 0) { log('無法休息'); return; }
+  window.hp = Math.min(window.maxHp, window.hp + 30);
+  window.restUsed = true;
+  log(`😴恢復30HP`);
+  let sneak = Math.max(1, rand(window.curMonster.atk - 2, window.curMonster.atk + 1));
+  window.hp = Math.max(0, window.hp - sneak);
+  log(`⚠️偷襲-${sneak}`);
+  if (window.hp <= 0) { window.hp = window.maxHp; window.restUsed = false; log('💀復活'); }
+  updateUI();
+  saveGame();
+  hurtSound();
+}
+
+// ========== 區域與怪物生成 ==========
 const zones = [
   { name: "🌳新手村", maxLv: 30, mons: ["🟣史萊姆", "🟢哥布林", "🐺森林狼", "🦇蝙蝠", "🌿樹精"] },
   { name: "🏜️沙漠", maxLv: 90, mons: ["🦂巨蠍", "🧻木乃伊", "🐍沙蛇", "🦅沙鷹", "🏺詛咒陶罐"] },
@@ -455,7 +690,8 @@ function saveGame() {
     difficulty: window.difficulty, equipment: window.equipment, deathStreak: window.deathStreak,
     lastDmg: window.lastDmg, totalKills: window.totalKills, maxDamage: window.maxDamage,
     maxLevel: window.maxLevel, gold: window.gold, ownedPets, currentPet: currentPet ? currentPet.id : null,
-    talentPoints, talents: talents.map(t => ({ id: t.id, current: t.current })), dailyQuests
+    talentPoints, talents: talents.map(t => ({ id: t.id, current: t.current })), dailyQuests,
+    hiddenAchievements: window.hiddenAchievements
   };
   localStorage.setItem('gameSave', JSON.stringify(state));
   toast('💾 存檔');
@@ -485,6 +721,7 @@ function loadGame() {
         }
       }
       if (s.dailyQuests) dailyQuests = s.dailyQuests;
+      if (s.hiddenAchievements) window.hiddenAchievements = s.hiddenAchievements;
       resetDailyQuests();
       let ds = document.getElementById('diffSelect'); if (ds) ds.value = window.difficulty;
     } catch (e) { }
@@ -520,6 +757,7 @@ async function loadCloudSave() {
         }
       }
       if (s.dailyQuests) dailyQuests = s.dailyQuests;
+      if (s.hiddenAchievements) window.hiddenAchievements = s.hiddenAchievements;
       resetDailyQuests();
       applyEquipBonus();
       applyTalentBonuses();
@@ -529,171 +767,6 @@ async function loadCloudSave() {
       toast('☁️ 雲端同步');
     } else loadGame();
   } catch (e) { toast('雲端失敗', 1); loadGame(); }
-}
-
-// ========== 戰鬥邏輯 ==========
-function levelUp() {
-  let up = false;
-  while (window.exp >= 50) {
-    window.exp -= 50; window.lv++; window.baseHp += 20; window.baseAtk += 5;
-    let bonus = calcEqBonus(window.equipment);
-    window.hp = Math.floor((window.baseHp + bonus.hp) * 0.7);
-    up = true;
-    log(`🎉 升 Lv${window.lv} 攻${window.baseAtk + bonus.atk}`);
-    if (window.lv > window.maxLevel) window.maxLevel = window.lv;
-    lvUpSound();
-    addTalentPoint();
-  }
-  if (up) refreshMonster();
-  applyEquipBonus();
-  saveGame();
-}
-function monsterSkillAttack() {
-  if (!window.curMonster || !window.curMonster.skill) return;
-  let s = window.curMonster.skill;
-  if (s.name === '治癒' && s.heal) {
-    let heal = Math.floor(window.curMonster.maxHp * 0.15);
-    window.curMonster.hp = Math.min(window.curMonster.maxHp, window.curMonster.hp + heal);
-    log(`💚 ${window.curMonster.emoji}${window.curMonster.name} 治療 ${heal}HP`);
-    updateUI();
-    return;
-  }
-  let baseDmg = Math.max(1, rand(window.curMonster.atk - 2, window.curMonster.atk + 2));
-  let dmg = Math.floor(baseDmg * (s.dmgMod || 1));
-  window.hp = Math.max(0, window.hp - dmg);
-  log(`💀 ${window.curMonster.emoji}${window.curMonster.name} ${s.effect}${s.name} ${dmg}傷`);
-  if (window.hp <= 0) { window.hp = window.maxHp; window.restUsed = false; window.deathStreak++; log(`💀 復活`); }
-  updateUI();
-  saveGame();
-}
-function monsterCounter() {
-  if (!window.curMonster) return;
-  let d = Math.max(1, rand(window.curMonster.atk - 3, window.curMonster.atk + 2));
-  window.hp -= d;
-  log(`😈 ${window.curMonster.emoji}${window.curMonster.name} 反擊 ${d}`);
-  if (window.hp <= 0) { window.hp = window.maxHp; window.restUsed = false; window.deathStreak++; log(`💀 復活`); }
-  else window.deathStreak = 0;
-  updateUI();
-  saveGame();
-  let skillChance = window.curMonster.isBoss ? 0.7 : 0.4;
-  if (Math.random() < skillChance) monsterSkillAttack();
-  if (window.curMonster.isBoss && window.curMonster.hp <= window.curMonster.maxHp * 0.3) {
-    window.curMonster.atk = Math.floor(window.curMonster.atk * 1.5);
-    log(`💢 Boss 狂暴！攻擊力提升 50%！`);
-  }
-}
-function defeatMonster() {
-  if (!window.curMonster) return;
-  let expGain = Math.floor(window.curMonster.exp * (window.expMultiplier || 1));
-  window.exp += expGain;
-  let goldDrop = rand(10, window.curMonster.isBoss ? 100 : 30);
-  addGold(goldDrop);
-  log(`🎉 擊敗 ${window.curMonster.isBoss ? '👑BOSS ' : ''}+${expGain}EXP +${goldDrop}💰`);
-  window.totalKills++;
-  if (window.lastDmg > window.maxDamage) window.maxDamage = window.lastDmg;
-  updateQuestProgress('kill');
-  if (Math.random() < 0.3 || window.curMonster.isBoss) {
-    let eq = generateEquipment();
-    if (window.curMonster.isBoss) eq.quality = '史詩';
-    window.equipment.push(eq);
-    updateQuestProgress('equip');
-    toast(`🎁獲得 ${eq.name}+${eq.bonus}`);
-    if (!window.equipment.some(e => e.type === eq.type && e.equipped)) {
-      eq.equipped = true;
-      applyEquipBonus();
-      toast(`✨自動裝備`);
-    }
-    saveGame();
-  }
-  levelUp();
-  refreshMonster();
-  updateUI();
-  defeatSound();
-}
-function attack() {
-  initAudio();
-  atkSound();
-  flash();
-  shake();
-  if (window.hp <= 0) { log('無法攻擊'); return; }
-  if (!window.curMonster) { refreshMonster(); return; }
-  let baseDmg = Math.max(2, rand(window.atk - 3, window.atk + 5));
-  let isCrit = Math.random() < (window.critRate || 0.15);
-  let finalDmg = isCrit ? Math.floor(baseDmg * 1.5) : baseDmg;
-  window.lastDmg = finalDmg;
-  window.curMonster.hp -= finalDmg;
-  let critMsg = isCrit ? ' 暴擊！' : '';
-  log(`⚔️ ${finalDmg}傷${critMsg}`);
-  if (window.curMonster.hp <= 0) defeatMonster();
-  else monsterCounter();
-  updateUI();
-  saveGame();
-}
-function showSkillMenu() {
-  let ov = document.createElement('div');
-  ov.className = 'skill-menu-overlay';
-  let cd = document.createElement('div');
-  cd.className = 'skill-menu-card';
-  cd.innerHTML = '<h3>選技能</h3>';
-  const skillList = [
-    { name: '火焰拳', dmg: atk => rand(atk + 8, atk * 2 + 5), effect: '🔥' },
-    { name: '水槍', dmg: atk => rand(atk + 5, atk * 2 + 2), effect: '💧' },
-    { name: '雷電', dmg: atk => rand(atk + 10, atk * 2 + 8), effect: '⚡' },
-    { name: '治癒', heal: 30, effect: '💚' }
-  ];
-  skillList.forEach(s => {
-    let btn = document.createElement('button');
-    btn.innerText = s.name === '治癒' ? `${s.name} (恢復${s.heal}HP)` : s.name;
-    btn.onclick = () => {
-      document.body.removeChild(ov);
-      if (window.hp <= 0) { log('無法施放'); return; }
-      if (!window.curMonster && s.name !== '治癒') { log('沒有怪物'); return; }
-      if (s.name === '治癒') {
-        window.hp = Math.min(window.maxHp, window.hp + s.heal);
-        log(`✨恢復${s.heal}HP`);
-        updateUI();
-        saveGame();
-        updateQuestProgress('skill');
-      } else {
-        let dmg = s.dmg(window.atk);
-        let isCrit = Math.random() < (window.critRate || 0.15);
-        if (isCrit) dmg = Math.floor(dmg * 1.5);
-        window.lastDmg = dmg;
-        window.curMonster.hp -= dmg;
-        log(`✨${s.effect} ${dmg}傷${isCrit ? ' 暴擊！' : ''}`);
-        if (window.curMonster.hp <= 0) defeatMonster();
-        else monsterCounter();
-        updateUI();
-        saveGame();
-        updateQuestProgress('skill');
-      }
-      skillSound();
-      flash();
-      shake();
-    };
-    cd.appendChild(btn);
-  });
-  let cancel = document.createElement('button');
-  cancel.innerText = '取消';
-  cancel.onclick = () => document.body.removeChild(ov);
-  cd.appendChild(cancel);
-  ov.appendChild(cd);
-  document.body.appendChild(ov);
-}
-function rest() {
-  initAudio();
-  if (window.restUsed) { log('已休息過'); return; }
-  if (window.hp <= 0) { log('無法休息'); return; }
-  window.hp = Math.min(window.maxHp, window.hp + 30);
-  window.restUsed = true;
-  log(`😴恢復30HP`);
-  let sneak = Math.max(1, rand(window.curMonster.atk - 2, window.curMonster.atk + 1));
-  window.hp = Math.max(0, window.hp - sneak);
-  log(`⚠️偷襲-${sneak}`);
-  if (window.hp <= 0) { window.hp = window.maxHp; window.restUsed = false; log('💀復活'); }
-  updateUI();
-  saveGame();
-  hurtSound();
 }
 
 // ========== 商店頁面渲染 ==========
@@ -718,10 +791,12 @@ window.renderSettings = () => {
   if (!c) return;
   let vol = Math.round((localStorage.volume ? parseFloat(localStorage.volume) : 0.7) * 100);
   let diff = window.difficulty, isMuted = localStorage.getItem('mute') === '1';
+  let currentSpeed = combatSpeed;
   c.innerHTML = `
     <div class="setting-item"><div>🔊音量</div><input type="range" id="volSlider" min="0" max="100" value="${vol}"></div>
     <div class="setting-item"><div>🔔音效</div><label class="switch"><input type="checkbox" id="sfxCk" ${!isMuted ? 'checked' : ''}><span class="slider"></span></label></div>
     <div class="setting-item"><div>⚔️難度</div><select id="diffSelect"><option value="easy" ${diff === 'easy' ? 'selected' : ''}>簡單</option><option value="normal" ${diff === 'normal' ? 'selected' : ''}>普通</option><option value="hard" ${diff === 'hard' ? 'selected' : ''}>困難</option><option value="extreme" ${diff === 'extreme' ? 'selected' : ''}>極限</option></select></div>
+    <div class="setting-item"><div>⚡戰鬥加速</div><label class="switch"><input type="checkbox" id="speedCk" ${combatSpeed === 2 ? 'checked' : ''}><span class="slider"></span></label></div>
     <div class="setting-item"><div>🔐Google</div><div><button id="googleBtn" style="background:#334155;padding:6px 12px;">登入</button> <button id="logoutBtn" style="background:#334155;padding:6px 12px;">登出</button></div></div>
     <div class="setting-item"><div>🏆成就</div><div>🐉${window.totalKills} 💥${window.maxDamage} 🏆${window.maxLevel}</div></div>
     <div class="setting-item"><div>📌 版本</div><div>${APP_VERSION}</div></div>
@@ -730,6 +805,7 @@ window.renderSettings = () => {
   document.getElementById('volSlider')?.addEventListener('input', e => { let v = e.target.value / 100; if (window.setVol) window.setVol(v); });
   document.getElementById('sfxCk')?.addEventListener('change', e => { if (window.setSfx) window.setSfx(e.target.checked); localStorage.setItem('mute', e.target.checked ? '0' : '1'); });
   document.getElementById('diffSelect')?.addEventListener('change', e => { window.difficulty = e.target.value; localStorage.setItem('difficulty', window.difficulty); refreshMonster(); toast(`難度:${window.difficulty}`); });
+  document.getElementById('speedCk')?.addEventListener('change', e => { window.setCombatSpeed(e.target.checked ? 2 : 1); toast(`戰鬥加速 ${e.target.checked ? '開啟' : '關閉'}`, false); });
   document.getElementById('googleBtn')?.addEventListener('click', () => window.googleLogin());
   document.getElementById('logoutBtn')?.addEventListener('click', () => window.googleLogout());
   document.getElementById('checkUpdateBtn')?.addEventListener('click', () => { if (confirm('檢查新版本？')) window.location.reload(); });
@@ -754,23 +830,15 @@ function showPage(id) {
   if (id === 'questPage') { resetDailyQuests(); updateQuestUI(); document.getElementById('claimQuestRewardBtn').onclick = claimQuestReward; }
 }
 
-// ========== 事件綁定（確保攻擊按鈕可用）==========
+// ========== 事件綁定 ==========
 document.addEventListener('DOMContentLoaded', () => {
-  const attackBtn = document.getElementById('attackBtn');
-  if (attackBtn) attackBtn.onclick = attack;
-  const skillBtn = document.getElementById('skillBtn');
-  if (skillBtn) skillBtn.onclick = showSkillMenu;
-  const restBtn = document.getElementById('restBtn');
-  if (restBtn) restBtn.onclick = rest;
-  const inventoryBtn = document.getElementById('inventoryBtn');
-  if (inventoryBtn) inventoryBtn.onclick = showBackpack;
-  const talentsBtn = document.getElementById('talentsBtn');
-  if (talentsBtn) talentsBtn.onclick = () => showPage('talentPage');
-  const questBtn = document.getElementById('questBtn');
-  if (questBtn) questBtn.onclick = () => showPage('questPage');
-  const saveBtn = document.getElementById('saveBtn');
-  if (saveBtn) saveBtn.onclick = saveGame;
-  // 其他按鈕綁定（與原有保持一致）
+  document.getElementById('attackBtn').onclick = attack;
+  document.getElementById('skillBtn').onclick = showSkillMenu;
+  document.getElementById('restBtn').onclick = rest;
+  document.getElementById('inventoryBtn').onclick = () => window.showBackpack();
+  document.getElementById('talentsBtn').onclick = () => showPage('talentPage');
+  document.getElementById('questBtn').onclick = () => showPage('questPage');
+  document.getElementById('saveBtn').onclick = saveGame;
   document.getElementById('toGameBtn').onclick = () => showPage('gamePage');
   document.getElementById('toSettingsBtn').onclick = () => showPage('settingsPage');
   document.getElementById('shopBtn').onclick = () => showPage('shopPage');
