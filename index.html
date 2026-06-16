@@ -47,12 +47,14 @@ button:active{transform:scale(0.97)}
 .flash{animation:flashAnim 0.15s}
 @keyframes flashAnim{0%{background:#ffffff80}100%{background:transparent}}
 .challenge-card{background:#0f172a;border-radius:20px;padding:12px;margin:8px 0;display:flex;justify-content:space-between;align-items:center}
+.music-btn{background:#334155;border:none;border-radius:50%;width:36px;height:36px;font-size:1.2rem;cursor:pointer;color:#fff;display:flex;align-items:center;justify-content:center}
+.music-btn.on{background:#3b82f6}
 </style>
 </head>
 <body>
 <div class="app" id="appRoot">
 
-<!-- 主選單 -->
+<!-- ===== 主選單 ===== -->
 <div id="mainPage" class="page active">
   <div class="main-title">MONSTER GAME+</div>
   <div class="author">by Disabledev | 旗艦版</div>
@@ -65,29 +67,34 @@ button:active{transform:scale(0.97)}
   <button class="settings-btn" id="helpBtn">❓ 幫助</button>
 </div>
 
-<!-- 設定 -->
+<!-- ===== 設定 ===== -->
 <div id="settingsPage" class="page"><div><button class="back-btn" id="backFromSettings">← 返回</button><span style="font-size:1.3rem;">⚙️ 設定</span></div><div id="settingsList"></div></div>
 
-<!-- 商店 -->
+<!-- ===== 商店 ===== -->
 <div id="shopPage" class="page"><div><button class="back-btn" id="backFromShop">← 返回</button><span style="font-size:1.3rem;">🛒 商店</span></div><div style="padding:16px;text-align:center"><div id="shopItemsList"></div><div id="dailyRewardStatus" style="background:rgba(255,255,255,0.1);border-radius:40px;padding:12px;margin:20px 0">⭐ 每日獎勵</div><button id="claimDailyBtn" class="play-btn" style="width:auto;padding:8px 16px">🎁 領取</button><div id="signinStatus" style="margin-top:16px;">📅 連續簽到: <span id="signinStreak">0</span> 天</div><button id="signinBtn" class="play-btn" style="width:auto;padding:8px 16px;background:#3b82f6;">✅ 簽到</button></div></div>
 
-<!-- 公會 -->
+<!-- ===== 公會 ===== -->
 <div id="guildPage" class="page"><div><button class="back-btn" id="backFromGuild">← 返回</button><span style="font-size:1.3rem;">🏛️ 公會</span></div><div id="guildInfo" class="guild-info"></div><div id="guildActions"></div><div id="guildBossSection" style="margin-top:12px;"></div></div>
 
-<!-- 圖鑑 -->
+<!-- ===== 圖鑑 ===== -->
 <div id="collectionPage" class="page"><div><button class="back-btn" id="backFromCollection">← 返回</button><span style="font-size:1.3rem;">📖 圖鑑</span></div><div id="collectionList"></div></div>
 
-<!-- 統計 -->
+<!-- ===== 統計 ===== -->
 <div id="statsPage" class="page"><div><button class="back-btn" id="backFromStats">← 返回</button><span style="font-size:1.3rem;">📊 統計</span></div><div id="statsContent"></div></div>
 
-<!-- 幫助 -->
-<div id="helpPage" class="page"><div><button class="back-btn" id="backFromHelp">← 返回</button><span style="font-size:1.3rem;">❓ 幫助</span></div><div class="help-content"><p>⚔️攻擊 ✨技能 😴休息 🎒裝備</p><p>🔥元素克制｜🔄轉生｜🏛️公會</p><p>📖圖鑑｜📊統計｜📋任務</p><p>⚡挑戰｜🤖自動戰鬥｜💤離線收益</p><p>☁️Google登入雲端存檔</p></div></div>
+<!-- ===== 幫助 ===== -->
+<div id="helpPage" class="page"><div><button class="back-btn" id="backFromHelp">← 返回</button><span style="font-size:1.3rem;">❓ 幫助</span></div><div class="help-content"><p>⚔️攻擊 ✨技能 😴休息 🎒裝備</p><p>🔥元素克制｜🔄轉生｜🏛️公會</p><p>📖圖鑑｜📊統計｜📋任務</p><p>⚡挑戰｜🤖自動戰鬥｜💤離線收益</p><p>🎵右上角音符開關音樂</p><p>☁️Google登入雲端存檔</p></div></div>
 
-<!-- 遊戲主頁 -->
+<!-- ===== 遊戲主頁 ===== -->
 <div id="gamePage" class="page">
-  <button class="back-btn" id="backFromGame">← 主選單</button>
-  <div style="display:flex; justify-content:space-between; align-items:center;flex-wrap:wrap;">
-    <div class="gold-display">💰 <span id="goldGame">0</span></div>
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+    <button class="back-btn" id="backFromGame" style="margin:0;">←</button>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <div class="gold-display" style="margin:0;">💰 <span id="goldGame">0</span></div>
+      <button id="musicToggleBtn" class="music-btn on" title="音樂開關">🔊</button>
+    </div>
+  </div>
+  <div style="display:flex; justify-content:space-between; align-items:center;flex-wrap:wrap; margin-top:-8px;">
     <div>🔄轉生Lv.<span id="rebirthLevel">0</span></div>
     <button id="autoBattleBtn" class="game-action" style="background:#3b82f6;padding:4px 12px;font-size:0.7rem;">🤖 OFF</button>
   </div>
@@ -110,14 +117,14 @@ button:active{transform:scale(0.97)}
   </div>
 </div>
 
-<!-- 挑戰 -->
+<!-- ===== 挑戰 ===== -->
 <div id="challengePage" class="page"><div><button class="back-btn" id="backFromChallenge">← 返回</button><span style="font-size:1.3rem;">⚡ 挑戰</span></div><div id="challengeList"></div></div>
 
-<!-- 任務 -->
+<!-- ===== 任務 ===== -->
 <div id="questPage" class="page"><div><button class="back-btn" id="backFromQuest">← 返回</button><span style="font-size:1.3rem;">📋 任務</span></div><div id="questList"></div><button id="claimQuestRewardBtn" class="play-btn" style="margin-top:16px;">領取獎勵</button></div>
 
-<!-- 引導 -->
-<div id="guideOverlay" class="guide-overlay" style="display:none"><div class="guide-card"><p>🎮 歡迎！</p><p>⚔️攻擊 ✨技能 🎒裝備 😴休息</p><p>🔥元素克制 +30%</p><p>🔄Lv100轉生</p><button id="closeGuideBtn">開始</button></div></div>
+<!-- ===== 引導 ===== -->
+<div id="guideOverlay" class="guide-overlay" style="display:none"><div class="guide-card"><p>🎮 歡迎！</p><p>⚔️攻擊 ✨技能 🎒裝備 😴休息</p><p>🔥元素克制 +30%</p><p>🔄Lv100轉生</p><p>🎵點擊右上角音符開關音樂</p><button id="closeGuideBtn">開始</button></div></div>
 </div>
 
 <script>
@@ -141,6 +148,101 @@ const db = firebase.firestore();
 const provider = new firebase.auth.GoogleAuthProvider();
 
 // ============================================================
+//  🎵 音樂與音效系統
+// ============================================================
+let audioCtx = null, musicOn = true, musicInterval = null;
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+function playTone(f, d, t = 'sine', v = 0.15) {
+  if (!musicOn) return;
+  try {
+    const ctx = getAudioCtx();
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.value = f; o.type = t;
+    g.gain.setValueAtTime(v, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + d);
+    o.start(ctx.currentTime); o.stop(ctx.currentTime + d);
+  } catch(e) {}
+}
+function playChord(n, d = 0.4, v = 0.08) {
+  if (!musicOn) return;
+  try {
+    const ctx = getAudioCtx();
+    n.forEach(f => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = f; o.type = 'sine';
+      g.gain.setValueAtTime(v, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + d);
+      o.start(ctx.currentTime); o.stop(ctx.currentTime + d);
+    });
+  } catch(e) {}
+}
+const SFX = {
+  attack: () => { playTone(600,0.08,'square',0.12); setTimeout(()=>playTone(400,0.06,'square',0.08),60); },
+  skill: () => { playTone(880,0.1,'square',0.15); setTimeout(()=>playTone(1100,0.12,'square',0.1),80); },
+  hurt: () => { playTone(250,0.2,'sawtooth',0.12); setTimeout(()=>playTone(180,0.25,'sawtooth',0.1),100); },
+  levelup: () => { playChord([523,659,784],0.15,0.1); setTimeout(()=>playChord([784,988,1175],0.2,0.08),150); },
+  defeat: () => { playTone(392,0.15,'sine',0.12); setTimeout(()=>playTone(523,0.25,'sine',0.12),150); },
+  boss: () => { playTone(110,0.4,'sawtooth',0.2); setTimeout(()=>playTone(82,0.6,'sawtooth',0.2),300); },
+  equip: () => { playTone(600,0.06,'sine',0.1); setTimeout(()=>playTone(800,0.08,'sine',0.08),80); },
+  gold: () => { playTone(1000,0.05,'sine',0.08); setTimeout(()=>playTone(1200,0.06,'sine',0.06),60); }
+};
+const MELODY = [[523,659,784],[587,740,880],[523,659,784],[494,659,880],[523,659,784],[587,740,880],[523,659,784],[880,988,1175]];
+const BASS = [130,146,130,123,130,146,130,110];
+function playMusic() {
+  if (!musicOn) { stopMusic(); return; }
+  if (musicInterval) return;
+  let beat = 0;
+  musicInterval = setInterval(() => {
+    if (!musicOn) { stopMusic(); return; }
+    try {
+      const ctx = getAudioCtx();
+      const idx = beat % MELODY.length;
+      MELODY[idx].forEach((f,i) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.frequency.value = f; o.type = 'sine';
+        g.gain.setValueAtTime(i===0?0.06:0.04, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+        o.start(ctx.currentTime); o.stop(ctx.currentTime + 0.6);
+      });
+      const bo = ctx.createOscillator(), bg = ctx.createGain();
+      bo.connect(bg); bg.connect(ctx.destination);
+      bo.frequency.value = BASS[idx]; bo.type = 'triangle';
+      bg.gain.setValueAtTime(0.08, ctx.currentTime);
+      bg.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+      bo.start(ctx.currentTime); bo.stop(ctx.currentTime + 0.4);
+      if (beat % 2 === 0) {
+        const buf = ctx.createBuffer(1, ctx.sampleRate*0.02, ctx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i=0; i<data.length; i++) data[i] = (Math.random()*2-1)*(1-i/data.length);
+        const src = ctx.createBufferSource(), g = ctx.createGain();
+        src.buffer = buf; src.connect(g); g.connect(ctx.destination);
+        g.gain.setValueAtTime(0.04, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
+        src.start(ctx.currentTime); src.stop(ctx.currentTime + 0.04);
+      }
+      beat++;
+    } catch(e) {}
+  }, 600);
+}
+function stopMusic(){ if(musicInterval){ clearInterval(musicInterval); musicInterval=null; } }
+function toggleMusic(){
+  musicOn = !musicOn;
+  const btn = document.getElementById('musicToggleBtn');
+  if(btn){ btn.innerText=musicOn?'🔊':'🔇'; btn.className='music-btn'+(musicOn?' on':''); }
+  if(musicOn){ getAudioCtx(); playMusic(); toast('🎵 音樂已開啟',false); }
+  else { stopMusic(); toast('🔇 音樂已關閉',false); }
+}
+document.addEventListener('click', ()=>{ if(!audioCtx){ getAudioCtx(); if(musicOn) playMusic(); } }, {once:true});
+document.addEventListener('touchstart', ()=>{ if(!audioCtx){ getAudioCtx(); if(musicOn) playMusic(); } }, {once:true});
+
+// ============================================================
 //  📦 全域狀態
 // ============================================================
 const G = {
@@ -157,11 +259,8 @@ const G = {
   autoBattle:false,
   guildBossHP:0, guildBossMaxHP:0, guildBossDefeated:false
 };
-let currentUser = null;
-let signinStreak = 0;
-let autoTimer = null;
-let infiniteTimer = null;
-let speedTimer = null;
+let currentUser=null, signinStreak=0;
+let autoTimer=null, infiniteTimer=null, speedTimer=null;
 
 // ============================================================
 //  🛠️ 工具
@@ -200,19 +299,19 @@ function applyEq(){
 function upEq(id){
   let i=G.equipment.find(e=>e.id==id); if(!i)return;
   let c=50*((i.level||0)+1);
-  if(G.gold>=c){ G.gold-=c; i.level++; i.bonus+=2; G.stats.totalUpgrade++; toast(`${i.name} +${i.level}`,false); updateGold(); saveGame(); applyEq(); closeBag(); }
+  if(G.gold>=c){ G.gold-=c; i.level++; i.bonus+=2; G.stats.totalUpgrade++; SFX.equip(); toast(`${i.name} +${i.level}`,false); updateGold(); saveGame(); applyEq(); closeBag(); }
   else toast('金幣不足',true);
 }
 function toggleEq(id){
   let i=G.equipment.find(e=>e.id==id); if(!i)return;
   if(i.equipped){ i.equipped=false; toast(`卸下 ${i.name}`); }
-  else { let s=G.equipment.find(e=>e.type===i.type&&e.equipped); if(s)s.equipped=false; i.equipped=true; toast(`裝備 ${i.name}`); }
+  else { let s=G.equipment.find(e=>e.type===i.type&&e.equipped); if(s)s.equipped=false; i.equipped=true; toast(`裝備 ${i.name}`); SFX.equip(); }
   applyEq(); saveGame(); closeBag();
 }
 function decomEq(t='普通'){
   const o=['普通','優秀','稀有','史詩']; let idx=o.indexOf(t), total=0;
   G.equipment=G.equipment.filter(e=>{ if(o.indexOf(e.quality)<idx&&!e.equipped){ total+=10; return false; } return true; });
-  if(total>0){ G.gold+=total; G.stats.totalGold+=total; toast(`分解得 ${total}金`,false); saveGame(); applyEq(); }
+  if(total>0){ G.gold+=total; G.stats.totalGold+=total; SFX.gold(); toast(`分解得 ${total}金`,false); saveGame(); applyEq(); }
   else toast('無可分解',true);
   closeBag();
 }
@@ -242,7 +341,7 @@ function showBag(){
 //  💰 金幣
 // ============================================================
 function updateGold(){ let g=document.getElementById('goldGame'); if(g)g.innerText=G.gold; }
-function addGold(a){ G.gold+=a; G.stats.totalGold+=a; updateGold(); saveGame(); }
+function addGold(a){ G.gold+=a; G.stats.totalGold+=a; SFX.gold(); updateGold(); saveGame(); }
 
 // ============================================================
 //  📅 每日 & 簽到
@@ -252,7 +351,7 @@ function claimDaily(){
   if(!canDaily()){ toast('今日已領',true); return; }
   let r=rand(1,3);
   if(r===1){ G.exp+=20; toast('🎁20EXP',false); levelUp(); }
-  else if(r===2){ let e=genEq(); G.equipment.push(e); G.stats.totalEquip++; toast(`🎁${e.name}`,false); if(!G.equipment.some(x=>x.type===e.type&&x.equipped)){ e.equipped=true; applyEq(); toast('✨自動裝',false); } }
+  else if(r===2){ let e=genEq(); G.equipment.push(e); G.stats.totalEquip++; SFX.equip(); toast(`🎁${e.name}`,false); if(!G.equipment.some(x=>x.type===e.type&&x.equipped)){ e.equipped=true; applyEq(); toast('✨自動裝',false); } }
   else { G.hp=Math.min(G.maxHp,G.hp+50); toast('🎁50HP',false); }
   localStorage.setItem('lastDaily',new Date().toDateString());
   updateUI(); saveGame();
@@ -263,11 +362,11 @@ function doSignin(){
   if(last){ let d=(new Date()-new Date(last))/(1000*3600*24); signinStreak=(d===1)?(signinStreak%7)+1:1; } else signinStreak=1;
   localStorage.setItem('lastSignin',today);
   let r=[100,150,200,250,300,400,500][signinStreak-1]||500;
-  addGold(r);
+  addGold(r); SFX.gold();
   toast(`簽到！連續${signinStreak}天 +${r}金`,false);
   document.getElementById('signinStreak').innerText=signinStreak;
   localStorage.setItem('signinStreak',signinStreak);
-  if(signinStreak===7){ toast('🎉 連續7天！史詩裝備箱！',false); let e=genEq(); e.quality='史詩'; G.equipment.push(e); G.stats.totalEquip++; saveGame(); }
+  if(signinStreak===7){ toast('🎉 連續7天！史詩裝備箱！',false); let e=genEq(); e.quality='史詩'; G.equipment.push(e); G.stats.totalEquip++; SFX.equip(); saveGame(); }
   if(signinStreak===30){ toast('🎉 連續30天！稱號「傳奇」！',false); localStorage.setItem('title','傳奇'); }
 }
 
@@ -281,6 +380,7 @@ function doRebirth(){
   G.baseAtk=10+G.rebirthLevel*2; G.baseHp=100+G.rebirthLevel*20;
   G.hp=G.maxHp;
   applyEq(); refreshMonster(); saveGame();
+  SFX.levelup();
   toast(`✨轉生成功！Lv.${G.rebirthLevel}`,false);
   updateUI();
 }
@@ -294,7 +394,7 @@ function createGuild(n){
   if(G.guild.name){ toast('已有公會',true); return; }
   if(G.gold<1000){ toast('需1000金',true); return; }
   G.gold-=1000; G.guild={name:n,level:1,exp:0,members:[{uid:'player',contribution:0}]};
-  saveGuild(); saveGame(); updateGold(); toast(`公會「${n}」創建成功`,false);
+  saveGuild(); saveGame(); updateGold(); SFX.equip(); toast(`公會「${n}」創建成功`,false);
   renderGuild();
 }
 function donateGuild(a){
@@ -304,7 +404,7 @@ function donateGuild(a){
   let c=Math.floor(a/10), m=G.guild.members.find(x=>x.uid==='player');
   if(m) m.contribution+=c; else G.guild.members.push({uid:'player',contribution:c});
   G.guild.exp+=c;
-  while(G.guild.exp>=G.guild.level*100){ G.guild.exp-=G.guild.level*100; G.guild.level++; toast(`公會升至 Lv.${G.guild.level}！攻擊+${G.guild.level*2}%`,false); }
+  while(G.guild.exp>=G.guild.level*100){ G.guild.exp-=G.guild.level*100; G.guild.level++; SFX.levelup(); toast(`公會升至 Lv.${G.guild.level}！攻擊+${G.guild.level*2}%`,false); }
   saveGuild(); saveGame(); updateGold(); applyEq(); renderGuild();
 }
 function renderGuild(){
@@ -324,7 +424,7 @@ function renderGuild(){
   let sh=document.getElementById('guildShop');
   sh.innerHTML=`<div class="setting-item"><div>🎁 稀有裝備箱</div><button id="buyGuildEq" ${c<200?'disabled':''}>200貢獻</button></div>`;
   document.getElementById('buyGuildEq')?.addEventListener('click',()=>{
-    if(c>=200){ m.contribution-=200; let e=genEq(); e.quality='稀有'; G.equipment.push(e); G.stats.totalEquip++; toast(`獲得 ${e.name}`,false); saveGuild(); saveGame(); renderGuild(); }
+    if(c>=200){ m.contribution-=200; let e=genEq(); e.quality='稀有'; G.equipment.push(e); G.stats.totalEquip++; SFX.equip(); toast(`獲得 ${e.name}`,false); saveGuild(); saveGame(); renderGuild(); }
     else toast('貢獻不足',true);
   });
   boss.innerHTML=`<div class="setting-item"><div>👑 公會Boss (${G.guildBossDefeated?'已擊敗':'挑戰中'})</div><button id="guildBossBtn" ${G.guildBossDefeated?'disabled':''}>${G.guildBossDefeated?'✅':'⚔️'}</button></div>`;
@@ -343,10 +443,11 @@ function fightGuildBoss(){
   let d=rand(G.atk-5,G.atk+10);
   G.guildBossHP-=d;
   G.hp-=rand(10,30);
+  SFX.attack();
   toast(`Boss -${d}HP`,false);
-  if(G.guildBossHP<=0){ G.guildBossDefeated=true; let r=500+G.guild.level*100; addGold(r); toast(`🎉 擊敗公會Boss！+${r}金！`,false); saveGuildBoss(); }
+  if(G.guildBossHP<=0){ G.guildBossDefeated=true; let r=500+G.guild.level*100; addGold(r); SFX.defeat(); toast(`🎉 擊敗公會Boss！+${r}金！`,false); saveGuildBoss(); }
   else saveGuildBoss();
-  if(G.hp<=0){ G.hp=G.maxHp; G.restUsed=false; toast('💀復活',true); }
+  if(G.hp<=0){ G.hp=G.maxHp; G.restUsed=false; SFX.hurt(); toast('💀復活',true); }
   updateUI(); saveGame();
 }
 
@@ -430,7 +531,7 @@ function renderQuests(){
 function claimQuests(){
   let t=0;
   G.quests.forEach(q=>{ if(q.completed&&!q.claimed){ q.claimed=true; t+=q.reward; } });
-  if(t>0){ addGold(t); toast(`領取 ${t} 金幣`,false); localStorage.setItem('quests',JSON.stringify(G.quests)); renderQuests(); }
+  if(t>0){ addGold(t); SFX.gold(); toast(`領取 ${t} 金幣`,false); localStorage.setItem('quests',JSON.stringify(G.quests)); renderQuests(); }
   else toast('無可領取',true);
 }
 
@@ -455,14 +556,14 @@ function startInfinite(){
   infActive=true; infWave=0; toast('♾️ 無限模式！',false);
   if(infiniteTimer)clearInterval(infiniteTimer);
   infiniteTimer=setInterval(()=>{
-    if(!infActive||G.hp<=0){ clearInterval(infiniteTimer); infActive=false; if(G.hp<=0){ G.hp=G.maxHp; updateUI(); toast(`💀 結束 波數:${infWave}`,true); if(infWave>G.challengeRecords.infinite)G.challengeRecords.infinite=infWave; saveGame(); } return; }
+    if(!infActive||G.hp<=0){ clearInterval(infiniteTimer); infActive=false; if(G.hp<=0){ G.hp=G.maxHp; updateUI(); SFX.hurt(); toast(`💀 結束 波數:${infWave}`,true); if(infWave>G.challengeRecords.infinite)G.challengeRecords.infinite=infWave; saveGame(); } return; }
     infWave++;
     let m=genMonster(); m.hp=Math.floor(m.hp*(1+infWave*0.1)); m.maxHp=m.hp; m.atk=Math.floor(m.atk*(1+infWave*0.05));
     G.curMonster=m; updateUI();
     let d=rand(G.atk-3,G.atk+5);
     m.hp-=d;
-    if(m.hp<=0){ G.totalKills++; addGold(rand(5,20)); }
-    else { G.hp-=rand(5,15); if(G.hp<=0){ G.hp=G.maxHp; G.restUsed=false; } }
+    if(m.hp<=0){ G.totalKills++; addGold(rand(5,20)); SFX.defeat(); }
+    else { G.hp-=rand(5,15); if(G.hp<=0){ G.hp=G.maxHp; G.restUsed=false; SFX.hurt(); } }
     updateUI();
   },1500);
 }
@@ -475,8 +576,8 @@ function startSpeedrun(){
     let m=genMonster(); G.curMonster=m; updateUI();
     let d=rand(G.atk-3,G.atk+5);
     m.hp-=d;
-    if(m.hp<=0){ killed++; G.totalKills++; addGold(rand(5,10)); }
-    else { G.hp-=rand(5,10); if(G.hp<=0){ G.hp=G.maxHp; } }
+    if(m.hp<=0){ killed++; G.totalKills++; addGold(rand(5,10)); SFX.defeat(); }
+    else { G.hp-=rand(5,10); if(G.hp<=0){ G.hp=G.maxHp; SFX.hurt(); } }
     updateUI();
   },1000);
 }
@@ -486,8 +587,8 @@ function startElemChallenge(){
   let m=genMonster(); G.curMonster=m; updateUI();
   let d=rand(G.atk-3,G.atk+5)*elemBonus('火',m.element);
   m.hp-=d;
-  if(m.hp<=0){ toast('🔥 成功！+200金',false); addGold(200); }
-  else toast('🔥 失敗',true);
+  if(m.hp<=0){ toast('🔥 成功！+200金',false); addGold(200); SFX.defeat(); }
+  else { toast('🔥 失敗',true); SFX.hurt(); }
   updateUI();
 }
 
@@ -539,6 +640,7 @@ function refreshMonster(){
   G.curMonster=genMonster(); G.restUsed=false;
   updateUI();
   log(`✨ ${G.curMonster.isBoss?'👑BOSS ':''}${G.curMonster.emoji}${G.curMonster.name} Lv.${G.curMonster.lv} HP${G.curMonster.hp} ${G.curMonster.element}`);
+  if(G.curMonster.isBoss) SFX.boss();
 }
 function levelUp(){
   let up=false;
@@ -551,13 +653,14 @@ function levelUp(){
     log(`🎉 升 Lv${G.lv}`);
     if(G.lv>G.maxLevel) G.maxLevel=G.lv;
   }
-  if(up){ applyEq(); refreshMonster(); }
+  if(up){ SFX.levelup(); applyEq(); refreshMonster(); }
   saveGame();
 }
 function monsterCounter(){
   if(!G.curMonster)return;
   let d=rand(G.curMonster.atk-3,G.curMonster.atk+2);
   G.hp-=d;
+  SFX.hurt();
   log(`😈 反擊 ${d}`);
   if(G.hp<=0){ G.hp=G.maxHp; G.restUsed=false; G.deathStreak++; log('💀復活'); }
   else G.deathStreak=0;
@@ -568,6 +671,7 @@ function defeatMonster(){
   G.exp+=G.curMonster.exp;
   let g=rand(10,G.curMonster.isBoss?100:30);
   addGold(g);
+  SFX.defeat();
   log(`🎉 +${G.curMonster.exp}EXP +${g}💰`);
   G.totalKills++;
   if(G.lastDmg>G.maxDamage) G.maxDamage=G.lastDmg;
@@ -578,6 +682,7 @@ function defeatMonster(){
     let e=genEq();
     if(G.curMonster.isBoss) e.quality='史詩';
     G.equipment.push(e); G.stats.totalEquip++;
+    SFX.equip();
     toast(`🎁獲得 ${e.name}`,false);
     if(!G.equipment.some(x=>x.type===e.type&&x.equipped)){ e.equipped=true; applyEq(); toast('✨自動裝',false); }
     updateQuest('q3');
@@ -595,6 +700,7 @@ function attack(){
   let d=Math.floor(base*eb);
   G.lastDmg=d;
   G.curMonster.hp-=d;
+  SFX.attack();
   let rect=document.getElementById('attackBtn').getBoundingClientRect();
   dmgFloat(rect.left+20, rect.top-20, '-'+d, d>20?'#ff6b6b':'#ffd93d');
   log(`⚔️ ${d}傷${eb>1?' 克制!':''}`);
@@ -622,6 +728,7 @@ function showSkill(){
         G.hp=Math.min(G.maxHp,G.hp+s.h);
         log(`✨恢復${s.h}HP`);
         updateUI(); saveGame();
+        SFX.skill();
       } else {
         if(!G.curMonster){ log('沒有怪物'); return; }
         let d=s.d(G.atk);
@@ -630,6 +737,7 @@ function showSkill(){
         G.lastDmg=d;
         G.curMonster.hp-=d;
         G.stats.skillUsage++;
+        SFX.skill();
         log(`✨${s.e} ${d}傷`);
         if(G.curMonster.hp<=0) defeatMonster();
         else monsterCounter();
@@ -651,8 +759,9 @@ function rest(){
   log(`😴恢復30HP`);
   let s=rand(G.curMonster.atk-2,G.curMonster.atk+1);
   G.hp=Math.max(0,G.hp-s);
+  if(s>0) SFX.hurt();
   log(`⚠️偷襲-${s}`);
-  if(G.hp<=0){ G.hp=G.maxHp; G.restUsed=false; log('💀復活'); }
+  if(G.hp<=0){ G.hp=G.maxHp; G.restUsed=false; SFX.hurt(); log('💀復活'); }
   updateUI(); saveGame();
 }
 function updateUI(){
@@ -722,19 +831,19 @@ function renderShop(){
     <div class="setting-item"><div>🐕 寵物 (攻擊+5%)</div><button id="buyPet">300💰</button></div>
   `;
   document.getElementById('buyEq')?.addEventListener('click',()=>{
-    if(G.gold>=100){ G.gold-=100; let e=genEq(); G.equipment.push(e); G.stats.totalEquip++; toast(`獲得 ${e.name}`,false); if(!G.equipment.some(x=>x.type===e.type&&x.equipped)){ e.equipped=true; applyEq(); toast('✨自動裝',false); } updateGold(); saveGame(); }
+    if(G.gold>=100){ G.gold-=100; let e=genEq(); G.equipment.push(e); G.stats.totalEquip++; SFX.equip(); toast(`獲得 ${e.name}`,false); if(!G.equipment.some(x=>x.type===e.type&&x.equipped)){ e.equipped=true; applyEq(); toast('✨自動裝',false); } updateGold(); saveGame(); }
     else toast('金幣不足',true);
   });
   document.getElementById('buyExp')?.addEventListener('click',()=>{
-    if(G.gold>=150){ G.gold-=150; G.exp+=30; toast('🧪 +30EXP',false); levelUp(); updateGold(); saveGame(); }
+    if(G.gold>=150){ G.gold-=150; G.exp+=30; SFX.skill(); toast('🧪 +30EXP',false); levelUp(); updateGold(); saveGame(); }
     else toast('金幣不足',true);
   });
   document.getElementById('buyRev')?.addEventListener('click',()=>{
-    if(G.gold>=200){ G.gold-=200; localStorage.setItem('revive','true'); toast('💊 復活石',false); updateGold(); saveGame(); }
+    if(G.gold>=200){ G.gold-=200; localStorage.setItem('revive','true'); SFX.equip(); toast('💊 復活石',false); updateGold(); saveGame(); }
     else toast('金幣不足',true);
   });
   document.getElementById('buyPet')?.addEventListener('click',()=>{
-    if(G.gold>=300){ G.gold-=300; localStorage.setItem('pet','true'); toast('🐕 寵物！攻擊+5%',false); G.baseAtk=Math.floor(G.baseAtk*1.05); applyEq(); updateGold(); saveGame(); }
+    if(G.gold>=300){ G.gold-=300; localStorage.setItem('pet','true'); SFX.levelup(); toast('🐕 寵物！攻擊+5%',false); G.baseAtk=Math.floor(G.baseAtk*1.05); applyEq(); updateGold(); saveGame(); }
     else toast('金幣不足',true);
   });
 }
@@ -749,14 +858,16 @@ function renderSettings(){
   let vol=localStorage.volume?parseFloat(localStorage.volume)*100:70;
   c.innerHTML=`
     <div class="setting-item"><div>🔊音量</div><input type="range" id="volSlider" min="0" max="100" value="${vol}"></div>
+    <div class="setting-item"><div>🎵音樂</div><button id="musicToggleSettingBtn" class="music-btn ${musicOn?'on':''}" style="width:auto;padding:4px 16px;border-radius:20px;">${musicOn?'🔊 開啟':'🔇 關閉'}</button></div>
     <div class="setting-item"><div>⚔️難度</div><select id="diffSelect"><option value="easy" ${G.difficulty==='easy'?'selected':''}>簡單</option><option value="normal" ${G.difficulty==='normal'?'selected':''}>普通</option><option value="hard" ${G.difficulty==='hard'?'selected':''}>困難</option><option value="extreme" ${G.difficulty==='extreme'?'selected':''}>極限</option></select></div>
     <div class="setting-item"><div>🔐Google</div><div><button id="googleBtn" style="background:#334155;padding:6px 12px;">登入</button> <button id="logoutBtn" style="background:#334155;padding:6px 12px;">登出</button></div></div>
     <div class="setting-item"><div>🏆成就</div><div>🐉${G.totalKills} 💥${G.maxDamage} 🏆${G.maxLevel}</div></div>
-    <div class="setting-item"><div>📌 版本</div><div>v7.0</div></div>
+    <div class="setting-item"><div>📌 版本</div><div>v7.0 🎵</div></div>
     <div class="setting-item"><div>🔄 更新</div><button id="checkUpdateBtn" style="background:#3b82f6;color:#fff;border:none;padding:6px 12px;border-radius:30px;">檢查</button></div>
     <div class="setting-item"><div style="color:#f87171;">⚠️重置</div><button id="resetGameBtn" style="background:#ef4444;color:#fff;border:none;padding:6px 12px;border-radius:30px;">重置</button></div>
   `;
   document.getElementById('volSlider')?.addEventListener('input',e=>localStorage.setItem('volume',e.target.value/100));
+  document.getElementById('musicToggleSettingBtn')?.addEventListener('click',toggleMusic);
   document.getElementById('diffSelect')?.addEventListener('change',e=>{ G.difficulty=e.target.value; localStorage.setItem('difficulty',G.difficulty); refreshMonster(); toast(`難度:${G.difficulty}`); });
   document.getElementById('googleBtn')?.addEventListener('click',googleLogin);
   document.getElementById('logoutBtn')?.addEventListener('click',googleLogout);
@@ -877,6 +988,7 @@ function loadSignin(){
 //  🚀 初始化
 // ============================================================
 document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('musicToggleBtn')?.addEventListener('click', toggleMusic);
   document.getElementById('attackBtn').onclick=attack;
   document.getElementById('skillBtn').onclick=showSkill;
   document.getElementById('restBtn').onclick=rest;
@@ -912,11 +1024,14 @@ document.addEventListener('DOMContentLoaded',()=>{
   calcOffline();
 
   if(!localStorage.getItem('guideShown')){
-    let ov=document.getElementById('guideOverlay');
-    ov.style.display='flex';
-    document.getElementById('closeGuideBtn').onclick=()=>{ ov.style.display='none'; localStorage.setItem('guideShown','true'); };
+    document.getElementById('guideOverlay').style.display='flex';
+    document.getElementById('closeGuideBtn').onclick=()=>{
+      document.getElementById('guideOverlay').style.display='none';
+      localStorage.setItem('guideShown','true');
+    };
   }
   setInterval(()=>{ if(document.getElementById('gamePage').classList.contains('active')){ G.stats.playTime++; } },1000);
+  setTimeout(()=>{ if(musicOn && !musicInterval){ getAudioCtx(); playMusic(); } },500);
 });
 </script>
 </body>
