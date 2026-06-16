@@ -57,6 +57,14 @@ button:active{transform:scale(0.97)}
 .report-card .copy-btn{background:#3b82f6;color:#fff}
 .report-card .discord-btn{background:#5865F2;color:#fff}
 .report-card .close-btn{background:#ef4444;color:#fff}
+.achievement-card{background:#0f172a;border-radius:16px;padding:12px;margin:8px 0;display:flex;justify-content:space-between;align-items:center;border-left:5px solid #334155}
+.achievement-card.locked{border-left-color:#475569;opacity:0.6}
+.achievement-card.unlocked{border-left-color:#facc15}
+.achievement-card .ach-icon{font-size:1.5rem;margin-right:8px}
+.achievement-card .ach-info{flex:1}
+.achievement-card .ach-name{font-weight:bold;font-size:0.9rem}
+.achievement-card .ach-desc{font-size:0.7rem;color:#94a3b8}
+.achievement-card .ach-status{font-size:0.7rem}
 </style>
 </head>
 <body>
@@ -65,13 +73,12 @@ button:active{transform:scale(0.97)}
 <!-- 主選單 -->
 <div id="mainPage" class="page active">
   <div class="main-title">MONSTER GAME+</div>
-  <div class="author">by Disabledev | 旗艦版</div>
+  <div class="author">by Disabledev</div>
   <button class="play-btn" id="toGameBtn">▶ 開始遊戲</button>
   <button class="settings-btn" id="toSettingsBtn">⚙️ 設定</button>
   <button class="settings-btn" id="shopBtn">🛒 商店</button>
   <button class="settings-btn" id="guildBtn">🏛️ 公會</button>
-  <button class="settings-btn" id="collectionBtn">📖 圖鑑</button>
-  <button class="settings-btn" id="statsBtn">📊 統計</button>
+  <button class="settings-btn" id="achievementBtn">🏆 成就</button>
   <button class="settings-btn" id="helpBtn">❓ 幫助</button>
 </div>
 
@@ -84,14 +91,11 @@ button:active{transform:scale(0.97)}
 <!-- 公會 -->
 <div id="guildPage" class="page"><div><button class="back-btn" id="backFromGuild">← 返回</button><span style="font-size:1.3rem;">🏛️ 公會</span></div><div id="guildInfo" class="guild-info"></div><div id="guildActions"></div><div id="guildBossSection" style="margin-top:12px;"></div></div>
 
-<!-- 圖鑑 -->
-<div id="collectionPage" class="page"><div><button class="back-btn" id="backFromCollection">← 返回</button><span style="font-size:1.3rem;">📖 圖鑑</span></div><div id="collectionList"></div></div>
-
-<!-- 統計 -->
-<div id="statsPage" class="page"><div><button class="back-btn" id="backFromStats">← 返回</button><span style="font-size:1.3rem;">📊 統計</span></div><div id="statsContent"></div></div>
+<!-- 成就 -->
+<div id="achievementPage" class="page"><div><button class="back-btn" id="backFromAchievement">← 返回</button><span style="font-size:1.3rem;">🏆 成就</span></div><div id="achievementList"></div></div>
 
 <!-- 幫助 -->
-<div id="helpPage" class="page"><div><button class="back-btn" id="backFromHelp">← 返回</button><span style="font-size:1.3rem;">❓ 幫助</span></div><div class="help-content"><p>⚔️攻擊 ✨技能 😴休息 🎒裝備</p><p>🔥元素克制｜🔄轉生｜🏛️公會</p><p>📖圖鑑｜📊統計｜📋任務</p><p>⚡挑戰｜🤖自動戰鬥｜💤離線收益</p><p>🎵右上角音符開關音樂</p><p>📋點擊「回報」按鈕產生Bug報告</p><p>☁️Google登入雲端存檔</p></div></div>
+<div id="helpPage" class="page"><div><button class="back-btn" id="backFromHelp">← 返回</button><span style="font-size:1.3rem;">❓ 幫助</span></div><div class="help-content"><p>⚔️攻擊 ✨技能 😴休息 🎒裝備</p><p>🔥元素克制｜🔄轉生｜🏛️公會</p><p>🏆成就｜📋任務｜⚡挑戰</p><p>🤖自動戰鬥｜💤離線收益</p><p>🎵音樂｜📋回報｜☁️雲端存檔</p></div></div>
 
 <!-- 遊戲主頁 -->
 <div id="gamePage" class="page">
@@ -119,21 +123,13 @@ button:active{transform:scale(0.97)}
     <button class="game-action rest" id="restBtn">😴</button>
     <button class="game-action inventory" id="inventoryBtn">🎒</button>
     <button class="game-action" id="rebirthBtn">🔄轉生</button>
-    <button class="game-action" id="challengeBtn">⚡挑戰</button>
-    <button class="game-action" id="questBtn">📋任務</button>
     <button class="game-action" id="reportBtn" style="background:#f59e0b;color:#fff;">📋 回報</button>
     <button class="game-action save" id="saveBtn">💾</button>
   </div>
 </div>
 
-<!-- 挑戰 -->
-<div id="challengePage" class="page"><div><button class="back-btn" id="backFromChallenge">← 返回</button><span style="font-size:1.3rem;">⚡ 挑戰</span></div><div id="challengeList"></div></div>
-
-<!-- 任務 -->
-<div id="questPage" class="page"><div><button class="back-btn" id="backFromQuest">← 返回</button><span style="font-size:1.3rem;">📋 任務</span></div><div id="questList"></div><button id="claimQuestRewardBtn" class="play-btn" style="margin-top:16px;">領取獎勵</button></div>
-
 <!-- 引導 -->
-<div id="guideOverlay" class="guide-overlay" style="display:none"><div class="guide-card"><p>🎮 歡迎！</p><p>⚔️攻擊 ✨技能 🎒裝備 😴休息</p><p>🔥元素克制 +30%</p><p>🔄Lv100轉生</p><p>🎵點擊右上角音符開關音樂</p><p>📋點擊「回報」按鈕產生Bug報告</p><button id="closeGuideBtn">開始</button></div></div>
+<div id="guideOverlay" class="guide-overlay" style="display:none"><div class="guide-card"><p>🎮 歡迎！</p><p>⚔️攻擊 ✨技能 🎒裝備 😴休息</p><p>🔥元素克制 +30%</p><p>🔄Lv100轉生</p><p>📋點擊「回報」產生Bug報告</p><button id="closeGuideBtn">開始</button></div></div>
 </div>
 
 <script>
@@ -154,7 +150,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth(), db = firebase.firestore(), provider = new firebase.auth.GoogleAuthProvider();
 
 // ============================================================
-//  🔒 Webhook URL（請妥善保管，此為範例）
+//  🔒 Webhook URL
 // ============================================================
 const WEBHOOK_URL = 'https://discord.com/api/webhooks/1503764494969475215/yj1L6PR8nVzbSEWomvEZYBas9Jx4_5KwQZJrvcrNUsBHcKx9nmI59bRGkOM7R_90yjb8';
 
@@ -183,18 +179,16 @@ const G = {
   totalKills:0, maxDamage:0, maxLevel:1,
   equipment:[],
   guild:{name:null, level:1, exp:0, members:[{uid:'player',contribution:0}]},
-  collection:{},
+  achievements:{},
   stats:{playTime:0, totalGold:0, totalEquip:0, totalUpgrade:0, skillUsage:0, bossKills:0},
-  quests:[],
-  challengeRecords:{infinite:0, speedrun:0},
   autoBattle:false,
   guildBossHP:0, guildBossMaxHP:0, guildBossDefeated:false
 };
 let currentUser=null, signinStreak=0;
-let autoTimer=null, infTimer=null, spdTimer=null;
+let autoTimer=null;
 
 // ============================================================
-//  🛠️ 工具函數（安全版本 - 使用 textContent）
+//  🛠️ 工具
 // ============================================================
 function toast(m,e){ const d=document.createElement('div');d.className='toast';d.textContent=m;d.style.color=e?'#ff8888':'#facc15';document.body.appendChild(d);setTimeout(()=>d.remove(),2000); }
 function rand(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
@@ -289,6 +283,7 @@ function doRebirth(){
   SFX.levelup();
   toast(`✨轉生成功！Lv.${G.rebirthLevel}`,false);
   updateUI();
+  checkAchievements();
 }
 
 // ============================================================
@@ -304,6 +299,7 @@ function createGuild(n){
   G.gold-=1000; G.guild={name:cleanName,level:1,exp:0,members:[{uid:'player',contribution:0}]};
   saveGuild(); saveGame(); updateGold(); SFX.equip(); toast(`公會「${cleanName}」創建成功`,false);
   renderGuild();
+  checkAchievements();
 }
 function donateGuild(a){
   if(!G.guild.name){ toast('請先創建公會',true); return; }
@@ -314,6 +310,7 @@ function donateGuild(a){
   G.guild.exp+=c;
   while(G.guild.exp>=G.guild.level*100){ G.guild.exp-=G.guild.level*100; G.guild.level++; SFX.levelup(); toast(`公會升至 Lv.${G.guild.level}！攻擊+${G.guild.level*2}%`,false); }
   saveGuild(); saveGame(); updateGold(); applyEq(); renderGuild();
+  checkAchievements();
 }
 function renderGuild(){
   const info=document.getElementById('guildInfo'), act=document.getElementById('guildActions'), boss=document.getElementById('guildBossSection');
@@ -354,123 +351,60 @@ function fightGuildBoss(){
 }
 
 // ============================================================
-//  📖 圖鑑
+//  🏆 成就系統
 // ============================================================
-function initCollection(){ const c=localStorage.getItem('collection'); if(c)G.collection=JSON.parse(c); else G.collection={}; }
-function updateCollection(m){ if(!m)return; const k=m.emoji+m.name; if(!G.collection[k])G.collection[k]={name:m.name,emoji:m.emoji,element:m.element,kills:0}; G.collection[k].kills++; localStorage.setItem('collection',JSON.stringify(G.collection)); }
-function renderCollection(){
-  const c=document.getElementById('collectionList');
-  if(!c)return;
-  const ks=Object.keys(G.collection);
-  if(!ks.length){ c.innerHTML='<p>尚未擊敗任何怪物</p>'; return; }
-  let h='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
-  ks.forEach(k=>{ const d=G.collection[k]; h+=`<div style="background:#0f172a;border-radius:16px;padding:12px;text-align:center;border:1px solid #334155;"><div style="font-size:2rem;">${d.emoji}</div><div>${d.name}</div><div style="font-size:0.7rem;color:#94a3b8;">${d.element}</div><div style="font-size:0.7rem;color:#facc15;">${d.kills}</div></div>`; });
-  h+='</div>'; c.innerHTML=h;
+const ACHIEVEMENTS = [
+  { id:'first_blood', name:'第一滴血', desc:'擊殺第1隻怪物', icon:'🩸', check:()=>G.totalKills>=1, reward:50 },
+  { id:'hundred_kills', name:'百人斬', desc:'擊殺100隻怪物', icon:'⚔️', check:()=>G.totalKills>=100, reward:200 },
+  { id:'thousand_kills', name:'千人斬', desc:'擊殺1000隻怪物', icon:'💀', check:()=>G.totalKills>=1000, reward:500 },
+  { id:'first_upgrade', name:'強化新手', desc:'強化1次裝備', icon:'🔧', check:()=>G.stats.totalUpgrade>=1, reward:50 },
+  { id:'master_upgrade', name:'強化大師', desc:'強化10次裝備', icon:'🔨', check:()=>G.stats.totalUpgrade>=10, reward:300 },
+  { id:'collector', name:'裝備收藏家', desc:'獲得5件裝備', icon:'📦', check:()=>G.stats.totalEquip>=5, reward:100 },
+  { id:'guild_member', name:'公會成員', desc:'創建或加入公會', icon:'🏛️', check:()=>G.guild.name!==null, reward:100 },
+  { id:'guild_contributor', name:'公會貢獻者', desc:'貢獻值達100', icon:'💰', check:()=>{ const m=G.guild.members.find(x=>x.uid==='player'); return m?m.contribution>=100:false; }, reward:200 },
+  { id:'element_master', name:'元素大師', desc:'使用3種不同元素攻擊', icon:'🔥', check:()=>{ const s=localStorage.getItem('elements_used'); return s?JSON.parse(s).length>=3:false; }, reward:150 },
+  { id:'boss_hunter', name:'Boss獵人', desc:'擊殺5隻Boss', icon:'👑', check:()=>(G.stats.bossKills||0)>=5, reward:300 },
+  { id:'rebirth_1', name:'轉生者', desc:'轉生1次', icon:'🔄', check:()=>G.rebirthLevel>=1, reward:500 },
+  { id:'rebirth_5', name:'傳奇', desc:'轉生5次', icon:'🌟', check:()=>G.rebirthLevel>=5, reward:1000 }
+];
+function initAchievements(){
+  const saved = localStorage.getItem('achievements');
+  if(saved) G.achievements = JSON.parse(saved);
+  else G.achievements = {};
+  ACHIEVEMENTS.forEach(a=>{ if(!(a.id in G.achievements)) G.achievements[a.id]=false; });
 }
-
-// ============================================================
-//  📊 統計
-// ============================================================
-function renderStats(){
-  const c=document.getElementById('statsContent');
-  if(!c)return;
-  const s=G.stats, m=G.guild.members.find(x=>x.uid==='player');
-  c.innerHTML=`
-    <div class="setting-item"><div>⏱️ 遊玩時間</div><div>${Math.floor(s.playTime/60)}分${s.playTime%60}秒</div></div>
-    <div class="setting-item"><div>💰 總金幣</div><div>${s.totalGold}</div></div>
-    <div class="setting-item"><div>⚔️ 擊殺數</div><div>${G.totalKills}</div></div>
-    <div class="setting-item"><div>💥 最大傷害</div><div>${G.maxDamage}</div></div>
-    <div class="setting-item"><div>🏆 最高等級</div><div>${G.maxLevel}</div></div>
-    <div class="setting-item"><div>🔄 轉生次數</div><div>${G.rebirthLevel}</div></div>
-    <div class="setting-item"><div>🎒 獲得裝備</div><div>${s.totalEquip}</div></div>
-    <div class="setting-item"><div>🔧 強化次數</div><div>${s.totalUpgrade}</div></div>
-    <div class="setting-item"><div>✨ 技能使用</div><div>${s.skillUsage}</div></div>
-    <div class="setting-item"><div>👑 Boss擊殺</div><div>${s.bossKills||0}</div></div>
-    <div class="setting-item"><div>🏛️ 公會貢獻</div><div>${m?.contribution||0}</div></div>
-  `;
+function checkAchievements(){
+  let unlocked = false;
+  ACHIEVEMENTS.forEach(a=>{
+    if(!G.achievements[a.id] && a.check()){
+      G.achievements[a.id] = true;
+      unlocked = true;
+      addGold(a.reward);
+      toast(`🏆 解鎖成就：${a.icon} ${a.name}！獎勵 ${a.reward} 金幣`, false);
+      localStorage.setItem('achievements', JSON.stringify(G.achievements));
+      saveGame();
+    }
+  });
+  if(unlocked) renderAchievements();
 }
-
-// ============================================================
-//  📋 任務
-// ============================================================
-function initQuests(){ const q=localStorage.getItem('quests'); if(q)G.quests=JSON.parse(q); else resetQuests(); }
-function resetQuests(){
-  const today=new Date().toDateString();
-  G.quests=[
-    {id:'q1',name:'擊敗5隻怪物',target:5,current:0,reward:200,completed:false,claimed:false},
-    {id:'q2',name:'使用3次技能',target:3,current:0,reward:150,completed:false,claimed:false},
-    {id:'q3',name:'獲得2件裝備',target:2,current:0,reward:100,completed:false,claimed:false},
-    {id:'q4',name:'強化2次裝備',target:2,current:0,reward:120,completed:false,claimed:false},
-    {id:'q5',name:'捐獻公會1次',target:1,current:0,reward:80,completed:false,claimed:false}
-  ];
-  localStorage.setItem('quests',JSON.stringify(G.quests));
-  localStorage.setItem('questDate',today);
-}
-function checkQuests(){ if(localStorage.getItem('questDate')!==new Date().toDateString())resetQuests(); }
-function updateQuest(id,a=1){ G.quests.forEach(q=>{ if(q.completed||q.claimed)return; if(q.id===id){ q.current=Math.min(q.target,q.current+a); if(q.current>=q.target)q.completed=true; } }); localStorage.setItem('quests',JSON.stringify(G.quests)); renderQuests(); }
-function renderQuests(){ const c=document.getElementById('questList'); if(!c)return; c.innerHTML=G.quests.map(q=>`<div class="setting-item"><div>${q.name}<br><span style="font-size:0.7rem;color:#94a3b8;">${q.current}/${q.target}</span></div><div>${q.completed?'✅':q.claimed?'已領':'⏳'}</div></div>`).join(''); }
-function claimQuests(){
-  let t=0;
-  G.quests.forEach(q=>{ if(q.completed&&!q.claimed){ q.claimed=true; t+=q.reward; } });
-  if(t>0){ addGold(t); SFX.gold(); toast(`領取 ${t} 金幣`,false); localStorage.setItem('quests',JSON.stringify(G.quests)); renderQuests(); }
-  else toast('無可領取',true);
-}
-
-// ============================================================
-//  ⚡ 挑戰
-// ============================================================
-function renderChallenges(){
-  const c=document.getElementById('challengeList');
-  if(!c)return;
-  c.innerHTML=`
-    <div class="challenge-card"><div>♾️ 無限模式<br><span style="font-size:0.7rem;">不斷戰鬥，記錄最高波數</span></div><div>最高: ${G.challengeRecords.infinite||0}波<br><button id="infBtn" class="game-action" style="padding:4px 12px;">開始</button></div></div>
-    <div class="challenge-card"><div>⚡ 速通<br><span style="font-size:0.7rem;">最快擊敗10隻怪物</span></div><div>最快: ${G.challengeRecords.speedrun||0}秒<br><button id="speedBtn" class="game-action" style="padding:4px 12px;">開始</button></div></div>
-    <div class="challenge-card"><div>🔥 屬性限制<br><span style="font-size:0.7rem;">限火屬性武器攻擊</span></div><div><button id="elemBtn" class="game-action" style="padding:4px 12px;">開始</button></div></div>
-  `;
-  document.getElementById('infBtn')?.addEventListener('click',startInfinite);
-  document.getElementById('speedBtn')?.addEventListener('click',startSpeedrun);
-  document.getElementById('elemBtn')?.addEventListener('click',startElemChallenge);
-}
-let infWave=0, infActive=false;
-function startInfinite(){
-  if(infActive){ toast('進行中',true); return; }
-  infActive=true; infWave=0; toast('♾️ 無限模式！',false);
-  if(infTimer)clearInterval(infTimer);
-  infTimer=setInterval(()=>{
-    if(!infActive||G.hp<=0){ clearInterval(infTimer); infActive=false; if(G.hp<=0){ G.hp=G.maxHp; updateUI(); SFX.hurt(); toast(`💀 結束 波數:${infWave}`,true); if(infWave>G.challengeRecords.infinite)G.challengeRecords.infinite=infWave; saveGame(); } return; }
-    infWave++;
-    const m=genMonster(); m.hp=Math.floor(m.hp*(1+infWave*.1)); m.maxHp=m.hp; m.atk=Math.floor(m.atk*(1+infWave*.05));
-    G.curMonster=m; updateUI();
-    const d=rand(G.atk-3,G.atk+5);
-    m.hp-=d;
-    if(m.hp<=0){ G.totalKills++; addGold(rand(5,20)); SFX.defeat(); }
-    else { G.hp-=rand(5,15); if(G.hp<=0){ G.hp=G.maxHp; G.restUsed=false; SFX.hurt(); } }
-    updateUI();
-  },1500);
-}
-function startSpeedrun(){
-  toast('⚡ 速通開始！',false);
-  let killed=0; const start=Date.now();
-  if(spdTimer)clearInterval(spdTimer);
-  spdTimer=setInterval(()=>{
-    if(killed>=10){ clearInterval(spdTimer); const t=(Date.now()-start)/1000; toast(`⚡ ${t}秒`,false); if(t<G.challengeRecords.speedrun||!G.challengeRecords.speedrun)G.challengeRecords.speedrun=Math.floor(t); saveGame(); return; }
-    const m=genMonster(); G.curMonster=m; updateUI();
-    const d=rand(G.atk-3,G.atk+5);
-    m.hp-=d;
-    if(m.hp<=0){ killed++; G.totalKills++; addGold(rand(5,10)); SFX.defeat(); }
-    else { G.hp-=rand(5,10); if(G.hp<=0){ G.hp=G.maxHp; SFX.hurt(); } }
-    updateUI();
-  },1000);
-}
-function startElemChallenge(){
-  if(playerElem()!=='火'){ toast('請裝備火屬性武器！',true); return; }
-  toast('🔥 屬性限制挑戰！',false);
-  const m=genMonster(); G.curMonster=m; updateUI();
-  const d=rand(G.atk-3,G.atk+5)*elemBonus('火',m.element);
-  m.hp-=d;
-  if(m.hp<=0){ toast('🔥 成功！+200金',false); addGold(200); SFX.defeat(); }
-  else { toast('🔥 失敗',true); SFX.hurt(); }
-  updateUI();
+function renderAchievements(){
+  const container = document.getElementById('achievementList');
+  if(!container) return;
+  let html = '';
+  ACHIEVEMENTS.forEach(a=>{
+    const unlocked = G.achievements[a.id] || false;
+    const status = unlocked ? '✅ 已解鎖' : '🔒 未解鎖';
+    const cls = unlocked ? 'unlocked' : 'locked';
+    html += `<div class="achievement-card ${cls}">
+      <div class="ach-icon">${a.icon}</div>
+      <div class="ach-info">
+        <div class="ach-name">${a.name}</div>
+        <div class="ach-desc">${a.desc}</div>
+      </div>
+      <div class="ach-status">${status}</div>
+    </div>`;
+  });
+  container.innerHTML = html;
 }
 
 // ============================================================
@@ -544,8 +478,6 @@ function defeatMonster(){
   G.totalKills++;
   if(G.lastDmg>G.maxDamage)G.maxDamage=G.lastDmg;
   if(G.curMonster.isBoss){ G.stats.bossKills=(G.stats.bossKills||0)+1; }
-  updateCollection(G.curMonster);
-  updateQuest('q1');
   if(Math.random()<.3||G.curMonster.isBoss){
     const e=genEq();
     if(G.curMonster.isBoss)e.quality='史詩';
@@ -553,12 +485,12 @@ function defeatMonster(){
     SFX.equip();
     toast(`🎁獲得 ${e.name}`,false);
     if(!G.equipment.some(x=>x.type===e.type&&x.equipped)){ e.equipped=true; applyEq(); toast('✨自動裝',false); }
-    updateQuest('q3');
   }
   levelUp();
   refreshMonster();
   updateUI();
   saveGame();
+  checkAchievements();
 }
 function attack(){
   if(G.hp<=0){ log('無法攻擊'); return; }
@@ -572,6 +504,11 @@ function attack(){
   const rect=document.getElementById('attackBtn').getBoundingClientRect();
   dmgFloat(rect.left+20, rect.top-20, '-'+d, d>20?'#ff6b6b':'#ffd93d');
   log(`⚔️ ${d}傷${eb>1?' 克制!':''}`);
+  // 記錄元素使用（成就用）
+  if(playerElem()!=='無'){
+    let used = JSON.parse(localStorage.getItem('elements_used')||'[]');
+    if(!used.includes(playerElem())){ used.push(playerElem()); localStorage.setItem('elements_used',JSON.stringify(used)); }
+  }
   if(G.curMonster.hp<=0)defeatMonster();
   else monsterCounter();
   updateUI(); saveGame();
@@ -610,7 +547,7 @@ function showSkill(){
         if(G.curMonster.hp<=0)defeatMonster();
         else monsterCounter();
         updateUI(); saveGame();
-        updateQuest('q2');
+        checkAchievements();
       }
     };
     cd.appendChild(b);
@@ -695,7 +632,7 @@ function renderShop(){
     <div class="setting-item"><div>🐕 寵物 (攻擊+5%)</div><button id="buyPet">300💰</button></div>
   `;
   document.getElementById('buyEq')?.addEventListener('click',()=>{
-    if(G.gold>=100){ G.gold-=100; const e=genEq(); G.equipment.push(e); G.stats.totalEquip++; SFX.equip(); toast(`獲得 ${e.name}`,false); if(!G.equipment.some(x=>x.type===e.type&&x.equipped)){ e.equipped=true; applyEq(); toast('✨自動裝',false); } updateGold(); saveGame(); }
+    if(G.gold>=100){ G.gold-=100; const e=genEq(); G.equipment.push(e); G.stats.totalEquip++; SFX.equip(); toast(`獲得 ${e.name}`,false); if(!G.equipment.some(x=>x.type===e.type&&x.equipped)){ e.equipped=true; applyEq(); toast('✨自動裝',false); } updateGold(); saveGame(); checkAchievements(); }
     else toast('金幣不足',true);
   });
   document.getElementById('buyExp')?.addEventListener('click',()=>{
@@ -725,8 +662,8 @@ function renderSettings(){
     <div class="setting-item"><div>🎵音樂</div><button id="musicToggleSettingBtn" class="music-btn ${musicOn?'on':''}" style="width:auto;padding:4px 16px;border-radius:20px;">${musicOn?'🔊 開啟':'🔇 關閉'}</button></div>
     <div class="setting-item"><div>⚔️難度</div><select id="diffSelect"><option value="easy" ${G.difficulty==='easy'?'selected':''}>簡單</option><option value="normal" ${G.difficulty==='normal'?'selected':''}>普通</option><option value="hard" ${G.difficulty==='hard'?'selected':''}>困難</option><option value="extreme" ${G.difficulty==='extreme'?'selected':''}>極限</option></select></div>
     <div class="setting-item"><div>🔐Google</div><div><button id="googleBtn" style="background:#334155;padding:6px 12px;">登入</button> <button id="logoutBtn" style="background:#334155;padding:6px 12px;">登出</button></div></div>
-    <div class="setting-item"><div>🏆成就</div><div>🐉${G.totalKills} 💥${G.maxDamage} 🏆${G.maxLevel}</div></div>
-    <div class="setting-item"><div>📌 版本</div><div>v7.0</div></div>
+    <div class="setting-item"><div>🏆成就</div><div>${Object.values(G.achievements).filter(v=>v).length}/${ACHIEVEMENTS.length}</div></div>
+    <div class="setting-item"><div>📌 版本</div><div>v8.0</div></div>
     <div class="setting-item"><div>🔄 更新</div><button id="checkUpdateBtn" style="background:#3b82f6;color:#fff;border:none;padding:6px 12px;border-radius:30px;">檢查</button></div>
     <div class="setting-item"><div style="color:#f87171;">⚠️重置</div><button id="resetGameBtn" style="background:#ef4444;color:#fff;border:none;padding:6px 12px;border-radius:30px;">重置</button></div>
   `;
@@ -754,12 +691,13 @@ function openReport() {
   const wi = w ? `${w.name}+${w.bonus} (${w.element})` : '無';
   const ai = a ? `${a.name}+${a.bonus} (${a.element})` : '無';
   const mi = G.curMonster ? `${G.curMonster.emoji}${G.curMonster.name} Lv.${G.curMonster.lv} HP:${G.curMonster.hp}/${G.curMonster.maxHp}` : '無';
+  const achCount = Object.values(G.achievements).filter(v=>v).length;
 
   const report = `========================================
 🎮 幻獸鬥士 Bug 回報
 ========================================
 📅 時間：${timeStr}
-🔍 版本：v7.0
+🔍 版本：v8.0
 
 ━━━ 玩家狀態 ━━━
 👤 等級：${G.lv}
@@ -769,6 +707,7 @@ function openReport() {
 🔄 轉生：${G.rebirthLevel} 次
 🔥 元素：${playerElem()}
 🏛️ 公會：${gn} (Lv.${gl}) 貢獻:${gc}
+🏆 成就：${achCount}/${ACHIEVEMENTS.length}
 
 ━━━ 裝備 ━━━
 🗡️ 武器：${wi}
@@ -873,7 +812,7 @@ window.googleLogout=async()=>{ await auth.signOut(); currentUser=null; renderSet
 auth.onAuthStateChanged(u=>{ currentUser=u; renderSettings(); });
 
 function saveGame(){
-  const state={lv:G.lv, exp:G.exp, baseAtk:G.baseAtk, baseHp:G.baseHp, hp:G.hp, maxHp:G.maxHp, atk:G.atk, restUsed:G.restUsed, difficulty:G.difficulty, equipment:G.equipment, deathStreak:G.deathStreak, lastDmg:G.lastDmg, totalKills:G.totalKills, maxDamage:G.maxDamage, maxLevel:G.maxLevel, gold:G.gold, rebirthLevel:G.rebirthLevel, guild:G.guild, collection:G.collection, stats:G.stats, quests:G.quests, challengeRecords:G.challengeRecords, guildBossHP:G.guildBossHP, guildBossMaxHP:G.guildBossMaxHP, guildBossDefeated:G.guildBossDefeated, lastUpdated:new Date().toISOString()};
+  const state={lv:G.lv, exp:G.exp, baseAtk:G.baseAtk, baseHp:G.baseHp, hp:G.hp, maxHp:G.maxHp, atk:G.atk, restUsed:G.restUsed, difficulty:G.difficulty, equipment:G.equipment, deathStreak:G.deathStreak, lastDmg:G.lastDmg, totalKills:G.totalKills, maxDamage:G.maxDamage, maxLevel:G.maxLevel, gold:G.gold, rebirthLevel:G.rebirthLevel, guild:G.guild, achievements:G.achievements, stats:G.stats, guildBossHP:G.guildBossHP, guildBossMaxHP:G.guildBossMaxHP, guildBossDefeated:G.guildBossDefeated, lastUpdated:new Date().toISOString()};
   localStorage.setItem('gameSave',JSON.stringify(state));
   if(currentUser){
     db.collection('players').doc(currentUser.uid).set(state).catch(err=>{
@@ -894,14 +833,12 @@ function loadGame(){
       G.totalKills=s.totalKills??0; G.maxDamage=s.maxDamage??0; G.maxLevel=s.maxLevel??1;
       G.gold=s.gold??0; G.rebirthLevel=s.rebirthLevel??0;
       if(s.guild)G.guild=s.guild;
-      if(s.collection)G.collection=s.collection;
+      if(s.achievements)G.achievements=s.achievements;
       if(s.stats)G.stats=s.stats;
-      if(s.quests)G.quests=s.quests;
-      if(s.challengeRecords)G.challengeRecords=s.challengeRecords;
       if(s.guildBossHP!==undefined){ G.guildBossHP=s.guildBossHP; G.guildBossMaxHP=s.guildBossMaxHP; G.guildBossDefeated=s.guildBossDefeated; }
     }catch(e){ console.error('Load game error:', e); }
   }
-  applyEq(); refreshMonster(); updateUI();
+  applyEq(); refreshMonster(); updateUI(); renderAchievements();
 }
 async function loadCloud(){
   if(!currentUser)return;
@@ -916,12 +853,10 @@ async function loadCloud(){
       G.totalKills=s.totalKills??0; G.maxDamage=s.maxDamage??0; G.maxLevel=s.maxLevel??1;
       G.gold=s.gold??0; G.rebirthLevel=s.rebirthLevel??0;
       if(s.guild)G.guild=s.guild;
-      if(s.collection)G.collection=s.collection;
+      if(s.achievements)G.achievements=s.achievements;
       if(s.stats)G.stats=s.stats;
-      if(s.quests)G.quests=s.quests;
-      if(s.challengeRecords)G.challengeRecords=s.challengeRecords;
       if(s.guildBossHP!==undefined){ G.guildBossHP=s.guildBossHP; G.guildBossMaxHP=s.guildBossMaxHP; G.guildBossDefeated=s.guildBossDefeated; }
-      applyEq(); refreshMonster(); updateUI();
+      applyEq(); refreshMonster(); updateUI(); renderAchievements();
       toast('☁️ 同步完成',false);
     }
   }catch(e){ 
@@ -938,16 +873,11 @@ function showPage(id){
   document.getElementById(id)?.classList.add('active');
   
   if(autoTimer){ clearInterval(autoTimer); autoTimer=null; }
-  if(infTimer){ clearInterval(infTimer); infTimer=null; infActive=false; }
-  if(spdTimer){ clearInterval(spdTimer); spdTimer=null; }
   
   if(id==='settingsPage')renderSettings();
   if(id==='shopPage'){ renderShop(); updateGold(); checkDailyUI(); loadSignin(); document.getElementById('claimDailyBtn').onclick=()=>{ claimDaily(); checkDailyUI(); }; document.getElementById('signinBtn').onclick=()=>{ doSignin(); loadSignin(); }; }
   if(id==='guildPage'){ initGuild(); initGuildBoss(); renderGuild(); }
-  if(id==='collectionPage')renderCollection();
-  if(id==='statsPage')renderStats();
-  if(id==='challengePage')renderChallenges();
-  if(id==='questPage'){ checkQuests(); renderQuests(); document.getElementById('claimQuestRewardBtn').onclick=claimQuests; }
+  if(id==='achievementPage')renderAchievements();
   if(id==='gamePage'){ if(musicOn&&!musicTimer) playMusic(); }
 }
 function loadSignin(){
@@ -969,22 +899,24 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('saveBtn').onclick=saveGame;
   document.getElementById('rebirthBtn').onclick=doRebirth;
   document.getElementById('autoBattleBtn').onclick=toggleAuto;
-  document.getElementById('challengeBtn').onclick=()=>showPage('challengePage');
-  document.getElementById('questBtn').onclick=()=>showPage('questPage');
   document.getElementById('toGameBtn').onclick=()=>showPage('gamePage');
   document.getElementById('toSettingsBtn').onclick=()=>showPage('settingsPage');
   document.getElementById('shopBtn').onclick=()=>showPage('shopPage');
   document.getElementById('guildBtn').onclick=()=>showPage('guildPage');
-  document.getElementById('collectionBtn').onclick=()=>showPage('collectionPage');
-  document.getElementById('statsBtn').onclick=()=>showPage('statsPage');
+  document.getElementById('achievementBtn').onclick=()=>showPage('achievementPage');
   document.getElementById('helpBtn').onclick=()=>showPage('helpPage');
   document.querySelectorAll('.back-btn').forEach(btn=>{
     btn.onclick=()=>showPage('mainPage');
   });
-  document.getElementById('backFromChallenge').onclick=()=>showPage('gamePage');
-  document.getElementById('backFromQuest').onclick=()=>showPage('gamePage');
 
-  loadGame(); initGuild(); initGuildBoss(); initCollection(); initQuests(); loadSignin(); calcOffline();
+  initAchievements();
+  loadGame(); 
+  initGuild(); 
+  initGuildBoss(); 
+  loadSignin(); 
+  calcOffline();
+  renderAchievements();
+  
   if(!localStorage.getItem('guideShown')){
     document.getElementById('guideOverlay').style.display='flex';
     document.getElementById('closeGuideBtn').onclick=()=>{
