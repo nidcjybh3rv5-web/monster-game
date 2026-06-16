@@ -3,12 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>幻獸鬥士</title>
+<title>幻獸鬥士 - 旗艦版</title>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <style>
-/* ===== 精簡樣式 ===== */
 *{margin:0;padding:0;box-sizing:border-box;user-select:none}
 body{background:radial-gradient(circle at 20% 30%,#1a2a3a,#0a0f1e);font-family:system-ui;min-height:100vh;display:flex;justify-content:center;align-items:center;color:#fff;padding:16px}
 .app{width:100%;max-width:550px;background:rgba(255,255,255,0.08);backdrop-filter:blur(25px);border-radius:48px;padding:24px 20px 32px;border:1px solid rgba(255,255,255,0.2)}
@@ -53,9 +52,10 @@ button:active{transform:scale(0.97)}
 .report-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);backdrop-filter:blur(10px);z-index:10000;display:flex;justify-content:center;align-items:center}
 .report-card{background:#1e293b;width:90%;max-width:400px;max-height:80%;border-radius:32px;padding:20px;border:1px solid #facc15;display:flex;flex-direction:column}
 .report-card textarea{width:100%;height:280px;background:#0f172a;color:#fff;border:1px solid #334155;border-radius:16px;padding:12px;font-size:0.85rem;resize:vertical;font-family:monospace;margin:12px 0}
-.report-card .report-buttons{display:flex;gap:12px;justify-content:center}
+.report-card .report-buttons{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 .report-card .report-buttons button{padding:8px 24px;border-radius:40px;border:none;cursor:pointer;font-weight:bold}
 .report-card .copy-btn{background:#3b82f6;color:#fff}
+.report-card .discord-btn{background:#5865F2;color:#fff}
 .report-card .close-btn{background:#ef4444;color:#fff}
 </style>
 </head>
@@ -138,7 +138,7 @@ button:active{transform:scale(0.97)}
 
 <script>
 // ============================================================
-//  🔥 Firebase 設定（已內嵌）
+//  🔥 Firebase 設定
 // ============================================================
 const firebaseConfig = {
   apiKey: "AIzaSyDevirfNqjlg5hVkF6pgMMU9tfx7CDac4A",
@@ -733,20 +733,21 @@ function renderSettings(){
 }
 
 // ============================================================
-//  📋 回報功能
+//  📋 回報功能（含 Discord 發送）
 // ============================================================
-function openReport(){
-  const now=new Date();
-  const timeStr=now.toLocaleString('zh-TW',{hour12:false});
-  const ua=navigator.userAgent;
-  const gn=G.guild?.name||'無', gl=G.guild?.level||0;
-  const gc=G.guild?.members?.find(m=>m.uid==='player')?.contribution||0;
-  const w=G.equipment.find(e=>e.type==='w'&&e.equipped);
-  const a=G.equipment.find(e=>e.type==='a'&&e.equipped);
-  const wi=w?`${w.name}+${w.bonus} (${w.element})`:'無';
-  const ai=a?`${a.name}+${a.bonus} (${a.element})`:'無';
-  const mi=G.curMonster?`${G.curMonster.emoji}${G.curMonster.name} Lv.${G.curMonster.lv} HP:${G.curMonster.hp}/${G.curMonster.maxHp}`:'無';
-  const report=`========================================
+function openReport() {
+  const now = new Date();
+  const timeStr = now.toLocaleString('zh-TW', { hour12: false });
+  const ua = navigator.userAgent;
+  const gn = G.guild?.name || '無', gl = G.guild?.level || 0;
+  const gc = G.guild?.members?.find(m => m.uid === 'player')?.contribution || 0;
+  const w = G.equipment.find(e => e.type === 'w' && e.equipped);
+  const a = G.equipment.find(e => e.type === 'a' && e.equipped);
+  const wi = w ? `${w.name}+${w.bonus} (${w.element})` : '無';
+  const ai = a ? `${a.name}+${a.bonus} (${a.element})` : '無';
+  const mi = G.curMonster ? `${G.curMonster.emoji}${G.curMonster.name} Lv.${G.curMonster.lv} HP:${G.curMonster.hp}/${G.curMonster.maxHp}` : '無';
+
+  const report = `========================================
 🎮 幻獸鬥士 Bug 回報
 ========================================
 📅 時間：${timeStr}
@@ -774,31 +775,84 @@ function openReport(){
 ━━━ 系統資訊 ━━━
 🌐 瀏覽器：${ua}
 📱 平台：${navigator.platform}
-☁️ 登入狀態：${currentUser?'已登入 ('+currentUser.displayName+')':'未登入'}
+☁️ 登入狀態：${currentUser ? '已登入 (' + currentUser.displayName + ')' : '未登入'}
 
 ━━━ 請描述您遇到的問題 ━━━
 （請在這裡輸入詳細描述...）
 
 ========================================`;
-  const ov=document.createElement('div'); ov.className='report-overlay';
-  const cd=document.createElement('div'); cd.className='report-card';
-  const title=document.createElement('h3'); title.innerText='📋 Bug 回報'; title.style.marginBottom='8px';
-  const ta=document.createElement('textarea'); ta.id='reportTextarea'; ta.value=report;
-  const bd=document.createElement('div'); bd.className='report-buttons';
-  const copy=document.createElement('button'); copy.className='copy-btn'; copy.innerText='📋 複製';
-  copy.onclick=()=>{
-    ta.select(); ta.setSelectionRange(0,99999);
-    if(navigator.clipboard&&navigator.clipboard.writeText){
-      navigator.clipboard.writeText(ta.value).then(()=>toast('✅ 已複製！',false)).catch(()=>{ document.execCommand('copy'); toast('✅ 已複製！',false); });
-    } else { document.execCommand('copy'); toast('✅ 已複製！',false); }
+
+  const ov = document.createElement('div');
+  ov.className = 'report-overlay';
+  const cd = document.createElement('div');
+  cd.className = 'report-card';
+  const title = document.createElement('h3');
+  title.innerText = '📋 Bug 回報';
+  title.style.marginBottom = '8px';
+  const ta = document.createElement('textarea');
+  ta.id = 'reportTextarea';
+  ta.value = report;
+  const bd = document.createElement('div');
+  bd.className = 'report-buttons';
+
+  const copy = document.createElement('button');
+  copy.className = 'copy-btn';
+  copy.innerText = '📋 複製';
+  copy.onclick = () => {
+    ta.select();
+    ta.setSelectionRange(0, 99999);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(ta.value).then(() => toast('✅ 已複製！', false)).catch(() => { document.execCommand('copy');
+        toast('✅ 已複製！', false); });
+    } else { document.execCommand('copy');
+      toast('✅ 已複製！', false); }
   };
-  const close=document.createElement('button'); close.className='close-btn'; close.innerText='✖ 關閉';
-  close.onclick=()=>document.body.removeChild(ov);
-  ov.onclick=e=>{ if(e.target===ov)document.body.removeChild(ov); };
-  bd.appendChild(copy); bd.appendChild(close);
-  cd.appendChild(title); cd.appendChild(ta); cd.appendChild(bd);
-  ov.appendChild(cd); document.body.appendChild(ov);
-  setTimeout(()=>{ ta.select(); ta.setSelectionRange(0,99999); },100);
+
+  const WEBHOOK_URL = 'https://discord.com/api/webhooks/1503764494969475215/yj1L6PR8nVzbSEWomvEZYBas9Jx4_5KwQZJrvcrNUsBHcKx9nmI59bRGkOM7R_90yjb8';
+  const send = document.createElement('button');
+  send.className = 'discord-btn';
+  send.innerText = '📤 Discord';
+  send.onclick = () => {
+    const content = ta.value;
+    send.innerText = '⏳ 發送中...';
+    send.disabled = true;
+    fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: content })
+    })
+    .then(res => {
+      send.innerText = '📤 Discord';
+      send.disabled = false;
+      if (res.ok) {
+        toast('✅ 已發送到 Discord！', false);
+      } else {
+        toast('❌ 發送失敗 (HTTP ' + res.status + ')', true);
+      }
+    })
+    .catch(() => {
+      send.innerText = '📤 Discord';
+      send.disabled = false;
+      toast('❌ 發送失敗，請檢查網路', true);
+    });
+  };
+
+  const close = document.createElement('button');
+  close.className = 'close-btn';
+  close.innerText = '✖ 關閉';
+  close.onclick = () => document.body.removeChild(ov);
+  ov.onclick = e => { if (e.target === ov) document.body.removeChild(ov); };
+
+  bd.appendChild(copy);
+  bd.appendChild(send);
+  bd.appendChild(close);
+  cd.appendChild(title);
+  cd.appendChild(ta);
+  cd.appendChild(bd);
+  ov.appendChild(cd);
+  document.body.appendChild(ov);
+  setTimeout(() => { ta.select();
+    ta.setSelectionRange(0, 99999); }, 100);
 }
 
 // ============================================================
