@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>幻獸鬥士 - 最終旗艦版</title>
+<title>幻獸鬥士 - 旗艦版</title>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -122,16 +122,19 @@ button:active{transform:scale(0.97)}
 
 <script>
 // ============================================================
-//  🔥 FIREBASE 設定（請填入您的）
+//  🔥 FIREBASE 設定（已填入您的設定）
 // ============================================================
 const firebaseConfig = {
-  apiKey: "請填入",
-  authDomain: "請填入",
-  projectId: "請填入",
-  storageBucket: "請填入",
-  messagingSenderId: "請填入",
-  appId: "請填入"
+  apiKey: "AIzaSyDevirfNqjlg5hVkF6pgMMU9tfx7CDac4A",
+  authDomain: "monster-game-f193f.firebaseapp.com",
+  databaseURL: "https://monster-game-f193f-default-rtdb.firebaseio.com",
+  projectId: "monster-game-f193f",
+  storageBucket: "monster-game-f193f.firebasestorage.app",
+  messagingSenderId: "304101821779",
+  appId: "1:304101821779:web:9b77e901083a7949f265a6",
+  measurementId: "G-LDLS7KEDZ9"
 };
+
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
@@ -165,7 +168,6 @@ let speedTimer = null;
 // ============================================================
 function toast(m,e){ let d=document.createElement('div');d.className='toast';d.innerText=m;d.style.color=e?'#ff8888':'#facc15';document.body.appendChild(d);setTimeout(()=>d.remove(),2000); }
 function rand(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
-function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
 function dmgFloat(x,y,t,c='#ff6b6b'){ let e=document.createElement('div');e.className='dmg-float';e.innerText=t;e.style.left=x+'px';e.style.top=y+'px';e.style.color=c;document.body.appendChild(e);setTimeout(()=>e.remove(),1000); }
 
 // ============================================================
@@ -325,7 +327,6 @@ function renderGuild(){
     if(c>=200){ m.contribution-=200; let e=genEq(); e.quality='稀有'; G.equipment.push(e); G.stats.totalEquip++; toast(`獲得 ${e.name}`,false); saveGuild(); saveGame(); renderGuild(); }
     else toast('貢獻不足',true);
   });
-  // 公會Boss
   boss.innerHTML=`<div class="setting-item"><div>👑 公會Boss (${G.guildBossDefeated?'已擊敗':'挑戰中'})</div><button id="guildBossBtn" ${G.guildBossDefeated?'disabled':''}>${G.guildBossDefeated?'✅':'⚔️'}</button></div>`;
   document.getElementById('guildBossBtn')?.addEventListener('click', fightGuildBoss);
 }
