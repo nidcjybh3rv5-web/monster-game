@@ -1,4 +1,178 @@
 // ============================================================
+//  🧬 自癒引擎 (Self-Healing Engine)
+//  功能：檢測缺失的關鍵函數/變數，並自動補充備用實作
+// ============================================================
+(function heal() {
+  console.log('🧬 自癒引擎啟動...');
+
+  // 1. 定義備用函數庫（若檢測到缺失則注入）
+  const backupLib = {
+
+    // ---------- 裝備 ----------
+    generateEquipment: function() {
+      // 替代 genEq
+      const t = Math.random() < 0.5 ? 'w' : 'a';
+      const q = { name: '普通', color: '#9ca3af', min: 1, max: 3 };
+      const b = Math.floor(Math.random() * (q.max - q.min + 1)) + q.min;
+      const e = ['火','水','草','光','暗'][Math.floor(Math.random()*5)] || '無';
+      return {
+        id: Date.now() + '-' + Math.random(),
+        type: t,
+        quality: q.name,
+        color: q.color,
+        bonus: b,
+        name: `${q.name} ${t==='w'?'武':'防'}`,
+        equipped: false,
+        level: 0,
+        element: e
+      };
+    },
+
+    // ---------- 公會 ----------
+    createGuild: function(name) {
+      if (typeof toast === 'function') toast('公會系統未載入，請重新整理', true);
+      else alert('公會系統未載入');
+    },
+    joinGuild: function(name) {
+      if (typeof toast === 'function') toast('公會系統未載入', true);
+      else alert('公會系統未載入');
+    },
+    leaveGuild: function() {
+      if (typeof toast === 'function') toast('公會系統未載入', true);
+      else alert('公會系統未載入');
+    },
+    donateGold: function(amount) {
+      if (typeof toast === 'function') toast('公會系統未載入', true);
+      else alert('公會系統未載入');
+    },
+    attackGuildBoss: function() {
+      if (typeof toast === 'function') toast('公會系統未載入', true);
+      else alert('公會系統未載入');
+    },
+    renderGuildUI: function() {
+      const info = document.getElementById('guildInfo');
+      const actions = document.getElementById('guildActions');
+      if (info) info.innerHTML = '<p>公會系統未載入</p>';
+      if (actions) actions.innerHTML = '';
+    },
+
+    // ---------- PvP ----------
+    startPvP: function() {
+      if (typeof toast === 'function') toast('PvP 系統未載入', true);
+      else alert('PvP 系統未載入');
+    },
+    renderPvPUI: function() {
+      const c = document.getElementById('pvpContent');
+      if (c) c.innerHTML = '<p>PvP 系統未載入</p>';
+    },
+
+    // ---------- 賽季 ----------
+    claimSeasonReward: function(level) {
+      if (typeof toast === 'function') toast('賽季系統未載入', true);
+      else alert('賽季系統未載入');
+    },
+    renderSeasonUI: function() {
+      const c = document.getElementById('seasonContent');
+      if (c) c.innerHTML = '<p>賽季系統未載入</p>';
+    },
+    updateSeasonProgress: function(type, amount) {
+      // 靜默忽略
+    },
+
+    // ---------- 成就 ----------
+    checkAchievements: function() {
+      // 靜默忽略
+    },
+    renderAchievements: function() {
+      const c = document.getElementById('achievementList');
+      if (c) c.innerHTML = '<p>成就系統未載入</p>';
+    },
+
+    // ---------- 回報 ----------
+    openReport: function() {
+      if (typeof toast === 'function') toast('回報系統未載入', true);
+      else alert('回報系統未載入');
+    },
+
+    // ---------- 其他輔助 ----------
+    applyEq: function() {
+      // 簡易版：僅重新計算攻擊和血量
+      if (typeof G !== 'undefined' && G) {
+        const b = { atk: 0, hp: 0 };
+        if (G.equipment) {
+          G.equipment.forEach(e => {
+            if (e.equipped) {
+              if (e.type === 'w') b.atk += e.bonus;
+              else b.hp += e.bonus;
+            }
+          });
+        }
+        const rb = 1 + (G.rebirthLevel || 0) * 0.05;
+        const gb = (G.guild && G.guild.name) ? 1 + (G.guild.level || 1) * 0.02 : 1;
+        G.atk = Math.floor((G.baseAtk + b.atk) * rb * gb);
+        G.maxHp = Math.floor((G.baseHp + b.hp) * rb);
+        if (G.hp > G.maxHp) G.hp = G.maxHp;
+        if (typeof updateUI === 'function') updateUI();
+      }
+    }
+  };
+
+  // 2. 檢查清單：需要檢查的全域函數/變數
+  const checkList = [
+    'genEq', 'generateEquipment', // 裝備
+    'applyEq', 'upEq', 'toggleEq', 'showBag', 'closeBag',
+    'createGuild', 'joinGuild', 'leaveGuild', 'donateGold', 'attackGuildBoss', 'renderGuildUI',
+    'startPvP', 'renderPvPUI',
+    'claimSeasonReward', 'renderSeasonUI', 'updateSeasonProgress',
+    'checkAchievements', 'renderAchievements',
+    'openReport',
+    'toast', 'rand', 'dmgFloat', 'sanitizeInput',
+    'refreshMonster', 'attack', 'showSkill', 'rest', 'levelUp', 'updateUI', 'log',
+    'toggleAuto', 'calcOffline',
+    'renderShop', 'checkDailyUI', 'renderSettings', 'renderStats',
+    'showPage', 'saveGame', 'loadGame', 'loadCloud'
+  ];
+
+  // 3. 檢查並修復
+  let repaired = 0;
+  checkList.forEach(name => {
+    if (typeof window[name] === 'undefined' && typeof globalThis[name] === 'undefined') {
+      // 若在 backupLib 中有對應備用，則注入
+      if (backupLib[name]) {
+        window[name] = backupLib[name];
+        console.log(`✅ 自癒：補充缺失的函數 ${name}`);
+        repaired++;
+      } else {
+        console.warn(`⚠️ 自癒：找不到 ${name} 的備用實作`);
+      }
+    }
+  });
+
+  // 特別檢查 G 物件（若不存在則創建）
+  if (typeof G === 'undefined') {
+    window.G = {
+      lv: 1, exp: 0, hp: 100, maxHp: 100, atk: 10,
+      baseAtk: 10, baseHp: 100, gold: 0, restUsed: false,
+      difficulty: 'normal', rebirthLevel: 0,
+      curMonster: null, deathStreak: 0, lastDmg: 0,
+      totalKills: 0, maxDamage: 0, maxLevel: 1,
+      equipment: [],
+      guild: { name: null, level: 1, exp: 0, members: [{ uid: 'player', contribution: 0 }] },
+      achievements: {},
+      stats: { playTime: 0, totalGold: 0, totalEquip: 0, totalUpgrade: 0, skillUsage: 0, bossKills: 0 },
+      autoBattle: false
+    };
+    console.log('✅ 自癒：補充缺失的 G 物件');
+    repaired++;
+  }
+
+  if (repaired > 0) {
+    console.log(`🧬 自癒完成，共修復 ${repaired} 個缺失項目`);
+    // 若有修復，可顯示提示（但避免干擾）
+  } else {
+    console.log('🧬 自癒檢查通過，所有組件完整');
+  }
+})();// ============================================================
 //  🔥 Firebase 設定
 // ============================================================
 const firebaseConfig = {
