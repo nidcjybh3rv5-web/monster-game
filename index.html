@@ -73,7 +73,7 @@ button:active{transform:scale(0.97)}
 <!-- 主選單 -->
 <div id="mainPage" class="page active">
   <div class="main-title">MONSTER GAME+</div>
-  <div class="author">by Disabledev | 完整自癒版</div>
+  <div class="author">by Disabledev | 完整版</div>
   <button class="play-btn" id="toGameBtn">▶ 開始遊戲</button>
   <button class="settings-btn" id="toSettingsBtn">⚙️ 設定</button>
   <button class="settings-btn" id="shopBtn">🛒 商店</button>
@@ -90,8 +90,12 @@ button:active{transform:scale(0.97)}
 <!-- 商店 -->
 <div id="shopPage" class="page"><div><button class="back-btn" id="backFromShop">← 返回</button><span style="font-size:1.3rem;">🛒 商店</span></div><div style="padding:16px;text-align:center"><div id="shopItemsList"></div><div id="dailyRewardStatus" style="background:rgba(255,255,255,0.1);border-radius:40px;padding:12px;margin:20px 0">⭐ 每日獎勵</div><button id="claimDailyBtn" class="play-btn" style="width:auto;padding:8px 16px">🎁 領取</button><div id="signinStatus" style="margin-top:16px;">📅 連續簽到: <span id="signinStreak">0</span> 天</div><button id="signinBtn" class="play-btn" style="width:auto;padding:8px 16px;background:#3b82f6;">✅ 簽到</button></div></div>
 
-<!-- 公會 -->
-<div id="guildPage" class="page"><div><button class="back-btn" id="backFromGuild">← 返回</button><span style="font-size:1.3rem;">🏛️ 公會</span></div><div id="guildInfo" class="guild-info"></div><div id="guildActions"></div></div>
+<!-- 公會頁面 -->
+<div id="guildPage" class="page">
+  <div><button class="back-btn" id="backFromGuild">← 返回</button><span style="font-size:1.3rem;">🏛️ 公會</span></div>
+  <div id="guildInfo" class="guild-info"></div>
+  <div id="guildActions"></div>
+</div>
 
 <!-- PvP -->
 <div id="pvpPage" class="page"><div><button class="back-btn" id="backFromPvp">← 返回</button><span style="font-size:1.3rem;">⚔️ PvP</span></div><div id="pvpContent"></div></div>
@@ -142,7 +146,7 @@ button:active{transform:scale(0.97)}
 
 <script>
 // ============================================================
-//  🧬 自癒引擎 - 確保所有關鍵函數存在
+//  🧬 自癒引擎
 // ============================================================
 (function heal() {
   console.log('🧬 自癒引擎啟動...');
@@ -164,7 +168,8 @@ button:active{transform:scale(0.97)}
   let fixed=0; list.forEach(n=>{ if(typeof window[n]==='undefined'){ window[n]=backup[n]; console.log('✅ 自癒補充:'+n); fixed++; } });
   if(typeof window.G==='undefined'){ window.G={lv:1,exp:0,hp:100,maxHp:100,atk:10,baseAtk:10,baseHp:100,gold:0,restUsed:false,difficulty:'normal',rebirthLevel:0,curMonster:null,deathStreak:0,lastDmg:0,totalKills:0,maxDamage:0,maxLevel:1,equipment:[],guild:{name:null,level:1,exp:0,members:[{uid:'player',contribution:0}]},achievements:{},stats:{playTime:0,totalGold:0,totalEquip:0,totalUpgrade:0,skillUsage:0,bossKills:0},autoBattle:false}; fixed++; }
   console.log('🧬 自癒完成，修復 '+fixed+' 項');
-})();// ============================================================
+})();
+  // ============================================================
 //  🔥 Firebase 設定
 // ============================================================
 const firebaseConfig = {
@@ -181,9 +186,9 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth(), db = firebase.firestore(), provider = new firebase.auth.GoogleAuthProvider();
 
 // ============================================================
-//  🔒 Webhook URL
+//  🔒 Webhook URL (已更新為您的新網址)
 // ============================================================
-const WEBHOOK_URL = 'https://discord.com/api/webhooks/1503764494969475215/yj1L6PR8nVzbSEWomvEZYBas9Jx4_5KwQZJrvcrNUsBHcKx9nmI59bRGkOM7R_90yjb8';
+const WEBHOOK_URL = 'https://discord.com/api/webhooks/1519312504302342366/7nl1GoalmzeTVrHrwv93z5OT3EJZLNQfn2DC6-IWMhuNYXlzVUzUOC8cnt1Kk1C-3OdI';
 
 // ============================================================
 //  🎵 音樂與音效
@@ -297,8 +302,9 @@ function doRebirth(){
   toast(`✨轉生成功！Lv.${G.rebirthLevel}`,false);
   updateUI();
   checkAchievements();
-}// ============================================================
-//  🏛️ 公會系統
+}
+// ============================================================
+//  🏛️ 公會系統（完整含推薦與排名）
 // ============================================================
 const guildsCollection = db.collection('guilds');
 myGuild = localStorage.getItem('myGuild') || null;
@@ -317,19 +323,23 @@ async function createGuild(name) {
     renderGuildUI(); saveGame(); checkAchievements();
   } catch(e){ toast('創建失敗:'+e.message,true); }
 }
+
 async function joinGuild(name) {
   if (!currentUser) return toast('請先登入',true);
   if (myGuild) return toast('已有公會',true);
   const n=sanitizeInput(name.trim()); if(!n) return toast('請輸入名稱',true);
   try {
     const ref=guildsCollection.doc(n);
-    if(!(await ref.get()).exists) return toast('公會不存在',true);
+    const doc=await ref.get();
+    if(!doc.exists) return toast('公會不存在',true);
+    if(doc.data().members.length>=10) return toast('公會已滿',true);
     await ref.update({members:firebase.firestore.FieldValue.arrayUnion(currentUser.uid),[`contribution.${currentUser.uid}`]:0});
     myGuild=n; localStorage.setItem('myGuild',n);
     toast(`加入「${n}」成功`,false);
     renderGuildUI(); checkAchievements();
   } catch(e){ toast('加入失敗:'+e.message,true); }
 }
+
 async function leaveGuild() {
   if(!myGuild) return toast('未加入公會',true);
   if(!confirm('確定退出？')) return;
@@ -339,6 +349,7 @@ async function leaveGuild() {
     toast('已退出公會',false); renderGuildUI();
   } catch(e){ toast('退出失敗:'+e.message,true); }
 }
+
 async function donateGold(amount) {
   if(!myGuild) return toast('請先加入公會',true);
   if(G.gold<amount) return toast('金幣不足',true);
@@ -353,6 +364,7 @@ async function donateGold(amount) {
     renderGuildUI(); checkAchievements(); updateSeasonProgress('donate');
   } catch(e){ toast('捐獻失敗:'+e.message,true); }
 }
+
 async function attackGuildBoss() {
   if(!myGuild) return toast('請先加入公會',true);
   if(G.hp<=0) return toast('HP不足',true);
@@ -369,36 +381,125 @@ async function attackGuildBoss() {
     renderGuildUI();
   } catch(e){ toast('Boss戰鬥失敗:'+e.message,true); }
 }
+
 async function resetGuildBossIfNeeded() {
   const last=localStorage.getItem('guildBossReset');
   const now=Date.now();
   if(!last||now-parseInt(last)>7*24*60*60*1000){
-    const snap=await guildsCollection.get(); const batch=db.batch();
-    snap.forEach(d=>{ const ref=d.ref; batch.update(ref,{bossHp:1000+(d.data().level-1)*200,bossMaxHp:1000+(d.data().level-1)*200,bossDefeated:false}); });
-    await batch.commit(); localStorage.setItem('guildBossReset',now.toString()); toast('🔄 Boss已重置',false);
+    try {
+      const snap=await guildsCollection.get(); const batch=db.batch();
+      snap.forEach(d=>{ const ref=d.ref; const data=d.data(); batch.update(ref,{bossHp:1000+(data.level-1)*200,bossMaxHp:1000+(data.level-1)*200,bossDefeated:false}); });
+      await batch.commit(); localStorage.setItem('guildBossReset',now.toString()); toast('🔄 Boss已重置',false);
+    } catch(e){ console.error('重置Boss失敗:',e); }
   }
 }
-async function fetchGuildInfo() {
-  if(!myGuild){ document.getElementById('guildInfo').innerHTML='<p>尚未加入公會</p>'; document.getElementById('guildActions').innerHTML=`<input type="text" id="guildNameInput" placeholder="公會名稱" style="background:#0f172a;color:#fff;padding:8px;border-radius:20px;"><button id="createGuildBtn" class="play-btn" style="width:auto;margin-top:8px;">創建 (1000金)</button><button id="joinGuildBtn" class="play-btn" style="width:auto;margin-top:8px;">加入</button>`; document.getElementById('createGuildBtn')?.addEventListener('click',()=>{ const n=document.getElementById('guildNameInput').value; if(n)createGuild(n); }); document.getElementById('joinGuildBtn')?.addEventListener('click',()=>{ const n=document.getElementById('guildNameInput').value; if(n)joinGuild(n); }); return; }
+
+async function loadRecommendAndRanking() {
   try {
-    const doc=await guildsCollection.doc(myGuild).get();
-    if(!doc.exists){ toast('公會不存在',true); myGuild=null; localStorage.removeItem('myGuild'); renderGuildUI(); return; }
-    const data=doc.data(); const myC=data.contribution[currentUser?.uid]||0;
-    document.getElementById('guildInfo').innerHTML=`<div>🏛️ ${data.name} Lv.${data.level} (${data.exp}/${data.level*100})</div><div>📈 攻擊+${data.level*2}%</div><div>👥 ${data.members.length}人</div><div>💰 貢獻:${myC}</div><div>👾 Boss:${data.bossHp}/${data.bossMaxHp} ${data.bossDefeated?'✅':''}</div>`;
-    document.getElementById('guildActions').innerHTML=`<button id="d100" class="game-action">捐100</button><button id="d500" class="game-action">捐500</button><button id="d1000" class="game-action">捐1000</button><button id="attackBossBtn" class="game-action" ${data.bossDefeated?'disabled':''}>⚔️ Boss</button><button id="leaveBtn" class="game-action" style="background:#ef4444;">退出</button><div id="guildShop"></div>`;
-    document.getElementById('d100')?.addEventListener('click',()=>donateGold(100));
-    document.getElementById('d500')?.addEventListener('click',()=>donateGold(500));
-    document.getElementById('d1000')?.addEventListener('click',()=>donateGold(1000));
-    document.getElementById('attackBossBtn')?.addEventListener('click',attackGuildBoss);
-    document.getElementById('leaveBtn')?.addEventListener('click',leaveGuild);
-    const shop=document.getElementById('guildShop');
-    shop.innerHTML=`<div class="setting-item"><div>🎁 稀有裝備箱</div><button id="buyGuildEq" ${myC<200?'disabled':''}>200貢獻</button></div>`;
-    document.getElementById('buyGuildEq')?.addEventListener('click',async()=>{
-      if(myC>=200){ await guildsCollection.doc(myGuild).update({[`contribution.${currentUser.uid}`]:firebase.firestore.FieldValue.increment(-200)}); const e=genEq(); e.quality='稀有'; G.equipment.push(e); applyEq(); toast(`獲得 ${e.name}`,false); saveGame(); renderGuildUI(); }
-      else toast('貢獻不足',true);
+    const snapshot = await guildsCollection.orderBy('level', 'desc').limit(20).get();
+    const guilds = [];
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const totalContrib = Object.values(data.contribution || {}).reduce((a, b) => a + b, 0);
+      guilds.push({
+        id: doc.id,
+        name: data.name,
+        level: data.level || 1,
+        members: data.members?.length || 0,
+        contribution: totalContrib,
+        bossDefeated: data.bossDefeated || false
+      });
     });
-  } catch(e){ toast('載入失敗:'+e.message,true); }
+
+    // 推薦公會
+    const recommend = guilds.filter(g => g.members < 10 && !g.bossDefeated).sort((a,b)=>b.level-a.level).slice(0,3);
+    const recDiv = document.getElementById('guildRecommend');
+    if (recDiv) {
+      if (recommend.length === 0) recDiv.innerHTML = '<p style="color:#94a3b8;">暫無推薦公會</p>';
+      else recDiv.innerHTML = `<h4>🌟 推薦公會</h4>` + recommend.map(g => `
+        <div class="setting-item" style="font-size:0.8rem;">
+          <div>🏛️ ${g.name} (Lv.${g.level})<br><span style="font-size:0.7rem;color:#94a3b8;">成員 ${g.members}人</span></div>
+          <button onclick="joinGuild('${g.name}')" class="game-action" style="padding:4px 12px;">加入</button>
+        </div>
+      `).join('');
+    }
+
+    // 公會排名
+    const rankDiv = document.getElementById('guildRanking');
+    if (rankDiv) {
+      const top10 = guilds.slice(0, 10);
+      rankDiv.innerHTML = `<h4>🏆 公會排名</h4>` + top10.map((g, i) => `
+        <div class="setting-item" style="font-size:0.8rem;">
+          <div>${i+1}. ${g.name} (Lv.${g.level})<br><span style="font-size:0.7rem;color:#94a3b8;">👥 ${g.members}人 | 💰 ${g.contribution}</span></div>
+          <span style="color:${i===0?'#facc15':i===1?'#94a3b8':i===2?'#cd7f32':'#475569'}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':''}</span>
+        </div>
+      `).join('');
+    }
+  } catch (e) {
+    console.error('載入推薦/排名失敗:', e);
+  }
 }
+
+async function fetchGuildInfo() {
+  if (!myGuild) {
+    document.getElementById('guildInfo').innerHTML = '<p>尚未加入公會</p>';
+    document.getElementById('guildActions').innerHTML = `
+      <input type="text" id="guildNameInput" placeholder="公會名稱" style="background:#0f172a;color:#fff;padding:8px;border-radius:20px;">
+      <button id="createGuildBtn" class="play-btn" style="width:auto;margin-top:8px;">創建 (1000金)</button>
+      <button id="joinGuildBtn" class="play-btn" style="width:auto;margin-top:8px;">加入</button>
+      <div id="guildRecommend" style="margin-top:16px;text-align:left;"></div>
+      <div id="guildRanking" style="margin-top:16px;text-align:left;"></div>
+    `;
+    document.getElementById('createGuildBtn')?.addEventListener('click', () => {
+      const n = document.getElementById('guildNameInput').value;
+      if (n) createGuild(n);
+    });
+    document.getElementById('joinGuildBtn')?.addEventListener('click', () => {
+      const n = document.getElementById('guildNameInput').value;
+      if (n) joinGuild(n);
+    });
+    await loadRecommendAndRanking();
+    return;
+  }
+  try {
+    const doc = await guildsCollection.doc(myGuild).get();
+    if (!doc.exists) { toast('公會不存在',true); myGuild=null; localStorage.removeItem('myGuild'); renderGuildUI(); return; }
+    const data = doc.data();
+    const myC = data.contribution[currentUser?.uid] || 0;
+    document.getElementById('guildInfo').innerHTML = `
+      <div>🏛️ ${data.name} Lv.${data.level} (${data.exp}/${data.level*100})</div>
+      <div>📈 攻擊+${data.level*2}%</div>
+      <div>👥 ${data.members.length}人</div>
+      <div>💰 貢獻:${myC}</div>
+      <div>👾 Boss:${data.bossHp}/${data.bossMaxHp} ${data.bossDefeated?'✅':''}</div>
+    `;
+    document.getElementById('guildActions').innerHTML = `
+      <button id="d100" class="game-action">捐100</button>
+      <button id="d500" class="game-action">捐500</button>
+      <button id="d1000" class="game-action">捐1000</button>
+      <button id="attackBossBtn" class="game-action" ${data.bossDefeated?'disabled':''}>⚔️ Boss</button>
+      <button id="leaveBtn" class="game-action" style="background:#ef4444;">退出</button>
+      <div id="guildShop"></div>
+    `;
+    document.getElementById('d100')?.addEventListener('click', () => donateGold(100));
+    document.getElementById('d500')?.addEventListener('click', () => donateGold(500));
+    document.getElementById('d1000')?.addEventListener('click', () => donateGold(1000));
+    document.getElementById('attackBossBtn')?.addEventListener('click', attackGuildBoss);
+    document.getElementById('leaveBtn')?.addEventListener('click', leaveGuild);
+    const shop = document.getElementById('guildShop');
+    shop.innerHTML = `<div class="setting-item"><div>🎁 稀有裝備箱</div><button id="buyGuildEq" ${myC<200?'disabled':''}>200貢獻</button></div>`;
+    document.getElementById('buyGuildEq')?.addEventListener('click', async () => {
+      if (myC >= 200) {
+        await guildsCollection.doc(myGuild).update({[`contribution.${currentUser.uid}`]: firebase.firestore.FieldValue.increment(-200)});
+        const e = genEq(); e.quality = '稀有'; G.equipment.push(e); applyEq();
+        toast(`獲得 ${e.name}`, false); saveGame(); renderGuildUI();
+      } else toast('貢獻不足', true);
+    });
+  } catch (e) {
+    toast('載入失敗:'+e.message, true);
+  }
+}
+
 function renderGuildUI(){ document.getElementById('guildInfo').innerHTML='載入中...'; document.getElementById('guildActions').innerHTML=''; fetchGuildInfo(); }
 resetGuildBossIfNeeded();
 
@@ -811,4 +912,4 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 </script>
 </body>
-</html>
+</html>  
