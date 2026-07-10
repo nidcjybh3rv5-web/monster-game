@@ -1,0 +1,19 @@
+.music-btn{background:#334155;border:none;border-radius:50%;width:36px;height:36px;font-size:1.2rem;cursor:pointer;color:#fff;display:flex;align-items:center;justify-content:center}
+.music-btn.on{background:#3b82f6}
+.report-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);backdrop-filter:blur(10px);z-index:10000;display:flex;justify-content:center;align-items:center}
+.report-card{background:#1e293b;width:90%;max-width:400px;max-height:80%;border-radius:32px;padding:20px;border:1px solid #facc15;display:flex;flex-direction:column}
+.report-card textarea{width:100%;height:280px;background:#0f172a;color:#fff;border:1px solid #334155;border-radius:16px;padding:12px;font-size:0.85rem;resize:vertical;font-family:monospace;margin:12px 0}
+.report-card .report-buttons{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.report-card .report-buttons button{padding:8px 24px;border-radius:40px;border:none;cursor:pointer;font-weight:bold}
+.report-card .copy-btn{background:#3b82f6;color:#fff}
+.report-card .discord-btn{background:#5865F2;color:#fff}
+.report-card .close-btn{background:#ef4444;color:#fff}
+.achievement-card{background:#0f172a;border-radius:16px;padding:12px;margin:8px 0;display:flex;justify-content:space-between;align-items:center;border-left:5px solid #334155}
+.achievement-card.locked{border-left-color:#475569;opacity:0.6}
+.achievement-card.unlocked{border-left-color:#facc15}
+.achievement-card .ach-icon{font-size:1.5rem;margin-right:8px}
+.achievement-card .ach-info{flex:1}
+.achievement-card .ach-name{font-weight:bold;font-size:0.9rem}
+.achievement-card .ach-desc{font-size:0.7rem;color:#94a3b8}
+.achievement-card .ach-status{font-size:0.7rem}
+
