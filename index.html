@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>幻獸鬥士 - 完整版</title>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/ui.css">
+<link rel="stylesheet" href="css/battle.css">
+</head>
+<body>
+<div class="app" id="appRoot">
+
+<!-- 主選單 -->
+<div id="mainPage" class="page active">
+  <div class="main-title" id="mainTitle">MONSTER GAME+</div>
+  <div class="author" id="mainAuthor">by Disabledev | 完整版</div>
+  <button class="play-btn" id="toGameBtn" data-i18n="play">▶ 開始遊戲</button>
+  <button class="settings-btn" id="toSettingsBtn" data-i18n="settings">⚙️ 設定</button>
+  <button class="settings-btn" id="shopBtn" data-i18n="shop">🛒 商店</button>
+  <button class="settings-btn" id="guildBtn" data-i18n="guild">🏛️ 公會</button>
+  <button class="settings-btn" id="pvpBtn" data-i18n="pvp">⚔️ PvP</button>
+  <button class="settings-btn" id="seasonBtn" data-i18n="season">🎖️ 賽季</button>
+  <button class="settings-btn" id="achievementBtn" data-i18n="achievement">🏆 成就</button>
+  <button class="settings-btn" id="helpBtn" data-i18n="help">❓ 幫助</button>
+</div>
+
+<!-- 設定 -->
+<div id="settingsPage" class="page"><div><button class="back-btn" id="backFromSettings" data-i18n="back">← 返回</button><span style="font-size:1.3rem;" data-i18n="settings_title">⚙️ 設定</span></div><div id="settingsList"></div></div>
+
+<!-- 商店 -->
+<div id="shopPage" class="page"><div><button class="back-btn" id="backFromShop" data-i18n="back">← 返回</button><span style="font-size:1.3rem;" data-i18n="shop_title">🛒 商店</span></div><div style="padding:16px;text-align:center"><div id="shopItemsList"></div><div id="dailyRewardStatus" style="background:rgba(255,255,255,0.1);border-radius:40px;padding:12px;margin:20px 0" data-i18n="daily_reward">⭐ 每日獎勵</div><button id="claimDailyBtn" class="play-btn" style="width:auto;padding:8px 16px" data-i18n="claim">🎁 領取</button><div id="signinStatus" style="margin-top:16px;" data-i18n="signin_streak">📅 連續簽到: <span id="signinStreak">0</span> 天</div><button id="signinBtn" class="play-btn" style="width:auto;padding:8px 16px;background:#3b82f6;" data-i18n="signin">✅ 簽到</button></div></div>
+
+<!-- 公會 -->
+<div id="guildPage" class="page">
+  <div><button class="back-btn" id="backFromGuild" data-i18n="back">← 返回</button><span style="font-size:1.3rem;" data-i18n="guild_title">🏛️ 公會</span></div>
+  <div id="guildInfo" class="guild-info"></div>
+  <div id="guildActions"></div>
+</div>
+
+<!-- PvP -->
+<div id="pvpPage" class="page"><div><button class="back-btn" id="backFromPvp" data-i18n="back">← 返回</button><span style="font-size:1.3rem;" data-i18n="pvp_title">⚔️ PvP</span></div><div id="pvpContent"></div></div>
+
+<!-- 賽季 -->
+<div id="seasonPage" class="page"><div><button class="back-btn" id="backFromSeason" data-i18n="back">← 返回</button><span style="font-size:1.3rem;" data-i18n="season_title">🎖️ 賽季</span></div><div id="seasonContent"></div></div>
+
+<!-- 成就 -->
+<div id="achievementPage" class="page"><div><button class="back-btn" id="backFromAchievement" data-i18n="back">← 返回</button><span style="font-size:1.3rem;" data-i18n="achievement_title">🏆 成就</span></div><div id="achievementList"></div></div>
+
+<!-- 幫助 -->
+<div id="helpPage" class="page"><div><button class="back-btn" id="backFromHelp" data-i18n="back">← 返回</button><span style="font-size:1.3rem;" data-i18n="help_title">❓ 幫助</span></div><div class="help-content" id="helpContent"><p data-i18n="help_line1">⚔️攻擊 ✨技能 😴休息 🎒裝備</p><p data-i18n="help_line2">🔥元素克制｜🔄轉生｜🏛️公會</p><p data-i18n="help_line3">⚔️PvP｜🎖️賽季｜🏆成就</p><p data-i18n="help_line4">🤖自動戰鬥｜💤離線收益</p><p data-i18n="help_line5">🎵音樂｜📋回報｜☁️雲端存檔</p></div></div>
+
+<!-- 遊戲主頁 -->
+<div id="gamePage" class="page">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+    <button class="back-btn" id="backFromGame" data-i18n="back" style="margin:0;">←</button>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <div class="gold-display" style="margin:0;">💰 <span id="goldGame">0</span></div>
+      <button id="musicToggleBtn" class="music-btn on" title="音樂開關">🔊</button>
+    </div>
+  </div>
+  <div style="display:flex; justify-content:space-between; align-items:center;flex-wrap:wrap; margin-top:-8px;">
+    <div data-i18n="rebirth_level">🔄轉生Lv.<span id="rebirthLevel">0</span></div>
+    <button id="autoBattleBtn" class="game-action" style="background:#3b82f6;padding:4px 12px;font-size:0.7rem;">🤖 OFF</button>
+  </div>
+  <div class="stats-line"><span data-i18n="hp_label">❤️ <span id="hpText">100/100</span></span><span data-i18n="exp_label">⭐ <span id="expText">0/50</span></span><span data-i18n="level_label">⬆️ Lv <span id="levelText">1</span></span></div>
+  <div class="bar"><div class="fillhp" id="hpBar"></div></div><div class="bar"><div class="fillexp" id="expBar"></div></div>
+  <div class="stats-line"><span data-i18n="atk_label">⚔️ <span id="atkText">10</span></span><span data-i18n="zone_label">🗺️ <span id="zoneText">新手村</span></span><span data-i18n="elem_label">🔥<span id="playerElem">無</span></span></div>
+  <h3 id="monsterName">史萊姆</h3><div class="enemy-icon" id="monsterEmoji">🟣</div>
+  <div data-i18n="monster_info">💀 HP <span id="monsterHpText">0/0</span> | Lv <span id="monsterLevelText">0</span> | 元素:<span id="monsterElem">無</span></div>
+  <div class="bar"><div class="fillhp" id="monsterBar"></div></div>
+  <div class="log" id="logMsg">點擊攻擊開始</div>
+  <div class="buttons">
+    <button class="game-action attack" id="attackBtn" data-i18n="attack">⚔️</button>
+    <button class="game-action skill" id="skillBtn" data-i18n="skill">✨</button>
+    <button class="game-action rest" id="restBtn" data-i18n="rest">😴</button>
+    <button class="game-action inventory" id="inventoryBtn" data-i18n="inventory">🎒</button>
+    <button class="game-action" id="rebirthBtn" data-i18n="rebirth">🔄轉生</button>
+    <button class="game-action" id="reportBtn" style="background:#f59e0b;color:#fff;" data-i18n="report">📋 回報</button>
+    <button class="game-action save" id="saveBtn" data-i18n="save">💾</button>
+  </div>
+</div>
+
+<!-- 引導 -->
+<div id="guideOverlay" class="guide-overlay" style="display:none"><div class="guide-card"><p data-i18n="guide_welcome">🎮 歡迎！</p><p data-i18n="guide_line1">⚔️攻擊 ✨技能 🎒裝備 😴休息</p><p data-i18n="guide_line2">🔥元素克制 +30%</p><p data-i18n="guide_line3">🔄Lv100轉生</p><p data-i18n="guide_line4">📋點擊「回報」產生Bug報告</p><button id="closeGuideBtn" data-i18n="start">開始</button></div></div>
+</div>
+
+<script src="js/utils.js"></script>
+<script src="js/firebase.js"></script>
+<script src="js/main.js"></script>
+<script src="js/inventory.js"></script>
+<script src="js/guild.js"></script>
+<script src="js/battle.js"></script>
+<script src="js/pvp.js"></script>
+<script src="js/save.js"></script>
+<script src="js/enhancements.js"></script>
+</body>
+</html>
