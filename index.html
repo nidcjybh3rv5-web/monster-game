@@ -7,9 +7,65 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-<link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/ui.css">
-<link rel="stylesheet" href="css/battle.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;user-select:none}
+body{background:radial-gradient(circle at 20% 30%,#1a2a3a,#0a0f1e);font-family:system-ui;min-height:100vh;display:flex;justify-content:center;align-items:center;color:#fff;padding:16px}
+.app{width:100%;max-width:550px;background:rgba(255,255,255,0.08);backdrop-filter:blur(25px);border-radius:48px;padding:24px 20px 32px;border:1px solid rgba(255,255,255,0.2)}
+.page{display:none}.page.active{display:block}
+.main-title{font-size:2rem;font-weight:700;background:linear-gradient(135deg,#facc15,#ff8c00);-webkit-background-clip:text;background-clip:text;color:transparent;text-align:center;margin:20px 0 5px}
+.author{text-align:center;font-size:0.7rem;color:#94a3b8;margin-bottom:16px}
+.play-btn,.settings-btn{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:40px;padding:12px;font-size:1.1rem;font-weight:bold;cursor:pointer;width:80%;margin:10px auto;display:block;text-align:center;color:#fff}
+.play-btn{background:#facc15;color:#0f172a;border:none}
+button:active{transform:scale(0.97)}
+.back-btn{background:none;border:none;color:#3b82f6;font-size:1rem;cursor:pointer;margin-bottom:16px}
+.setting-item{background:rgba(255,255,255,0.05);border-radius:28px;padding:12px 20px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;font-size:0.85rem}
+.help-content{background:rgba(255,255,255,0.05);border-radius:28px;padding:20px;line-height:2;font-size:0.8rem}
+.stats-line{display:flex;justify-content:space-between;margin:12px 0;font-weight:bold}
+.bar{background:#1e293b;border-radius:20px;height:18px;overflow:hidden;margin:8px 0}
+.fillhp{background:#ef4444;height:100%}.fillexp{background:#3b82f6;height:100%}
+.enemy-icon{font-size:56px;margin:12px;text-align:center}
+.log{background:rgba(0,0,0,0.5);border-radius:24px;padding:12px;margin:16px 0;font-size:0.85rem;color:#facc15;min-height:70px;overflow-y:auto}
+.buttons{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:16px}
+.game-action{padding:10px 18px;border-radius:40px;font-weight:bold;border:none;background:#334155;color:#fff;cursor:pointer;font-size:0.85rem}
+.attack{background:#dc2626}.skill{background:#8b5cf6}.rest{background:#16a34a}.save{background:#9333ea}.inventory{background:#eab308;color:#0f172a}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:#facc15;padding:8px 20px;border-radius:40px;font-size:0.8rem;z-index:999;animation:fadeOut 2s forwards}
+@keyframes fadeOut{0%{opacity:1}70%{opacity:1}100%{opacity:0;visibility:hidden}}
+.gold-display{background:#00000066;border-radius:20px;padding:4px 12px;display:inline-block;margin-bottom:8px}
+.guild-info{background:#0f172a;border-radius:20px;padding:8px;margin:8px 0;font-size:0.8rem}
+.backpack-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);backdrop-filter:blur(10px);z-index:3000;display:flex;justify-content:center;align-items:center}
+.backpack-card{background:#1e293b;width:90%;max-width:350px;max-height:70%;border-radius:40px;padding:20px;border:1px solid #facc15;overflow-y:auto}
+.backpack-item{background:#0f172a;border-radius:32px;padding:10px 14px;margin:10px 0;display:flex;justify-content:space-between;align-items:center;border-left:5px solid;font-size:0.75rem}
+.close-backpack{background:#ef4444;color:white;padding:6px 16px;border-radius:40px;margin-top:16px;cursor:pointer;font-weight:bold}
+.skill-menu-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:2000;display:flex;justify-content:center;align-items:center}
+.skill-menu-card{background:#1e293b;width:260px;border-radius:32px;padding:16px;border:1px solid #facc15;text-align:center}
+.skill-menu-card button{display:block;width:100%;margin:8px 0;padding:10px;border-radius:40px;background:#334155;color:#fff;border:none;cursor:pointer;font-weight:bold}
+.guide-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:1000;display:flex;justify-content:center;align-items:center}
+.guide-card{background:#1e293b;max-width:300px;padding:24px;border-radius:32px;text-align:center;border:1px solid #facc15}
+.guide-card button{margin-top:16px;background:#facc15;border:none;padding:8px 20px;border-radius:40px;cursor:pointer;font-weight:bold}
+.dmg-float{position:fixed;font-weight:bold;font-size:1.8rem;pointer-events:none;z-index:5000;animation:floatUp 1s ease-out forwards}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-80px) scale(1.3)}}
+.flash{animation:flashAnim 0.15s}
+@keyframes flashAnim{0%{background:#ffffff80}100%{background:transparent}}
+.challenge-card{background:#0f172a;border-radius:20px;padding:12px;margin:8px 0;display:flex;justify-content:space-between;align-items:center}
+.music-btn{background:#334155;border:none;border-radius:50%;width:36px;height:36px;font-size:1.2rem;cursor:pointer;color:#fff;display:flex;align-items:center;justify-content:center}
+.music-btn.on{background:#3b82f6}
+.report-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);backdrop-filter:blur(10px);z-index:10000;display:flex;justify-content:center;align-items:center}
+.report-card{background:#1e293b;width:90%;max-width:400px;max-height:80%;border-radius:32px;padding:20px;border:1px solid #facc15;display:flex;flex-direction:column}
+.report-card textarea{width:100%;height:280px;background:#0f172a;color:#fff;border:1px solid #334155;border-radius:16px;padding:12px;font-size:0.85rem;resize:vertical;font-family:monospace;margin:12px 0}
+.report-card .report-buttons{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.report-card .report-buttons button{padding:8px 24px;border-radius:40px;border:none;cursor:pointer;font-weight:bold}
+.report-card .copy-btn{background:#3b82f6;color:#fff}
+.report-card .discord-btn{background:#5865F2;color:#fff}
+.report-card .close-btn{background:#ef4444;color:#fff}
+.achievement-card{background:#0f172a;border-radius:16px;padding:12px;margin:8px 0;display:flex;justify-content:space-between;align-items:center;border-left:5px solid #334155}
+.achievement-card.locked{border-left-color:#475569;opacity:0.6}
+.achievement-card.unlocked{border-left-color:#facc15}
+.achievement-card .ach-icon{font-size:1.5rem;margin-right:8px}
+.achievement-card .ach-info{flex:1}
+.achievement-card .ach-name{font-weight:bold;font-size:0.9rem}
+.achievement-card .ach-desc{font-size:0.7rem;color:#94a3b8}
+.achievement-card .ach-status{font-size:0.7rem}
+</style>
 </head>
 <body>
 <div class="app" id="appRoot">
@@ -88,14 +144,1136 @@
 <div id="guideOverlay" class="guide-overlay" style="display:none"><div class="guide-card"><p data-i18n="guide_welcome">🎮 歡迎！</p><p data-i18n="guide_line1">⚔️攻擊 ✨技能 🎒裝備 😴休息</p><p data-i18n="guide_line2">🔥元素克制 +30%</p><p data-i18n="guide_line3">🔄Lv100轉生</p><p data-i18n="guide_line4">📋點擊「回報」產生Bug報告</p><button id="closeGuideBtn" data-i18n="start">開始</button></div></div>
 </div>
 
-<script src="js/utils.js"></script>
-<script src="js/firebase.js"></script>
-<script src="js/main.js"></script>
-<script src="js/inventory.js"></script>
-<script src="js/guild.js"></script>
-<script src="js/battle.js"></script>
-<script src="js/pvp.js"></script>
-<script src="js/save.js"></script>
-<script src="js/enhancements.js"></script>
+<script>
+// ============================================================
+//  🌐 多語言系統 (i18n)
+// ============================================================
+const LANGUAGES = {
+  'zh-TW': {
+    name:'繁體中文', play:'▶ 開始遊戲', settings:'⚙️ 設定', shop:'🛒 商店',
+    guild:'🏛️ 公會', pvp:'⚔️ PvP', season:'🎖️ 賽季', achievement:'🏆 成就',
+    help:'❓ 幫助', back:'← 返回', settings_title:'⚙️ 設定', shop_title:'🛒 商店',
+    guild_title:'🏛️ 公會', pvp_title:'⚔️ PvP 競技場', season_title:'🎖️ 賽季通行證',
+    achievement_title:'🏆 成就', help_title:'❓ 幫助', daily_reward:'⭐ 每日獎勵',
+    claim:'🎁 領取', signin_streak:'📅 連續簽到: {days} 天', signin:'✅ 簽到',
+    attack:'⚔️', skill:'✨', rest:'😴', inventory:'🎒', rebirth:'🔄轉生',
+    report:'📋 回報', save:'💾', rebirth_level:'🔄轉生Lv.{level}',
+    hp_label:'❤️ {hp}', exp_label:'⭐ {exp}', level_label:'⬆️ Lv {level}',
+    atk_label:'⚔️ {atk}', zone_label:'🗺️ {zone}', elem_label:'🔥{elem}',
+    monster_info:'💀 HP {hp} | Lv {lv} | 元素:{elem}',
+    guide_welcome:'🎮 歡迎！', guide_line1:'⚔️攻擊 ✨技能 🎒裝備 😴休息',
+    guide_line2:'🔥元素克制 +30%', guide_line3:'🔄Lv100轉生',
+    guide_line4:'📋點擊「回報」產生Bug報告', start:'開始',
+    help_line1:'⚔️攻擊 ✨技能 😴休息 🎒裝備',
+    help_line2:'🔥元素克制｜🔄轉生｜🏛️公會',
+    help_line3:'⚔️PvP｜🎖️賽季｜🏆成就',
+    help_line4:'🤖自動戰鬥｜💤離線收益',
+    help_line5:'🎵音樂｜📋回報｜☁️雲端存檔',
+    language:'🌐 語言', volume:'🔊 音量', music:'🎵 音樂',
+    difficulty:'⚔️ 難度', google:'🔐 Google', achievements:'🏆 成就',
+    version:'📌 版本', check_update:'🔄 檢查更新', reset:'⚠️ 重置',
+    reset_confirm:'確定重置？所有進度將消失！',
+    no_guild:'尚未加入公會', create_guild:'創建 ({gold}金)', join_guild:'加入',
+    guild_name_placeholder:'公會名稱', recommend:'🌟 推薦公會', ranking:'🏆 公會排名',
+    no_recommend:'暫無推薦公會', donate:'捐{amount}金',
+    guild_shop:'🎁 稀有裝備箱', guild_shop_cost:'{cost}貢獻',
+    guild_boss:'👑 公會Boss', guild_boss_defeated:'✅ 已擊敗',
+    guild_boss_challenge:'⚔️ 挑戰', leave_guild:'退出',
+    leave_confirm:'確定要退出公會嗎？', member_count:'👥 {count}人',
+    contribution:'💰 貢獻: {value}', guild_level:'🏛️ {name} Lv.{level}',
+    guild_exp:'({exp}/{max})', guild_atk_bonus:'📈 攻擊+{bonus}%',
+    guild_loading:'載入中...', insufficient_gold:'金幣不足',
+    insufficient_contribution:'貢獻不足', pvp_find:'尋找對手',
+    pvp_history:'最近戰鬥', pvp_win:'✅勝', pvp_lose:'❌敗', pvp_draw:'⚖️平',
+    pvp_battle:'戰鬥中...', pvp_no_opponent:'沒有對手',
+    season_level:'等級 {level}', season_exp:'經驗 {exp}/{max}',
+    season_tasks:'📋 任務', season_rewards:'🎁 獎勵',
+    season_claim:'領取', season_claimed:'✅已領',
+    season_task_complete:'📋 任務完成：{task}，+{exp}賽季經驗',
+    season_level_up:'🎉 賽季等級提升至 {level}！',
+    season_reward_gold:'領取 {gold} 金幣！',
+    season_reward_equip:'獲得 {equip}',
+    report_copy:'📋 複製', report_discord:'📤 Discord', report_close:'✖ 關閉',
+    report_copied:'✅ 已複製！', report_discord_sent:'✅ 已發送到 Discord！',
+    report_discord_fail:'❌ 發送失敗',
+    toast_heal:'✨恢復{hp}HP', toast_damage:'⚔️ {dmg}傷',
+    toast_defeat:'🎉 +{exp}EXP +{gold}💰',
+    toast_levelup:'🎉 升 Lv{level}',
+    toast_rebirth_success:'✨轉生成功！Lv.{level}',
+    toast_rebirth_fail:'需Lv100且<10次轉生',
+    toast_guild_created:'公會「{name}」創建成功',
+    toast_guild_joined:'加入「{name}」成功', toast_guild_left:'已退出公會',
+    toast_guild_donate:'捐獻 {gold} 金，+{contribution}貢獻',
+    toast_guild_boss_damage:'Boss -{dmg}HP ({hp}/{max})',
+    toast_guild_boss_defeated:'🎉 公會Boss擊敗！+{gold}金',
+    toast_guild_boss_reset:'🔄 Boss已重置',
+    toast_cloud_sync:'☁️ 同步完成', toast_cloud_fail:'☁️ 雲端同步失敗',
+    toast_save:'💾 存檔完成', toast_load:'📂 載入完成',
+    toast_offline:'離線 {hours}小時 +{gold}金 +{exp}EXP',
+    toast_revive:'💀 復活', toast_cannot_attack:'無法攻擊',
+    toast_cannot_rest:'無法休息', toast_rested:'已休息過',
+    toast_no_monster:'沒有怪物', toast_hp_full:'HP 已滿',
+    toast_skill_no_monster:'沒有怪物',
+    toast_pvp_battle:'⚔️ PvP 開始！',
+    toast_pvp_result_win:'🏆 擊敗 {opponent}！+{gold}金',
+    toast_pvp_result_lose:'💀 被 {opponent} 擊敗',
+    toast_pvp_result_draw:'⚖️ 平局', toast_pvp_fail:'PvP失敗',
+    toast_quest_complete:'📋 任務完成：{task}，獎勵 {reward} 金',
+    toast_quest_claim:'領取 {gold} 金幣',
+    toast_quest_none:'無可領取獎勵',
+    toast_achievement_unlock:'🏆 解鎖成就：{icon} {name}！獎勵 {reward} 金幣',
+    toast_daily_claimed:'今日已領', toast_daily_exp:'🎁20EXP',
+    toast_daily_equip:'🎁{name}', toast_daily_hp:'🎁50HP',
+    toast_signin:'簽到！連續{days}天 +{gold}金',
+    toast_signin_7days:'🎉 連續7天！史詩裝備箱！',
+    toast_signin_30days:'🎉 連續30天！稱號「傳奇」！',
+    toast_upgrade:'{name} +{level}', toast_equip_auto:'✨自動裝',
+    toast_decompose:'分解得 {gold}金', toast_no_decompose:'無可分解',
+    toast_buy_equip:'獲得 {name}', toast_buy_exp:'🧪 +30EXP',
+    toast_buy_revive:'💊 復活石', toast_buy_pet:'🐕 寵物！攻擊+5%',
+    toast_not_enough_gold:'金幣不足', toast_already_claimed:'已領取',
+    toast_level_not_enough:'等級不足', toast_no_reward:'該等級無獎勵',
+    toast_season_levelup:'🎉 賽季等級提升至 {level}！',
+    toast_invalid_name:'請輸入有效名稱', toast_already_in_guild:'已有公會',
+    toast_guild_exists:'公會名稱已存在', toast_guild_not_found:'公會不存在',
+    toast_guild_full:'公會已滿', toast_guild_already_member:'您已在該公會',
+    toast_login_first:'請先登入', toast_login_success:'歡迎 {name}',
+    toast_login_fail:'登入失敗', toast_logout:'已登出',
+    toast_connect_error:'連線錯誤', toast_music_on:'🎵 音樂已開啟',
+    toast_music_off:'🔇 音樂已關閉', close:'關閉', decompose:'分解'
+  },
+  'zh-CN': {
+    name:'简体中文', play:'▶ 开始游戏', settings:'⚙️ 设定', shop:'🛒 商店',
+    guild:'🏛️ 公会', pvp:'⚔️ PvP', season:'🎖️ 赛季', achievement:'🏆 成就',
+    help:'❓ 帮助', back:'← 返回', settings_title:'⚙️ 设定', shop_title:'🛒 商店',
+    guild_title:'🏛️ 公会', pvp_title:'⚔️ PvP 竞技场', season_title:'🎖️ 赛季通行证',
+    achievement_title:'🏆 成就', help_title:'❓ 帮助', daily_reward:'⭐ 每日奖励',
+    claim:'🎁 领取', signin_streak:'📅 连续签到: {days} 天', signin:'✅ 签到',
+    attack:'⚔️', skill:'✨', rest:'😴', inventory:'🎒', rebirth:'🔄转生',
+    report:'📋 回报', save:'💾', rebirth_level:'🔄转生Lv.{level}',
+    hp_label:'❤️ {hp}', exp_label:'⭐ {exp}', level_label:'⬆️ Lv {level}',
+    atk_label:'⚔️ {atk}', zone_label:'🗺️ {zone}', elem_label:'🔥{elem}',
+    monster_info:'💀 HP {hp} | Lv {lv} | 元素:{elem}',
+    guide_welcome:'🎮 欢迎！', guide_line1:'⚔️攻击 ✨技能 🎒装备 😴休息',
+    guide_line2:'🔥元素克制 +30%', guide_line3:'🔄Lv100转生',
+    guide_line4:'📋点击「回报」产生Bug报告', start:'开始',
+    help_line1:'⚔️攻击 ✨技能 😴休息 🎒装备',
+    help_line2:'🔥元素克制｜🔄转生｜🏛️公会',
+    help_line3:'⚔️PvP｜🎖️赛季｜🏆成就',
+    help_line4:'🤖自动战斗｜💤离线收益',
+    help_line5:'🎵音乐｜📋回报｜☁️云端存盘',
+    language:'🌐 语言', volume:'🔊 音量', music:'🎵 音乐',
+    difficulty:'⚔️ 难度', google:'🔐 Google', achievements:'🏆 成就',
+    version:'📌 版本', check_update:'🔄 检查更新', reset:'⚠️ 重置',
+    reset_confirm:'确定重置？所有进度将消失！',
+    no_guild:'尚未加入公会', create_guild:'创建 ({gold}金)', join_guild:'加入',
+    guild_name_placeholder:'公会名称', recommend:'🌟 推荐公会', ranking:'🏆 公会排名',
+    no_recommend:'暂无推荐公会', donate:'捐{amount}金',
+    guild_shop:'🎁 稀有装备箱', guild_shop_cost:'{cost}贡献',
+    guild_boss:'👑 公会Boss', guild_boss_defeated:'✅ 已击败',
+    guild_boss_challenge:'⚔️ 挑战', leave_guild:'退出',
+    leave_confirm:'确定要退出公会吗？', member_count:'👥 {count}人',
+    contribution:'💰 贡献: {value}', guild_level:'🏛️ {name} Lv.{level}',
+    guild_exp:'({exp}/{max})', guild_atk_bonus:'📈 攻击+{bonus}%',
+    guild_loading:'加载中...', insufficient_gold:'金币不足',
+    insufficient_contribution:'贡献不足', pvp_find:'寻找对手',
+    pvp_history:'最近战斗', pvp_win:'✅胜', pvp_lose:'❌败', pvp_draw:'⚖️平',
+    pvp_battle:'战斗中...', pvp_no_opponent:'没有对手',
+    season_level:'等级 {level}', season_exp:'经验 {exp}/{max}',
+    season_tasks:'📋 任务', season_rewards:'🎁 奖励',
+    season_claim:'领取', season_claimed:'✅已领',
+    season_task_complete:'📋 任务完成：{task}，+{exp}赛季经验',
+    season_level_up:'🎉 赛季等级提升至 {level}！',
+    season_reward_gold:'领取 {gold} 金币！',
+    season_reward_equip:'获得 {equip}',
+    report_copy:'📋 复制', report_discord:'📤 Discord', report_close:'✖ 关闭',
+    report_copied:'✅ 已复制！', report_discord_sent:'✅ 已发送到 Discord！',
+    report_discord_fail:'❌ 发送失败',
+    toast_heal:'✨恢复{hp}HP', toast_damage:'⚔️ {dmg}伤',
+    toast_defeat:'🎉 +{exp}EXP +{gold}💰',
+    toast_levelup:'🎉 升 Lv{level}',
+    toast_rebirth_success:'✨转生成功！Lv.{level}',
+    toast_rebirth_fail:'需Lv100且<10次转生',
+    toast_guild_created:'公会「{name}」创建成功',
+    toast_guild_joined:'加入「{name}」成功', toast_guild_left:'已退出公会',
+    toast_guild_donate:'捐献 {gold} 金，+{contribution}贡献',
+    toast_guild_boss_damage:'Boss -{dmg}HP ({hp}/{max})',
+    toast_guild_boss_defeated:'🎉 公会Boss击败！+{gold}金',
+    toast_guild_boss_reset:'🔄 Boss已重置',
+    toast_cloud_sync:'☁️ 同步完成', toast_cloud_fail:'☁️ 云端同步失败',
+    toast_save:'💾 存盘完成', toast_load:'📂 载入完成',
+    toast_offline:'离线 {hours}小时 +{gold}金 +{exp}EXP',
+    toast_revive:'💀 复活', toast_cannot_attack:'无法攻击',
+    toast_cannot_rest:'无法休息', toast_rested:'已休息过',
+    toast_no_monster:'没有怪物', toast_hp_full:'HP 已满',
+    toast_skill_no_monster:'没有怪物',
+    toast_pvp_battle:'⚔️ PvP 开始！',
+    toast_pvp_result_win:'🏆 击败 {opponent}！+{gold}金',
+    toast_pvp_result_lose:'💀 被 {opponent} 击败',
+    toast_pvp_result_draw:'⚖️ 平局', toast_pvp_fail:'PvP失败',
+    toast_quest_complete:'📋 任务完成：{task}，奖励 {reward} 金',
+    toast_quest_claim:'领取 {gold} 金币',
+    toast_quest_none:'无可领取奖励',
+    toast_achievement_unlock:'🏆 解锁成就：{icon} {name}！奖励 {reward} 金币',
+    toast_daily_claimed:'今日已领', toast_daily_exp:'🎁20EXP',
+    toast_daily_equip:'🎁{name}', toast_daily_hp:'🎁50HP',
+    toast_signin:'签到！连续{days}天 +{gold}金',
+    toast_signin_7days:'🎉 连续7天！史诗装备箱！',
+    toast_signin_30days:'🎉 连续30天！称号「传奇」！',
+    toast_upgrade:'{name} +{level}', toast_equip_auto:'✨自动装',
+    toast_decompose:'分解得 {gold}金', toast_no_decompose:'无可分解',
+    toast_buy_equip:'获得 {name}', toast_buy_exp:'🧪 +30EXP',
+    toast_buy_revive:'💊 复活石', toast_buy_pet:'🐕 宠物！攻击+5%',
+    toast_not_enough_gold:'金币不足', toast_already_claimed:'已领取',
+    toast_level_not_enough:'等级不足', toast_no_reward:'该等级无奖励',
+    toast_season_levelup:'🎉 赛季等级提升至 {level}！',
+    toast_invalid_name:'请输入有效名称', toast_already_in_guild:'已有公会',
+    toast_guild_exists:'公会名称已存在', toast_guild_not_found:'公会不存在',
+    toast_guild_full:'公会已满', toast_guild_already_member:'您已在该公会',
+    toast_login_first:'请先登入', toast_login_success:'欢迎 {name}',
+    toast_login_fail:'登入失败', toast_logout:'已登出',
+    toast_connect_error:'连线错误', toast_music_on:'🎵 音乐已开启',
+    toast_music_off:'🔇 音乐已关闭', close:'关闭', decompose:'分解'
+  },
+  'en': {
+    name:'English', play:'▶ Play', settings:'⚙️ Settings', shop:'🛒 Shop',
+    guild:'🏛️ Guild', pvp:'⚔️ PvP', season:'🎖️ Season', achievement:'🏆 Achievement',
+    help:'❓ Help', back:'← Back', settings_title:'⚙️ Settings', shop_title:'🛒 Shop',
+    guild_title:'🏛️ Guild', pvp_title:'⚔️ PvP Arena', season_title:'🎖️ Season Pass',
+    achievement_title:'🏆 Achievements', help_title:'❓ Help', daily_reward:'⭐ Daily Reward',
+    claim:'🎁 Claim', signin_streak:'📅 Streak: {days} days', signin:'✅ Sign In',
+    attack:'⚔️', skill:'✨', rest:'😴', inventory:'🎒', rebirth:'🔄 Rebirth',
+    report:'📋 Report', save:'💾', rebirth_level:'🔄 Rebirth Lv.{level}',
+    hp_label:'❤️ {hp}', exp_label:'⭐ {exp}', level_label:'⬆️ Lv {level}',
+    atk_label:'⚔️ {atk}', zone_label:'🗺️ {zone}', elem_label:'🔥{elem}',
+    monster_info:'💀 HP {hp} | Lv {lv} | Element:{elem}',
+    guide_welcome:'🎮 Welcome!', guide_line1:'⚔️Attack ✨Skill 🎒Equipment 😴Rest',
+    guide_line2:'🔥Element Advantage +30%', guide_line3:'🔄Lv100 Rebirth',
+    guide_line4:'📋Click "Report" to generate Bug report', start:'Start',
+    help_line1:'⚔️Attack ✨Skill 😴Rest 🎒Equipment',
+    help_line2:'🔥Element｜🔄Rebirth｜🏛️Guild',
+    help_line3:'⚔️PvP｜🎖️Season｜🏆Achievement',
+    help_line4:'🤖Auto Battle｜💤Offline Gain',
+    help_line5:'🎵Music｜📋Report｜☁️Cloud Save',
+    language:'🌐 Language', volume:'🔊 Volume', music:'🎵 Music',
+    difficulty:'⚔️ Difficulty', google:'🔐 Google', achievements:'🏆 Achievements',
+    version:'📌 Version', check_update:'🔄 Check Update', reset:'⚠️ Reset',
+    reset_confirm:'Reset all progress?',
+    no_guild:'Not in a guild', create_guild:'Create ({gold}g)', join_guild:'Join',
+    guild_name_placeholder:'Guild Name', recommend:'🌟 Recommended Guilds', ranking:'🏆 Guild Ranking',
+    no_recommend:'No recommended guilds', donate:'Donate {amount}g',
+    guild_shop:'🎁 Rare Equipment Box', guild_shop_cost:'{cost} Contribution',
+    guild_boss:'👑 Guild Boss', guild_boss_defeated:'✅ Defeated',
+    guild_boss_challenge:'⚔️ Challenge', leave_guild:'Leave',
+    leave_confirm:'Leave this guild?', member_count:'👥 {count}',
+    contribution:'💰 Contribution: {value}', guild_level:'🏛️ {name} Lv.{level}',
+    guild_exp:'({exp}/{max})', guild_atk_bonus:'📈 ATK+{bonus}%',
+    guild_loading:'Loading...', insufficient_gold:'Not enough gold',
+    insufficient_contribution:'Not enough contribution', pvp_find:'Find Opponent',
+    pvp_history:'Recent Battles', pvp_win:'✅W', pvp_lose:'❌L', pvp_draw:'⚖️D',
+    pvp_battle:'Battling...', pvp_no_opponent:'No opponent',
+    season_level:'Level {level}', season_exp:'EXP {exp}/{max}',
+    season_tasks:'📋 Tasks', season_rewards:'🎁 Rewards',
+    season_claim:'Claim', season_claimed:'✅Claimed',
+    season_task_complete:'📋 Task complete: {task}, +{exp} Season EXP',
+    season_level_up:'🎉 Season level up to {level}!',
+    season_reward_gold:'Claimed {gold} gold!',
+    season_reward_equip:'Got {equip}',
+    report_copy:'📋 Copy', report_discord:'📤 Discord', report_close:'✖ Close',
+    report_copied:'✅ Copied!', report_discord_sent:'✅ Sent to Discord!',
+    report_discord_fail:'❌ Send failed',
+    toast_heal:'✨Restored {hp}HP', toast_damage:'⚔️ {dmg}dmg',
+    toast_defeat:'🎉 +{exp}EXP +{gold}g',
+    toast_levelup:'🎉 Lv{level}',
+    toast_rebirth_success:'✨Rebirth successful! Lv.{level}',
+    toast_rebirth_fail:'Need Lv100 & <10 rebirths',
+    toast_guild_created:'Guild "{name}" created',
+    toast_guild_joined:'Joined "{name}"', toast_guild_left:'Left guild',
+    toast_guild_donate:'Donated {gold}g, +{contribution} contribution',
+    toast_guild_boss_damage:'Boss -{dmg}HP ({hp}/{max})',
+    toast_guild_boss_defeated:'🎉 Guild Boss defeated! +{gold}g',
+    toast_guild_boss_reset:'🔄 Boss reset',
+    toast_cloud_sync:'☁️ Synced', toast_cloud_fail:'☁️ Sync failed',
+    toast_save:'💾 Saved', toast_load:'📂 Loaded',
+    toast_offline:'Offline {hours}h +{gold}g +{exp}EXP',
+    toast_revive:'💀 Revived', toast_cannot_attack:'Cannot attack',
+    toast_cannot_rest:'Cannot rest', toast_rested:'Already rested',
+    toast_no_monster:'No monster', toast_hp_full:'HP full',
+    toast_skill_no_monster:'No monster',
+    toast_pvp_battle:'⚔️ PvP Start!',
+    toast_pvp_result_win:'🏆 Defeated {opponent}! +{gold}g',
+    toast_pvp_result_lose:'💀 Defeated by {opponent}',
+    toast_pvp_result_draw:'⚖️ Draw', toast_pvp_fail:'PvP failed',
+    toast_quest_complete:'📋 Task complete: {task}, +{reward}g',
+    toast_quest_claim:'Claimed {gold}g',
+    toast_quest_none:'No rewards to claim',
+    toast_achievement_unlock:'🏆 Achievement unlocked: {icon} {name}! +{reward}g',
+    toast_daily_claimed:'Already claimed today',
+    toast_daily_exp:'🎁20EXP',
+    toast_daily_equip:'🎁{name}',
+    toast_daily_hp:'🎁50HP',
+    toast_signin:'Signed in! {days} days streak +{gold}g',
+    toast_signin_7days:'🎉 7-day streak! Epic Equipment Box!',
+    toast_signin_30days:'🎉 30-day streak! Title "Legend"!',
+    toast_upgrade:'{name} +{level}', toast_equip_auto:'✨Auto-equip',
+    toast_decompose:'Decomposed +{gold}g',
+    toast_no_decompose:'Nothing to decompose',
+    toast_buy_equip:'Got {name}', toast_buy_exp:'🧪 +30EXP',
+    toast_buy_revive:'💊 Revive Stone', toast_buy_pet:'🐕 Pet! ATK+5%',
+    toast_not_enough_gold:'Not enough gold',
+    toast_already_claimed:'Already claimed',
+    toast_level_not_enough:'Level not enough',
+    toast_no_reward:'No reward at this level',
+    toast_season_levelup:'🎉 Season level up to {level}!',
+    toast_invalid_name:'Enter a valid name',
+    toast_already_in_guild:'Already in a guild',
+    toast_guild_exists:'Guild name already exists',
+    toast_guild_not_found:'Guild not found',
+    toast_guild_full:'Guild is full',
+    toast_guild_already_member:'Already in this guild',
+    toast_login_first:'Please login first',
+    toast_login_success:'Welcome {name}',
+    toast_login_fail:'Login failed',
+    toast_logout:'Logged out',
+    toast_connect_error:'Connection error',
+    toast_music_on:'🎵 Music On',
+    toast_music_off:'🔇 Music Off',
+    close:'Close', decompose:'Decompose'
+  }
+};
+
+let currentLang = localStorage.getItem('language') || 'zh-TW';
+
+function t(key, params = {}) {
+  const lang = LANGUAGES[currentLang] || LANGUAGES['zh-TW'];
+  let text = lang[key] || key;
+  for (const [k, v] of Object.entries(params)) {
+    text = text.replace(`{${k}}`, v);
+  }
+  return text;
+}
+
+function applyLanguage() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+      el.placeholder = t(key);
+    } else {
+      el.textContent = t(key);
+    }
+  });
+  updateAllUI();
+}
+
+function updateAllUI() {
+  if (typeof updateUI === 'function') updateUI();
+  if (typeof renderGuildUI === 'function') renderGuildUI();
+  if (typeof renderAchievements === 'function') renderAchievements();
+  if (typeof renderPvPUI === 'function') renderPvPUI();
+  if (typeof renderSeasonUI === 'function') renderSeasonUI();
+  if (typeof renderShop === 'function') renderShop();
+  if (typeof renderSettings === 'function') renderSettings();
+}
+
+// ============================================================
+//  🧬 自癒引擎
+// ============================================================
+(function heal() {
+  console.log('🧬 自癒引擎啟動...');
+  const backup = {
+    toast: function(m,e){ const d=document.createElement('div');d.className='toast';d.textContent=m;d.style.color=e?'#ff8888':'#facc15';document.body.appendChild(d);setTimeout(()=>d.remove(),2000); },
+    rand: function(a,b){ return Math.floor(Math.random()*(b-a+1))+a; },
+    sanitizeInput: function(s){ return s.replace(/[<>"']/g,''); },
+    dmgFloat: function(x,y,t,c){ const e=document.createElement('div');e.className='dmg-float';e.textContent=t;e.style.left=x+'px';e.style.top=y+'px';e.style.color=c||'#ff6b6b';document.body.appendChild(e);setTimeout(()=>e.remove(),1000); },
+    generateEquipment: function(){ const t=Math.random()<0.5?'w':'a'; const b=Math.floor(Math.random()*3)+1; const e=['火','水','草','光','暗'][Math.floor(Math.random()*5)]||'無'; return {id:Date.now()+'-'+Math.random(),type:t,quality:'普通',color:'#9ca3af',bonus:b,name:`普通 ${t==='w'?'武':'防'}`,equipped:false,level:0,element:e}; },
+    genEq: function(){ return this.generateEquipment(); },
+    applyEq: function(){ if(typeof G!=='undefined'&&G){ const b={atk:0,hp:0}; if(G.equipment)G.equipment.forEach(e=>{if(e.equipped){if(e.type==='w')b.atk+=e.bonus;else b.hp+=e.bonus;}}); const rb=1+(G.rebirthLevel||0)*0.05; const gb=(G.guild&&G.guild.name)?1+(G.guild.level||1)*0.02:1; G.atk=Math.floor((G.baseAtk+b.atk)*rb*gb); G.maxHp=Math.floor((G.baseHp+b.hp)*rb); if(G.hp>G.maxHp)G.hp=G.maxHp; if(typeof updateUI==='function')updateUI(); } },
+    renderGuildUI: function(){ const i=document.getElementById('guildInfo'); const a=document.getElementById('guildActions'); if(i)i.innerHTML='<p>'+t('guild_loading')+'</p>'; if(a)a.innerHTML=''; },
+    renderPvPUI: function(){ const c=document.getElementById('pvpContent'); if(c)c.innerHTML='<p>'+t('pvp_no_opponent')+'</p>'; },
+    renderSeasonUI: function(){ const c=document.getElementById('seasonContent'); if(c)c.innerHTML='<p>'+t('season_tasks')+'</p>'; },
+    renderAchievements: function(){ const c=document.getElementById('achievementList'); if(c)c.innerHTML='<p>'+t('achievements')+'</p>'; },
+    openReport: function(){ this.toast(t('report_discord_fail'),false); }
+  };
+  const list=['toast','rand','dmgFloat','sanitizeInput','genEq','generateEquipment','applyEq','renderGuildUI','renderPvPUI','renderSeasonUI','renderAchievements','openReport'];
+  let fixed=0; list.forEach(n=>{ if(typeof window[n]==='undefined'){ window[n]=backup[n]; console.log('✅ 自癒補充:'+n); fixed++; } });
+  if(typeof window.G==='undefined'){ window.G={lv:1,exp:0,hp:100,maxHp:100,atk:10,baseAtk:10,baseHp:100,gold:0,restUsed:false,difficulty:'normal',rebirthLevel:0,curMonster:null,deathStreak:0,lastDmg:0,totalKills:0,maxDamage:0,maxLevel:1,equipment:[],guild:{name:null,level:1,exp:0,members:[{uid:'player',contribution:0}]},achievements:{},stats:{playTime:0,totalGold:0,totalEquip:0,totalUpgrade:0,skillUsage:0,bossKills:0},autoBattle:false}; fixed++; }
+  console.log('🧬 自癒完成，修復 '+fixed+' 項');
+})();
+
+// ============================================================
+//  🔥 Firebase 設定
+// ============================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyDevirfNqjlg5hVkF6pgMMU9tfx7CDac4A",
+  authDomain: "monster-game-f193f.firebaseapp.com",
+  databaseURL: "https://monster-game-f193f-default-rtdb.firebaseio.com",
+  projectId: "monster-game-f193f",
+  storageBucket: "monster-game-f193f.firebasestorage.app",
+  messagingSenderId: "304101821779",
+  appId: "1:304101821779:web:9b77e901083a7949f265a6",
+  measurementId: "G-LDLS7KEDZ9"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth(), db = firebase.firestore(), provider = new firebase.auth.GoogleAuthProvider();
+
+// ============================================================
+//  🔒 Webhook URL
+// ============================================================
+const WEBHOOK_URL = 'https://discord.com/api/webhooks/1519312504302342366/7nl1GoalmzeTVrHrwv93z5OT3EJZLNQfn2DC6-IWMhuNYXlzVUzUOC8cnt1Kk1C-3OdI';
+
+// ============================================================
+//  🎵 音樂與音效
+// ============================================================
+let actx=null, musicOn=true, musicTimer=null;
+function getCtx(){ if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)(); if(actx.state==='suspended')actx.resume(); return actx; }
+function playTone(f,d,t='sine',v=0.15){ if(!musicOn)return; try{ const c=getCtx(), o=c.createOscillator(), g=c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.value=f; o.type=t; g.gain.setValueAtTime(v,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+d); o.start(c.currentTime); o.stop(c.currentTime+d); }catch(e){} }
+function playChord(n,d=0.4,v=0.08){ if(!musicOn)return; try{ const c=getCtx(); n.forEach(f=>{ const o=c.createOscillator(), g=c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.value=f; o.type='sine'; g.gain.setValueAtTime(v,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+d); o.start(c.currentTime); o.stop(c.currentTime+d); }); }catch(e){} }
+const SFX={attack:()=>{playTone(600,.08,'square',.12);setTimeout(()=>playTone(400,.06,'square',.08),60);},skill:()=>{playTone(880,.1,'square',.15);setTimeout(()=>playTone(1100,.12,'square',.1),80);},hurt:()=>{playTone(250,.2,'sawtooth',.12);setTimeout(()=>playTone(180,.25,'sawtooth',.1),100);},levelup:()=>{playChord([523,659,784],.15,.1);setTimeout(()=>playChord([784,988,1175],.2,.08),150);},defeat:()=>{playTone(392,.15,'sine',.12);setTimeout(()=>playTone(523,.25,'sine',.12),150);},boss:()=>{playTone(110,.4,'sawtooth',.2);setTimeout(()=>playTone(82,.6,'sawtooth',.2),300);},equip:()=>{playTone(600,.06,'sine',.1);setTimeout(()=>playTone(800,.08,'sine',.08),80);},gold:()=>{playTone(1000,.05,'sine',.08);setTimeout(()=>playTone(1200,.06,'sine',.06),60);}};
+const MEL=[[523,659,784],[587,740,880],[523,659,784],[494,659,880],[523,659,784],[587,740,880],[523,659,784],[880,988,1175]], BASS=[130,146,130,123,130,146,130,110];
+function playMusic(){ if(!musicOn){ stopMusic(); return; } if(musicTimer)return; let b=0; musicTimer=setInterval(()=>{ if(!musicOn){ stopMusic(); return; } try{ const c=getCtx(); const i=b%MEL.length; MEL[i].forEach((f,j)=>{ const o=c.createOscillator(), g=c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.value=f; o.type='sine'; g.gain.setValueAtTime(j===0?.06:.04,c.currentTime); g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.6); o.start(c.currentTime); o.stop(c.currentTime+.6); }); const bo=c.createOscillator(), bg=c.createGain(); bo.connect(bg); bg.connect(c.destination); bo.frequency.value=BASS[i]; bo.type='triangle'; bg.gain.setValueAtTime(.08,c.currentTime); bg.gain.exponentialRampToValueAtTime(.001,c.currentTime+.4); bo.start(c.currentTime); bo.stop(c.currentTime+.4); if(b%2===0){ const buf=c.createBuffer(1,c.sampleRate*.02,c.sampleRate); const d=buf.getChannelData(0); for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(1-i/d.length); const src=c.createBufferSource(), g=c.createGain(); src.buffer=buf; src.connect(g); g.connect(c.destination); g.gain.setValueAtTime(.04,c.currentTime); g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.04); src.start(c.currentTime); src.stop(c.currentTime+.04); } b++; }catch(e){} },600); }
+function stopMusic(){ if(musicTimer){ clearInterval(musicTimer); musicTimer=null; } }
+function toggleMusic(){ musicOn=!musicOn; const b=document.getElementById('musicToggleBtn'); if(b){ b.textContent=musicOn?'🔊':'🔇'; b.className='music-btn'+(musicOn?' on':''); } if(musicOn){ getCtx(); playMusic(); toast(t('toast_music_on'),false); } else { stopMusic(); toast(t('toast_music_off'),false); } }
+document.addEventListener('click',()=>{ if(!actx){ getCtx(); if(musicOn)playMusic(); } },{once:true});
+document.addEventListener('touchstart',()=>{ if(!actx){ getCtx(); if(musicOn)playMusic(); } },{once:true});
+
+// ============================================================
+//  📦 全域狀態
+// ============================================================
+const G = window.G;
+let currentUser = null, signinStreak = 0, myGuild = null;
+let autoTimer = null, isPvPing = false;
+let pvpHistory = JSON.parse(localStorage.getItem('pvpHistory') || '[]');
+
+// ============================================================
+//  ⚡ 元素克制
+// ============================================================
+const ELEMS=['火','水','草','光','暗'], WEAK={'火':'草','水':'火','草':'水','光':'暗','暗':'光'};
+function randElem(){ return ELEMS[rand(0,4)]; }
+function elemBonus(a,d){ if(!a||a==='無')return 1; if(WEAK[a]===d)return 1.3; if(WEAK[d]===a)return 0.7; return 1; }
+
+// ============================================================
+//  🎒 裝備系統
+// ============================================================
+const QUAL=[{n:'普通',c:'#9ca3af',min:1,max:3,r:.5},{n:'優秀',c:'#4ade80',min:4,max:6,r:.3},{n:'稀有',c:'#3b82f6',min:7,max:10,r:.15},{n:'史詩',c:'#a855f7',min:11,max:15,r:.05}];
+function randQ(){ let r=Math.random(),a=0; for(let q of QUAL)if((a+=q.r)>r)return q; return QUAL[0]; }
+function genEq(){ let t=rand(0,1)?'w':'a', q=randQ(), b=rand(q.min,q.max), e=Math.random()<.3?randElem():'無'; return {id:Date.now()+'-'+Math.random(), type:t, quality:q.n, color:q.c, bonus:b, name:`${q.n} ${t==='w'?'武':'防'}`, equipped:false, level:0, element:e}; }
+function eqBonus(){ let a=0,h=0; G.equipment.forEach(e=>{ if(e.equipped)e.type==='w'?a+=e.bonus:h+=e.bonus; }); return {atk:a,hp:h}; }
+function playerElem(){ const w=G.equipment.find(e=>e.type==='w'&&e.equipped); return w?.element||'無'; }
+function guildBuff(){ return G.guild.name?1+G.guild.level*.02:1; }
+function applyEq(){ const b=eqBonus(), rb=1+G.rebirthLevel*.05, gb=guildBuff(); G.atk=Math.floor((G.baseAtk+b.atk)*rb*gb); G.maxHp=Math.floor((G.baseHp+b.hp)*rb); if(G.hp>G.maxHp)G.hp=G.maxHp; updateUI(); }
+function upEq(id){ const i=G.equipment.find(e=>e.id==id); if(!i)return; const c=50*((i.level||0)+1); if(G.gold>=c){ G.gold-=c; i.level++; i.bonus+=2; G.stats.totalUpgrade++; SFX.equip(); toast(t('toast_upgrade',{name:i.name,level:i.level}),false); updateGold(); saveGame(); applyEq(); closeBag(); updateSeasonProgress('upgrade'); }else toast(t('toast_not_enough_gold'),true); }
+function toggleEq(id){ const i=G.equipment.find(e=>e.id==id); if(!i)return; if(i.equipped){ i.equipped=false; toast(t('toast_unequip',{name:i.name}),false); }else{ const s=G.equipment.find(e=>e.type===i.type&&e.equipped); if(s)s.equipped=false; i.equipped=true; toast(t('toast_equip',{name:i.name}),false); SFX.equip(); } applyEq(); saveGame(); closeBag(); }
+function decomEq(t='普通'){ const o=['普通','優秀','稀有','史詩']; const idx=o.indexOf(t); let total=0; G.equipment=G.equipment.filter(e=>{ if(o.indexOf(e.quality)<idx&&!e.equipped){ total+=10; return false; } return true; }); if(total>0){ G.gold+=total; G.stats.totalGold+=total; SFX.gold(); toast(t('toast_decompose',{gold:total}),false); saveGame(); applyEq(); }else toast(t('toast_no_decompose'),true); closeBag(); }
+function closeBag(){ const o=document.querySelector('.backpack-overlay'); if(o)o.remove(); }
+function showBag(){
+  closeBag();
+  const ov=document.createElement('div'); ov.className='backpack-overlay';
+  const cd=document.createElement('div'); cd.className='backpack-card';
+  cd.innerHTML='<h3>🎒 '+t('inventory')+'</h3>';
+  const dd=document.createElement('div'); dd.style.display='flex'; dd.style.justifyContent='space-between'; dd.style.marginBottom='12px';
+  const sel=document.createElement('select'); sel.innerHTML='<option value="普通">普通及以下</option><option value="優秀">優秀及以下</option><option value="稀有">稀有及以下</option>'; sel.style.background='#0f172a'; sel.style.color='#fff'; sel.style.borderRadius='20px';
+  const btn=document.createElement('button'); btn.textContent=t('decompose'); btn.style.background='#ef4444'; btn.style.border='none'; btn.style.padding='4px 12px'; btn.style.borderRadius='20px'; btn.onclick=()=>{ decomEq(sel.value); };
+  dd.appendChild(sel); dd.appendChild(btn); cd.appendChild(dd);
+  if(!G.equipment.length)cd.innerHTML+='<p>無裝備</p>';
+  else G.equipment.forEach(e=>{
+    const d=document.createElement('div'); d.className='backpack-item'; d.style.borderLeftColor=e.color;
+    d.innerHTML=`<span style="color:${e.color}">${e.name}+${e.bonus} (${e.element}) +${e.level||0}</span><div><button class="eqBtn">${e.equipped?'卸下':'裝'}</button><button class="upBtn">強化</button></div>`;
+    d.querySelector('.eqBtn').onclick=()=>{ toggleEq(e.id); };
+    d.querySelector('.upBtn').onclick=()=>{ upEq(e.id); };
+    cd.appendChild(d);
+  });
+  const cl=document.createElement('button'); cl.textContent=t('close'); cl.className='close-backpack'; cl.onclick=closeBag;
+  cd.appendChild(cl); ov.appendChild(cd); document.body.appendChild(ov);
+}
+
+// ============================================================
+//  💰 金幣
+// ============================================================
+function updateGold(){ const g=document.getElementById('goldGame'); if(g)g.textContent=G.gold; }
+function addGold(a){ G.gold+=a; G.stats.totalGold+=a; SFX.gold(); updateGold(); saveGame(); }
+
+// ============================================================
+//  📅 每日 & 簽到
+// ============================================================
+function canDaily(){ return localStorage.getItem('lastDaily')!==new Date().toDateString(); }
+function claimDaily(){
+  if(!canDaily()){ toast(t('toast_daily_claimed'),true); return; }
+  const r=rand(1,3);
+  if(r===1){ G.exp+=20; toast(t('toast_daily_exp'),false); levelUp(); }
+  else if(r===2){ const e=genEq(); G.equipment.push(e); G.stats.totalEquip++; SFX.equip(); toast(t('toast_daily_equip',{name:e.name}),false); if(!G.equipment.some(x=>x.type===e.type&&x.equipped)){ e.equipped=true; applyEq(); toast(t('toast_equip_auto'),false); } updateSeasonProgress('equip'); }
+  else { G.hp=Math.min(G.maxHp,G.hp+50); toast(t('toast_daily_hp'),false); }
+  localStorage.setItem('lastDaily',new Date().toDateString());
+  updateUI(); saveGame();
+}
+function doSignin(){
+  const last=localStorage.getItem('lastSignin'), today=new Date().toDateString();
+  if(last===today)return;
+  if(last){ const d=(new Date()-new Date(last))/(1000*3600*24); signinStreak=(d===1)?(signinStreak%7)+1:1; }else signinStreak=1;
+  localStorage.setItem('lastSignin',today);
+  const r=[100,150,200,250,300,400,500][signinStreak-1]||500;
+  addGold(r); SFX.gold();
+  toast(t('toast_signin',{days:signinStreak,gold:r}),false);
+  document.getElementById('signinStreak').textContent=signinStreak;
+  localStorage.setItem('signinStreak',signinStreak);
+  if(signinStreak===7){ toast(t('toast_signin_7days'),false); const e=genEq(); e.quality='史詩'; G.equipment.push(e); G.stats.totalEquip++; SFX.equip(); saveGame(); }
+  if(signinStreak===30){ toast(t('toast_signin_30days'),false); localStorage.setItem('title','傳奇'); }
+}
+
+// ============================================================
+//  🔄 轉生
+// ============================================================
+function canRebirth(){ return G.lv>=100 && G.rebirthLevel<10; }
+function doRebirth(){
+  if(!canRebirth()){ toast(t('toast_rebirth_fail'),true); return; }
+  G.rebirthLevel++; G.lv=1; G.exp=0;
+  G.baseAtk=10+G.rebirthLevel*2; G.baseHp=100+G.rebirthLevel*20;
+  G.hp=G.maxHp;
+  applyEq(); refreshMonster(); saveGame();
+  SFX.levelup();
+  toast(t('toast_rebirth_success',{level:G.rebirthLevel}),false);
+  updateUI();
+  checkAchievements();
+}
+
+// ============================================================
+//  🏛️ 公會系統（完整含推薦與排名）
+// ============================================================
+const guildsCollection = db.collection('guilds');
+myGuild = localStorage.getItem('myGuild') || null;
+
+async function createGuild(name) {
+  if (!currentUser) return toast(t('toast_login_first'),true);
+  if (myGuild) return toast(t('toast_already_in_guild'),true);
+  if (G.gold<1000) return toast(t('toast_not_enough_gold'),true);
+  const n=sanitizeInput(name.trim()); if(!n) return toast(t('toast_invalid_name'),true);
+  try {
+    const ref=guildsCollection.doc(n);
+    if((await ref.get()).exists) return toast(t('toast_guild_exists'),true);
+    await ref.set({name:n,members:[currentUser.uid],contribution:{[currentUser.uid]:0},bossHp:1000,bossMaxHp:1000,bossDefeated:false,level:1,exp:0,createdAt:Date.now()});
+    G.gold-=1000; myGuild=n; localStorage.setItem('myGuild',n); updateGold();
+    toast(t('toast_guild_created',{name:n}),false);
+    renderGuildUI(); saveGame(); checkAchievements();
+  } catch(e){ toast(t('toast_connect_error'),true); }
+}
+
+async function joinGuild(name) {
+  if (!currentUser) return toast(t('toast_login_first'),true);
+  if (myGuild) return toast(t('toast_already_in_guild'),true);
+  const n=sanitizeInput(name.trim()); if(!n) return toast(t('toast_invalid_name'),true);
+  try {
+    const ref=guildsCollection.doc(n);
+    const doc=await ref.get();
+    if(!doc.exists) return toast(t('toast_guild_not_found'),true);
+    if(doc.data().members.length>=10) return toast(t('toast_guild_full'),true);
+    await ref.update({members:firebase.firestore.FieldValue.arrayUnion(currentUser.uid),[`contribution.${currentUser.uid}`]:0});
+    myGuild=n; localStorage.setItem('myGuild',n);
+    toast(t('toast_guild_joined',{name:n}),false);
+    renderGuildUI(); checkAchievements();
+  } catch(e){ toast(t('toast_connect_error'),true); }
+}
+
+async function leaveGuild() {
+  if(!myGuild) return toast(t('no_guild'),true);
+  if(!confirm(t('leave_confirm'))) return;
+  try {
+    await guildsCollection.doc(myGuild).update({members:firebase.firestore.FieldValue.arrayRemove(currentUser.uid),[`contribution.${currentUser.uid}`]:firebase.firestore.FieldValue.delete()});
+    myGuild=null; localStorage.removeItem('myGuild');
+    toast(t('toast_guild_left'),false); renderGuildUI();
+  } catch(e){ toast(t('toast_connect_error'),true); }
+}
+
+async function donateGuild(amount) {
+  if(!myGuild) return toast(t('no_guild'),true);
+  if(G.gold<amount) return toast(t('toast_not_enough_gold'),true);
+  try {
+    const ref=guildsCollection.doc(myGuild);
+    const c=Math.floor(amount/10);
+    await ref.update({[`contribution.${currentUser.uid}`]:firebase.firestore.FieldValue.increment(c),exp:firebase.firestore.FieldValue.increment(c)});
+    G.gold-=amount; updateGold(); saveGame();
+    const doc=await ref.get(); const data=doc.data();
+    while(data.exp>=data.level*100){ await ref.update({exp:firebase.firestore.FieldValue.increment(-data.level*100),level:firebase.firestore.FieldValue.increment(1)}); toast(t('toast_guild_levelup',{level:data.level+1}),false); applyEq(); }
+    toast(t('toast_guild_donate',{gold:amount,contribution:c}),false);
+    renderGuildUI(); checkAchievements(); updateSeasonProgress('donate');
+  } catch(e){ toast(t('toast_connect_error'),true); }
+}
+
+async function attackGuildBoss() {
+  if(!myGuild) return toast(t('no_guild'),true);
+  if(G.hp<=0) return toast(t('toast_cannot_attack'),true);
+  try {
+    const ref=guildsCollection.doc(myGuild);
+    const doc=await ref.get(); const data=doc.data();
+    if(data.bossDefeated) return toast(t('toast_guild_boss_defeated'),true);
+    const d=rand(G.atk-5,G.atk+15); const newHp=Math.max(0,data.bossHp-d);
+    await ref.update({bossHp:newHp,[`contribution.${currentUser.uid}`]:firebase.firestore.FieldValue.increment(d)});
+    const c=rand(5,20); G.hp=Math.max(0,G.hp-c); if(G.hp===0){ G.hp=G.maxHp; G.restUsed=false; toast(t('toast_revive'),true); }
+    updateUI(); saveGame();
+    if(newHp<=0){ await ref.update({bossDefeated:true,bossHp:0}); addGold(500); toast(t('toast_guild_boss_defeated',{gold:500}),false); }
+    else toast(t('toast_guild_boss_damage',{dmg:d,hp:newHp,max:data.bossMaxHp}),false);
+    renderGuildUI();
+  } catch(e){ toast(t('toast_connect_error'),true); }
+}
+
+async function resetGuildBossIfNeeded() {
+  const last=localStorage.getItem('guildBossReset');
+  const now=Date.now();
+  if(!last||now-parseInt(last)>7*24*60*60*1000){
+    try {
+      const snap=await guildsCollection.get(); const batch=db.batch();
+      snap.forEach(d=>{ const ref=d.ref; const data=d.data(); batch.update(ref,{bossHp:1000+(data.level-1)*200,bossMaxHp:1000+(data.level-1)*200,bossDefeated:false}); });
+      await batch.commit(); localStorage.setItem('guildBossReset',now.toString()); toast(t('toast_guild_boss_reset'),false);
+    } catch(e){ console.error('重置Boss失敗:',e); }
+  }
+}
+
+async function loadRecommendAndRanking() {
+  try {
+    const snapshot = await guildsCollection.orderBy('level', 'desc').limit(20).get();
+    const guilds = [];
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const totalContrib = Object.values(data.contribution || {}).reduce((a, b) => a + b, 0);
+      guilds.push({
+        id: doc.id,
+        name: data.name,
+        level: data.level || 1,
+        members: data.members?.length || 0,
+        contribution: totalContrib,
+        bossDefeated: data.bossDefeated || false
+      });
+    });
+
+    const recommend = guilds.filter(g => g.members < 10 && !g.bossDefeated).sort((a,b)=>b.level-a.level).slice(0,3);
+    const recDiv = document.getElementById('guildRecommend');
+    if (recDiv) {
+      if (recommend.length === 0) recDiv.innerHTML = `<p style="color:#94a3b8;">${t('no_recommend')}</p>`;
+      else recDiv.innerHTML = `<h4>${t('recommend')}</h4>` + recommend.map(g => `
+        <div class="setting-item" style="font-size:0.8rem;">
+          <div>🏛️ ${g.name} (Lv.${g.level})<br><span style="font-size:0.7rem;color:#94a3b8;">${t('member_count',{count:g.members})}</span></div>
+          <button onclick="joinGuild('${g.name}')" class="game-action" style="padding:4px 12px;">${t('join_guild')}</button>
+        </div>
+      `).join('');
+    }
+
+    const rankDiv = document.getElementById('guildRanking');
+    if (rankDiv) {
+      const top10 = guilds.slice(0, 10);
+      rankDiv.innerHTML = `<h4>${t('ranking')}</h4>` + top10.map((g, i) => `
+        <div class="setting-item" style="font-size:0.8rem;">
+          <div>${i+1}. ${g.name} (Lv.${g.level})<br><span style="font-size:0.7rem;color:#94a3b8;">${t('member_count',{count:g.members})} | 💰 ${g.contribution}</span></div>
+          <span style="color:${i===0?'#facc15':i===1?'#94a3b8':i===2?'#cd7f32':'#475569'}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':''}</span>
+        </div>
+      `).join('');
+    }
+  } catch (e) {
+    console.error('載入推薦/排名失敗:', e);
+  }
+}
+
+async function fetchGuildInfo() {
+  if (!myGuild) {
+    document.getElementById('guildInfo').innerHTML = `<p>${t('no_guild')}</p>`;
+    document.getElementById('guildActions').innerHTML = `
+      <input type="text" id="guildNameInput" placeholder="${t('guild_name_placeholder')}" style="background:#0f172a;color:#fff;padding:8px;border-radius:20px;">
+      <button id="createGuildBtn" class="play-btn" style="width:auto;margin-top:8px;">${t('create_guild',{gold:1000})}</button>
+      <button id="joinGuildBtn" class="play-btn" style="width:auto;margin-top:8px;">${t('join_guild')}</button>
+      <div id="guildRecommend" style="margin-top:16px;text-align:left;"></div>
+      <div id="guildRanking" style="margin-top:16px;text-align:left;"></div>
+    `;
+    document.getElementById('createGuildBtn')?.addEventListener('click', () => {
+      const n = document.getElementById('guildNameInput').value;
+      if (n) createGuild(n);
+    });
+    document.getElementById('joinGuildBtn')?.addEventListener('click', () => {
+      const n = document.getElementById('guildNameInput').value;
+      if (n) joinGuild(n);
+    });
+    await loadRecommendAndRanking();
+    return;
+  }
+  try {
+    const doc = await guildsCollection.doc(myGuild).get();
+    if (!doc.exists) { toast(t('toast_guild_not_found'),true); myGuild=null; localStorage.removeItem('myGuild'); renderGuildUI(); return; }
+    const data = doc.data();
+    const myC = data.contribution[currentUser?.uid] || 0;
+    document.getElementById('guildInfo').innerHTML = `
+      <div>${t('guild_level',{name:data.name,level:data.level})} ${t('guild_exp',{exp:data.exp,max:data.level*100})}</div>
+      <div>${t('guild_atk_bonus',{bonus:data.level*2})}</div>
+      <div>${t('member_count',{count:data.members.length})}</div>
+      <div>${t('contribution',{value:myC})}</div>
+      <div>${t('guild_boss')}: ${data.bossHp}/${data.bossMaxHp} ${data.bossDefeated?'✅':''}</div>
+    `;
+    document.getElementById('guildActions').innerHTML = `
+      <button id="d100" class="game-action">${t('donate',{amount:100})}</button>
+      <button id="d500" class="game-action">${t('donate',{amount:500})}</button>
+      <button id="d1000" class="game-action">${t('donate',{amount:1000})}</button>
+      <button id="attackBossBtn" class="game-action" ${data.bossDefeated?'disabled':''}>${t('guild_boss_challenge')}</button>
+      <button id="leaveBtn" class="game-action" style="background:#ef4444;">${t('leave_guild')}</button>
+      <div id="guildShop"></div>
+    `;
+    document.getElementById('d100')?.addEventListener('click', () => donateGuild(100));
+    document.getElementById('d500')?.addEventListener('click', () => donateGuild(500));
+    document.getElementById('d1000')?.addEventListener('click', () => donateGuild(1000));
+    document.getElementById('attackBossBtn')?.addEventListener('click', attackGuildBoss);
+    document.getElementById('leaveBtn')?.addEventListener('click', leaveGuild);
+    const shop = document.getElementById('guildShop');
+    shop.innerHTML = `<div class="setting-item"><div>${t('guild_shop')}</div><button id="buyGuildEq" ${myC<200?'disabled':''}>${t('guild_shop_cost',{cost:200})}</button></div>`;
+    document.getElementById('buyGuildEq')?.addEventListener('click', async () => {
+      if (myC >= 200) {
+        await guildsCollection.doc(myGuild).update({[`contribution.${currentUser.uid}`]: firebase.firestore.FieldValue.increment(-200)});
+        const e = genEq(); e.quality = '稀有'; G.equipment.push(e); applyEq();
+        toast(t('toast_buy_equip',{name:e.name}), false); saveGame(); renderGuildUI();
+      } else toast(t('toast_insufficient_contribution'), true);
+    });
+  } catch (e) {
+    toast(t('toast_connect_error'), true);
+  }
+}
+
+function renderGuildUI(){ document.getElementById('guildInfo').innerHTML=t('guild_loading'); document.getElementById('guildActions').innerHTML=''; fetchGuildInfo(); }
+resetGuildBossIfNeeded();
+
+// ============================================================
+//  ⚔️ 戰鬥核心
+// ============================================================
+const ZONES=[{n:"🌳新手村",max:30,m:["🟣史萊姆","🟢哥布林","🐺森林狼","🦇蝙蝠","🌿樹精"]},{n:"🏜️沙漠",max:90,m:["🦂巨蠍","🧻木乃伊","🐍沙蛇","🦅沙鷹","🏺詛咒陶罐"]},{n:"⛰️蒼穹",max:100,m:["🐉青龍","👼天使","😈惡魔","✨星辰之靈","🌙月獸"]}];
+const SKILLS=[{n:'毒擊',e:'🌿',m:1.2},{n:'砂塵',e:'🏜️',m:1.0},{n:'龍息',e:'🐉',m:1.5},{n:'閃電',e:'⚡',m:1.3},{n:'冰霜',e:'❄️',m:1.1},{n:'治癒',e:'💚',h:15}];
+function isBoss(l){ return l%10===0; }
+const BOSS=["新手守護者","沙暴領主","蒼穹巨龍","深淵魔王","永凍冰凰","雷霆泰坦","暗影幽靈","黃金獅鷲","時間守護者","終焉之神"];
+function getZone(){ return G.lv<=30?ZONES[0]:G.lv<=90?ZONES[1]:ZONES[2]; }
+function getMult(){ switch(G.difficulty){ case 'easy':return {hp:.7,atk:.7,exp:1.1,off:-2}; case 'hard':return {hp:1.5,atk:1.3,exp:.85,off:3}; case 'extreme':return {hp:2.0,atk:1.6,exp:.7,off:6}; default:return {hp:1,atk:1,exp:1,off:0}; } }
+function genMonster(){
+  const b=isBoss(G.lv); let emoji,name,skill,elem=randElem();
+  if(b){ emoji="👑"; name=BOSS[Math.floor((G.lv-1)/10)]||"上古Boss"; skill=SKILLS[rand(0,SKILLS.length-1)]; }
+  else { const z=getZone(), raw=z.m[rand(0,z.m.length-1)]; emoji=raw[0]; name=raw.slice(1); skill=SKILLS[rand(0,SKILLS.length-1)]; }
+  const m=getMult(); let off=m.off;
+  if(G.deathStreak>=3&&G.difficulty!=='easy')off=Math.max(-5, off-Math.floor(G.deathStreak/2));
+  let lv=Math.max(1, G.lv+off); if(b)lv=G.lv+2;
+  let hp=(30+lv*2.5)*m.hp, atk=(5+Math.floor(lv/2.5))*m.atk; if(b){ hp*=2; atk*=1.5; }
+  const vf=v=>Math.floor(v*(.6+Math.random()*.8)); let exp=Math.max(1,Math.floor((12+lv*.8)*m.exp)); if(b)exp*=3;
+  return {emoji,name,lv,hp:vf(hp),maxHp:vf(hp),atk:vf(atk),exp,skill,isBoss:b,element:elem};
+}
+function refreshMonster(){ G.curMonster=genMonster(); G.restUsed=false; updateUI(); log(`✨ ${G.curMonster.isBoss?'👑BOSS ':''}${G.curMonster.emoji}${G.curMonster.name} Lv.${G.curMonster.lv} HP${G.curMonster.hp} ${G.curMonster.element}`); if(G.curMonster.isBoss)SFX.boss(); }
+function levelUp(){
+  let up=false;
+  while(G.exp>=50){ G.exp-=50; G.lv++; G.baseHp+=20; G.baseAtk+=5; const b=eqBonus(); G.maxHp=Math.floor(G.baseHp+b.hp); G.hp=G.maxHp; up=true; log(t('toast_levelup',{level:G.lv})); if(G.lv>G.maxLevel)G.maxLevel=G.lv; }
+  if(up){ SFX.levelup(); applyEq(); refreshMonster(); }
+  saveGame();
+}
+function monsterCounter(){
+  if(!G.curMonster)return; const d=rand(G.curMonster.atk-3,G.curMonster.atk+2); G.hp-=d; SFX.hurt(); log(`😈 反擊 ${d}`);
+  if(G.hp<=0){ G.hp=G.maxHp; G.restUsed=false; G.deathStreak++; log(t('toast_revive')); } else G.deathStreak=0;
+  updateUI(); saveGame();
+}
+function defeatMonster(){
+  if(!G.curMonster)return;
+  G.exp+=G.curMonster.exp; const g=rand(10,G.curMonster.isBoss?100:30); addGold(g); SFX.defeat();
+  log(t('toast_defeat',{exp:G.curMonster.exp,gold:g})); G.totalKills++;
+  if(G.lastDmg>G.maxDamage)G.maxDamage=G.lastDmg;
+  if(G.curMonster.isBoss){ G.stats.bossKills=(G.stats.bossKills||0)+1; updateSeasonProgress('boss'); }
+  if(Math.random()<.3||G.curMonster.isBoss){ const e=genEq(); if(G.curMonster.isBoss)e.quality='史詩'; G.equipment.push(e); G.stats.totalEquip++; SFX.equip(); toast(t('toast_buy_equip',{name:e.name}),false); if(!G.equipment.some(x=>x.type===e.type&&x.equipped)){ e.equipped=true; applyEq(); toast(t('toast_equip_auto'),false); } updateSeasonProgress('equip'); }
+  levelUp(); refreshMonster(); updateUI(); saveGame(); checkAchievements();
+}
+function attack(){
+  if(G.hp<=0){ log(t('toast_cannot_attack')); return; }
+  if(!G.curMonster)refreshMonster();
+  const base=rand(G.atk-3,G.atk+5); const eb=elemBonus(playerElem(), G.curMonster.element); const d=Math.floor(base*eb);
+  G.lastDmg=d; G.curMonster.hp-=d; SFX.attack();
+  const rect=document.getElementById('attackBtn').getBoundingClientRect();
+  dmgFloat(rect.left+20, rect.top-20, '-'+d, d>20?'#ff6b6b':'#ffd93d');
+  log(t('toast_damage',{dmg:d})+(eb>1?' 克制!':''));
+  if(playerElem()!=='無'){ let used=JSON.parse(localStorage.getItem('elements_used')||'[]'); if(!used.includes(playerElem())){ used.push(playerElem()); localStorage.setItem('elements_used',JSON.stringify(used)); } }
+  updateSeasonProgress('attack');
+  if(G.curMonster.hp<=0)defeatMonster(); else monsterCounter();
+  updateUI(); saveGame();
+  if(d>G.atk*1.5){ document.body.classList.add('flash'); setTimeout(()=>document.body.classList.remove('flash'),200); }
+}
+function showSkill(){
+  const ov=document.createElement('div'); ov.className='skill-menu-overlay';
+  const cd=document.createElement('div'); cd.className='skill-menu-card'; cd.innerHTML='<h3>選技能</h3>';
+  const list=[{n:'火焰拳', d:a=>rand(a+8,a*2+5), e:'🔥'},{n:'水槍', d:a=>rand(a+5,a*2+2), e:'💧'},{n:'雷電', d:a=>rand(a+10,a*2+8), e:'⚡'},{n:'治癒', h:30, e:'💚'}];
+  list.forEach(s=>{ const b=document.createElement('button'); b.textContent=s.n==='治癒'?`${s.n} (+${s.h}HP)`:s.n; b.onclick=()=>{ document.body.removeChild(ov); if(G.hp<=0){ log(t('toast_cannot_attack')); return; } if(s.n==='治癒'){ G.hp=Math.min(G.maxHp,G.hp+s.h); log(t('toast_heal',{hp:s.h})); updateUI(); saveGame(); SFX.skill(); } else { if(!G.curMonster){ log(t('toast_no_monster')); return; } let d=s.d(G.atk); const eb=elemBonus(playerElem(), G.curMonster.element); d=Math.floor(d*eb); G.lastDmg=d; G.curMonster.hp-=d; G.stats.skillUsage++; SFX.skill(); log(`✨${s.e} ${d}傷`); if(G.curMonster.hp<=0)defeatMonster(); else monsterCounter(); updateUI(); saveGame(); checkAchievements(); } }; cd.appendChild(b); });
+  const c=document.createElement('button'); c.textContent=t('close'); c.onclick=()=>document.body.removeChild(ov); cd.appendChild(c); ov.appendChild(cd); document.body.appendChild(ov);
+}
+function rest(){
+  if(G.restUsed){ log(t('toast_rested')); return; }
+  if(G.hp<=0){ log(t('toast_cannot_rest')); return; }
+  if(!G.curMonster){ log(t('toast_no_monster')); return; }
+  G.hp=Math.min(G.maxHp,G.hp+30); G.restUsed=true;
+  log(t('toast_heal',{hp:30}));
+  const s=rand(G.curMonster.atk-2,G.curMonster.atk+1); G.hp=Math.max(0,G.hp-s); if(s>0)SFX.hurt();
+  log(`⚠️偷襲-${s}`);
+  if(G.hp<=0){ G.hp=G.maxHp; G.restUsed=false; SFX.hurt(); log(t('toast_revive')); }
+  updateUI(); saveGame();
+}
+function updateUI(){
+  document.getElementById('hpText').textContent=`${G.hp}/${G.maxHp}`;
+  document.getElementById('expText').textContent=`${G.exp}/50`;
+  document.getElementById('levelText').textContent=G.lv;
+  document.getElementById('atkText').textContent=G.atk;
+  document.getElementById('zoneText').textContent=getZone().n;
+  document.getElementById('playerElem').textContent=playerElem();
+  document.getElementById('rebirthLevel').textContent=G.rebirthLevel;
+  if(G.curMonster){
+    document.getElementById('monsterName').innerHTML=`${G.curMonster.emoji}${G.curMonster.name}`;
+    document.getElementById('monsterEmoji').textContent=G.curMonster.emoji;
+    document.getElementById('monsterHpText').textContent=`${G.curMonster.hp}/${G.curMonster.maxHp}`;
+    document.getElementById('monsterLevelText').textContent=G.curMonster.lv;
+    document.getElementById('monsterElem').textContent=G.curMonster.element;
+    document.getElementById('monsterBar').style.width=`${(G.curMonster.hp/G.curMonster.maxHp)*100}%`;
+  }
+  document.getElementById('hpBar').style.width=`${(G.hp/G.maxHp)*100}%`;
+  document.getElementById('expBar').style.width=`${(G.exp/50)*100}%`;
+  document.getElementById('restBtn').disabled=G.restUsed;
+  updateGold();
+}
+function log(m){ const el=document.getElementById('logMsg'); if(el) el.textContent=m; }
+
+// ============================================================
+//  🤖 自動戰鬥
+// ============================================================
+function toggleAuto(){
+  G.autoBattle=!G.autoBattle;
+  document.getElementById('autoBattleBtn').textContent=G.autoBattle?'🤖 ON':'🤖 OFF';
+  if(G.autoBattle){ if(autoTimer)clearInterval(autoTimer); autoTimer=setInterval(()=>{ if(G.autoBattle&&document.getElementById('gamePage').classList.contains('active'))attack(); },1200); }
+  else { if(autoTimer){ clearInterval(autoTimer); autoTimer=null; } }
+}
+
+// ============================================================
+//  💤 離線收益
+// ============================================================
+function calcOffline(){
+  const last=localStorage.getItem('lastOnline');
+  if(last){
+    const diff=(Date.now()-parseInt(last))/1000/60/60;
+    if(diff>1){ const g=Math.floor(10*Math.min(diff,24)), e=Math.floor(5*Math.min(diff,24)); addGold(g); G.exp+=e; while(G.exp>=50)levelUp(); toast(t('toast_offline',{hours:Math.floor(diff),gold:g,exp:e}),false); }
+  }
+  localStorage.setItem('lastOnline',Date.now());
+}
+
+// ============================================================
+//  🛒 商店
+// ============================================================
+function renderShop(){
+  const c=document.getElementById('shopItemsList');
+  if(!c)return;
+  c.innerHTML=`
+    <div class="setting-item"><div>🎁 裝備箱</div><button id="buyEq">100💰</button></div>
+    <div class="setting-item"><div>🧪 經驗藥水 (+30EXP)</div><button id="buyExp">150💰</button></div>
+    <div class="setting-item"><div>💊 復活石</div><button id="buyRev">200💰</button></div>
+    <div class="setting-item"><div>🐕 寵物 (攻擊+5%)</div><button id="buyPet">300💰</button></div>
+  `;
+  document.getElementById('buyEq')?.addEventListener('click',()=>{ if(G.gold>=100){ G.gold-=100; const e=genEq(); G.equipment.push(e); G.stats.totalEquip++; SFX.equip(); toast(t('toast_buy_equip',{name:e.name}),false); if(!G.equipment.some(x=>x.type===e.type&&x.equipped)){ e.equipped=true; applyEq(); toast(t('toast_equip_auto'),false); } updateGold(); saveGame(); checkAchievements(); updateSeasonProgress('equip'); } else toast(t('toast_not_enough_gold'),true); });
+  document.getElementById('buyExp')?.addEventListener('click',()=>{ if(G.gold>=150){ G.gold-=150; G.exp+=30; SFX.skill(); toast(t('toast_buy_exp'),false); levelUp(); updateGold(); saveGame(); } else toast(t('toast_not_enough_gold'),true); });
+  document.getElementById('buyRev')?.addEventListener('click',()=>{ if(G.gold>=200){ G.gold-=200; localStorage.setItem('revive','true'); SFX.equip(); toast(t('toast_buy_revive'),false); updateGold(); saveGame(); } else toast(t('toast_not_enough_gold'),true); });
+  document.getElementById('buyPet')?.addEventListener('click',()=>{ if(G.gold>=300){ G.gold-=300; localStorage.setItem('pet','true'); SFX.levelup(); toast(t('toast_buy_pet'),false); G.baseAtk=Math.floor(G.baseAtk*1.05); applyEq(); updateGold(); saveGame(); } else toast(t('toast_not_enough_gold'),true); });
+}
+function checkDailyUI(){ const d=document.getElementById('dailyRewardStatus'); if(d)d.innerHTML=canDaily()?t('daily_reward'):t('daily_reward')+' ✅'; }
+
+// ============================================================
+//  ⚙️ 設定
+// ============================================================
+function renderSettings(){
+  const c=document.getElementById('settingsList');
+  if(!c)return;
+  const vol=localStorage.volume?parseFloat(localStorage.volume)*100:70;
+  c.innerHTML=`
+    <div class="setting-item"><div>${t('volume')}</div><input type="range" id="volSlider" min="0" max="100" value="${vol}"></div>
+    <div class="setting-item"><div>${t('music')}</div><button id="musicToggleSettingBtn" class="music-btn ${musicOn?'on':''}" style="width:auto;padding:4px 16px;border-radius:20px;">${musicOn?'🔊 '+t('music'):'🔇 '+t('music')}</button></div>
+    <div class="setting-item"><div>${t('language')}</div><select id="langSelect"><option value="zh-TW" ${currentLang==='zh-TW'?'selected':''}>🇹🇼 繁體中文</option><option value="zh-CN" ${currentLang==='zh-CN'?'selected':''}>🇨🇳 简体中文</option><option value="en" ${currentLang==='en'?'selected':''}>🇬🇧 English</option></select></div>
+    <div class="setting-item"><div>${t('difficulty')}</div><select id="diffSelect"><option value="easy" ${G.difficulty==='easy'?'selected':''}>簡單</option><option value="normal" ${G.difficulty==='normal'?'selected':''}>普通</option><option value="hard" ${G.difficulty==='hard'?'selected':''}>困難</option><option value="extreme" ${G.difficulty==='extreme'?'selected':''}>極限</option></select></div>
+    <div class="setting-item"><div>${t('google')}</div><div><button id="googleBtn" style="background:#334155;padding:6px 12px;">登入</button> <button id="logoutBtn" style="background:#334155;padding:6px 12px;">登出</button></div></div>
+    <div class="setting-item"><div>${t('achievements')}</div><div>${Object.values(G.achievements).filter(v=>v).length}/${ACHIEVEMENTS.length}</div></div>
+    <div class="setting-item"><div>${t('version')}</div><div>v8.0</div></div>
+    <div class="setting-item"><div>${t('check_update')}</div><button id="checkUpdateBtn" style="background:#3b82f6;color:#fff;border:none;padding:6px 12px;border-radius:30px;">${t('check_update')}</button></div>
+    <div class="setting-item"><div style="color:#f87171;">${t('reset')}</div><button id="resetGameBtn" style="background:#ef4444;color:#fff;border:none;padding:6px 12px;border-radius:30px;">${t('reset')}</button></div>
+  `;
+  document.getElementById('volSlider')?.addEventListener('input',e=>localStorage.setItem('volume',e.target.value/100));
+  document.getElementById('musicToggleSettingBtn')?.addEventListener('click',toggleMusic);
+  document.getElementById('langSelect')?.addEventListener('change',e=>{ currentLang=e.target.value; localStorage.setItem('language',currentLang); applyLanguage(); toast(t('toast_language_changed'),false); });
+  document.getElementById('diffSelect')?.addEventListener('change',e=>{ G.difficulty=e.target.value; localStorage.setItem('difficulty',G.difficulty); refreshMonster(); toast(t('toast_difficulty_changed'),false); });
+  document.getElementById('googleBtn')?.addEventListener('click',googleLogin);
+  document.getElementById('logoutBtn')?.addEventListener('click',googleLogout);
+  document.getElementById('checkUpdateBtn')?.addEventListener('click',()=>toast(t('toast_latest_version'),false));
+  document.getElementById('resetGameBtn')?.addEventListener('click',()=>{ if(confirm(t('reset_confirm'))){ localStorage.clear(); location.reload(); } });
+  if(currentUser){ const g=document.getElementById('googleBtn'); if(g){ g.textContent=`👤 ${currentUser.displayName}`; g.disabled=true; } }
+}
+
+// ============================================================
+//  🏆 成就系統
+// ============================================================
+const ACHIEVEMENTS = [
+  {id:'first_blood',name:'第一滴血',desc:'擊殺第1隻怪物',icon:'🩸',check:()=>G.totalKills>=1,reward:50},
+  {id:'hundred_kills',name:'百人斬',desc:'擊殺100隻怪物',icon:'⚔️',check:()=>G.totalKills>=100,reward:200},
+  {id:'thousand_kills',name:'千人斬',desc:'擊殺1000隻怪物',icon:'💀',check:()=>G.totalKills>=1000,reward:500},
+  {id:'first_upgrade',name:'強化新手',desc:'強化1次裝備',icon:'🔧',check:()=>G.stats.totalUpgrade>=1,reward:50},
+  {id:'master_upgrade',name:'強化大師',desc:'強化10次裝備',icon:'🔨',check:()=>G.stats.totalUpgrade>=10,reward:300},
+  {id:'collector',name:'裝備收藏家',desc:'獲得5件裝備',icon:'📦',check:()=>G.stats.totalEquip>=5,reward:100},
+  {id:'guild_member',name:'公會成員',desc:'創建或加入公會',icon:'🏛️',check:()=>G.guild.name!==null,reward:100},
+  {id:'guild_contributor',name:'公會貢獻者',desc:'貢獻值達100',icon:'💰',check:()=>{ const m=G.guild.members.find(x=>x.uid==='player'); return m?m.contribution>=100:false; },reward:200},
+  {id:'element_master',name:'元素大師',desc:'使用3種不同元素攻擊',icon:'🔥',check:()=>{ const s=localStorage.getItem('elements_used'); return s?JSON.parse(s).length>=3:false; },reward:150},
+  {id:'boss_hunter',name:'Boss獵人',desc:'擊殺5隻Boss',icon:'👑',check:()=>(G.stats.bossKills||0)>=5,reward:300},
+  {id:'rebirth_1',name:'轉生者',desc:'轉生1次',icon:'🔄',check:()=>G.rebirthLevel>=1,reward:500},
+  {id:'rebirth_5',name:'傳奇',desc:'轉生5次',icon:'🌟',check:()=>G.rebirthLevel>=5,reward:1000}
+];
+function initAchievements(){ const saved=localStorage.getItem('achievements'); if(saved) G.achievements=JSON.parse(saved); else G.achievements={}; ACHIEVEMENTS.forEach(a=>{ if(!(a.id in G.achievements)) G.achievements[a.id]=false; }); }
+function checkAchievements(){
+  let unlocked=false;
+  ACHIEVEMENTS.forEach(a=>{ if(!G.achievements[a.id] && a.check()){ G.achievements[a.id]=true; unlocked=true; addGold(a.reward); toast(t('toast_achievement_unlock',{icon:a.icon,name:a.name,reward:a.reward}),false); localStorage.setItem('achievements',JSON.stringify(G.achievements)); saveGame(); } });
+  if(unlocked) renderAchievements();
+}
+function renderAchievements(){
+  const c=document.getElementById('achievementList');
+  if(!c)return;
+  let html='';
+  ACHIEVEMENTS.forEach(a=>{ const unlocked=G.achievements[a.id]||false; const status=unlocked?'✅ 已解鎖':'🔒 未解鎖'; const cls=unlocked?'unlocked':'locked'; html+=`<div class="achievement-card ${cls}"><div class="ach-icon">${a.icon}</div><div class="ach-info"><div class="ach-name">${a.name}</div><div class="ach-desc">${a.desc}</div></div><div class="ach-status">${status}</div></div>`; });
+  c.innerHTML=html;
+}
+
+// ============================================================
+//  ⚔️ PvP
+// ============================================================
+async function findOpponent(){
+  if(!currentUser) return toast(t('toast_login_first'),true);
+  try {
+    const snap=await db.collection('players').limit(20).get();
+    const candidates=snap.docs.filter(d=>d.id!==currentUser.uid).map(d=>({uid:d.id,...d.data()}));
+    if(candidates.length===0){ toast(t('pvp_no_opponent'),true); return null; }
+    return candidates[Math.floor(Math.random()*candidates.length)];
+  } catch(e){ toast(t('toast_connect_error'),true); return null; }
+}
+async function startPvP(){
+  if(isPvPing) return toast(t('pvp_battle'),true);
+  if(G.hp<=0) return toast(t('toast_cannot_attack'),true);
+  isPvPing=true;
+  try {
+    const opp=await findOpponent();
+    if(!opp){ isPvPing=false; return; }
+    const op={name:opp.uid?'玩家'+opp.uid.slice(0,4):'對手',lv:opp.lv||1,hp:opp.hp||100,maxHp:opp.maxHp||100,atk:opp.atk||10,element:opp.playerElem||'無'};
+    let pHp=G.hp, oHp=op.hp;
+    while(pHp>0&&oHp>0){
+      const pD=rand(G.atk-3,G.atk+5); oHp=Math.max(0,oHp-pD); if(oHp<=0)break;
+      const aD=rand(op.atk-3,op.atk+5); pHp=Math.max(0,pHp-aD);
+    }
+    let result='';
+    if(pHp>0&&oHp<=0){ result='win'; const r=50+rand(0,50); addGold(r); toast(t('toast_pvp_result_win',{opponent:op.name,gold:r}),false); checkAchievements(); }
+    else if(oHp>0&&pHp<=0){ result='lose'; toast(t('toast_pvp_result_lose',{opponent:op.name}),true); G.hp=G.maxHp; G.restUsed=false; updateUI(); }
+    else { result='draw'; toast(t('toast_pvp_result_draw'),false); }
+    pvpHistory.push({opponent:op.name,result:result,time:new Date().toISOString()});
+    if(pvpHistory.length>50)pvpHistory.shift();
+    localStorage.setItem('pvpHistory',JSON.stringify(pvpHistory));
+    G.hp=Math.min(G.maxHp,pHp); updateUI(); saveGame();
+  } catch(e){ toast(t('toast_pvp_fail'),true); }
+  isPvPing=false;
+}
+function renderPvPUI(){
+  document.getElementById('pvpContent').innerHTML=`
+    <div style="text-align:center;padding:16px;">
+      <h3>${t('pvp_title')}</h3>
+      <button id="pvpFindBtn" class="play-btn" style="width:auto;margin:16px auto;">${t('pvp_find')}</button>
+      <div id="pvpHistory"><h4>${t('pvp_history')}</h4>${pvpHistory.slice(-5).map(h=>`<div class="setting-item"><span>${h.opponent}</span><span style="color:${h.result==='win'?'#4ade80':h.result==='lose'?'#ef4444':'#facc15'}">${h.result==='win'?t('pvp_win'):h.result==='lose'?t('pvp_lose'):t('pvp_draw')}</span></div>`).join('')}</div>
+    </div>
+  `;
+  document.getElementById('pvpFindBtn')?.addEventListener('click',startPvP);
+}
+
+// ============================================================
+//  🎖️ 賽季通行證
+// ============================================================
+const SEASON_EXP_PER_LEVEL=100;
+function loadSeasonData(){
+  const d=localStorage.getItem('seasonData');
+  if(d)return JSON.parse(d);
+  return {level:1,exp:0,claimed:[],tasks:[
+    {id:'s1',desc:t('season_task_attack'),target:10,current:0,reward:100,claimed:false},
+    {id:'s2',desc:t('season_task_boss'),target:5,current:0,reward:200,claimed:false},
+    {id:'s3',desc:t('season_task_upgrade'),target:3,current:0,reward:150,claimed:false},
+    {id:'s4',desc:t('season_task_donate'),target:2,current:0,reward:120,claimed:false},
+    {id:'s5',desc:t('season_task_equip'),target:10,current:0,reward:300,claimed:false}
+  ]};
+}
+function saveSeasonData(d){ localStorage.setItem('seasonData',JSON.stringify(d)); }
+function updateSeasonProgress(type,amt=1){
+  const d=loadSeasonData();
+  d.tasks.forEach(t=>{ if(t.claimed)return; if((type==='attack'&&t.id==='s1')||(type==='boss'&&t.id==='s2')||(type==='upgrade'&&t.id==='s3')||(type==='donate'&&t.id==='s4')||(type==='equip'&&t.id==='s5')){ t.current=Math.min(t.target,t.current+amt); if(t.current>=t.target&&!t.claimed){ t.claimed=true; d.exp+=20; toast(t('season_task_complete',{task:t.desc,exp:20}),false); while(d.exp>=SEASON_EXP_PER_LEVEL){ d.exp-=SEASON_EXP_PER_LEVEL; d.level++; toast(t('toast_season_levelup',{level:d.level}),false); } saveSeasonData(d); renderSeasonUI(); } } });
+  saveSeasonData(d);
+}
+function claimSeasonReward(level){
+  const d=loadSeasonData();
+  if(d.claimed.includes(level)) return toast(t('toast_already_claimed'),true);
+  if(d.level<level) return toast(t('toast_level_not_enough'),true);
+  const rewards={2:{gold:200},3:{equip:'common'},5:{gold:500},7:{equip:'rare'},10:{gold:1000}};
+  const r=rewards[level]; if(!r)return toast(t('toast_no_reward'),true);
+  if(r.gold){ addGold(r.gold); toast(t('season_reward_gold',{gold:r.gold}),false); }
+  else if(r.equip){ const e=genEq(); if(r.equip==='rare')e.quality='稀有'; G.equipment.push(e); toast(t('season_reward_equip',{equip:e.name}),false); saveGame(); }
+  d.claimed.push(level); saveSeasonData(d); renderSeasonUI();
+}
+function renderSeasonUI(){
+  const d=loadSeasonData(); const c=document.getElementById('seasonContent');
+  if(!c)return;
+  let html=`
+    <div style="padding:16px;">
+      <h3>${t('season_title')}</h3>
+      <div class="setting-item"><div>${t('season_level',{level:d.level})}</div><div>${t('season_exp',{exp:d.exp,max:SEASON_EXP_PER_LEVEL})}</div></div>
+      <div style="margin:16px 0;"><h4>${t('season_tasks')}</h4>${d.tasks.map(t=>`<div class="setting-item"><div>${t.desc} (${t.current}/${t.target})</div><div>${t.claimed?t('season_claimed'):'⏳'}</div></div>`).join('')}</div>
+      <div><h4>${t('season_rewards')}</h4>${[2,3,5,7,10].map(l=>`<div class="setting-item"><div>Lv.${l} ${l===2?'200金':l===3?'裝備箱':l===5?'500金':l===7?'稀有裝備箱':'1000金'}</div><button ${d.level>=l&&!d.claimed.includes(l)?'':'disabled'} onclick="claimSeasonReward(${l})">${d.claimed.includes(l)?t('season_claimed'):t('season_claim')}</button></div>`).join('')}</div>
+    </div>
+  `;
+  c.innerHTML=html;
+}
+window.claimSeasonReward = claimSeasonReward;
+
+// ============================================================
+//  📋 回報功能
+// ============================================================
+function openReport(){
+  const now=new Date(); const timeStr=now.toLocaleString('zh-TW',{hour12:false});
+  const ua=navigator.userAgent; const gn=G.guild?.name||'無', gl=G.guild?.level||0;
+  const gc=G.guild?.members?.find(m=>m.uid==='player')?.contribution||0;
+  const w=G.equipment.find(e=>e.type==='w'&&e.equipped); const a=G.equipment.find(e=>e.type==='a'&&e.equipped);
+  const wi=w?`${w.name}+${w.bonus} (${w.element})`:'無'; const ai=a?`${a.name}+${a.bonus} (${a.element})`:'無';
+  const mi=G.curMonster?`${G.curMonster.emoji}${G.curMonster.name} Lv.${G.curMonster.lv} HP:${G.curMonster.hp}/${G.curMonster.maxHp}`:'無';
+  const ach=Object.values(G.achievements).filter(v=>v).length;
+  const report=`========================================\n🎮 幻獸鬥士 Bug 回報\n========================================\n📅 時間：${timeStr}\n🔍 版本：v8.0\n\n━━━ 玩家狀態 ━━━\n👤 等級：${G.lv}\n❤️ HP：${G.hp}/${G.maxHp}\n⚔️ 攻擊：${G.atk}\n💰 金幣：${G.gold}\n🔄 轉生：${G.rebirthLevel} 次\n🔥 元素：${playerElem()}\n🏛️ 公會：${gn} (Lv.${gl}) 貢獻:${gc}\n🏆 成就：${ach}/${ACHIEVEMENTS.length}\n\n━━━ 裝備 ━━━\n🗡️ 武器：${wi}\n🛡️ 防具：${ai}\n🎒 總裝備數：${G.equipment.length} 件\n\n━━━ 戰鬥 ━━━\n👾 當前怪物：${mi}\n💀 總擊殺數：${G.totalKills}\n💥 最大傷害：${G.maxDamage}\n\n━━━ 系統資訊 ━━━\n🌐 瀏覽器：${ua}\n📱 平台：${navigator.platform}\n☁️ 登入狀態：${currentUser?'已登入 ('+currentUser.displayName+')':'未登入'}\n\n━━━ 請描述您遇到的問題 ━━━\n（請在這裡輸入詳細描述...）\n========================================`;
+  const ov=document.createElement('div'); ov.className='report-overlay';
+  const cd=document.createElement('div'); cd.className='report-card';
+  const title=document.createElement('h3'); title.textContent=t('report'); title.style.marginBottom='8px';
+  const ta=document.createElement('textarea'); ta.id='reportTextarea'; ta.value=report;
+  const bd=document.createElement('div'); bd.className='report-buttons';
+  const copy=document.createElement('button'); copy.className='copy-btn'; copy.textContent=t('report_copy');
+  copy.onclick=()=>{ ta.select(); ta.setSelectionRange(0,99999); if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(ta.value).then(()=>toast(t('report_copied'),false)).catch(()=>{ document.execCommand('copy'); toast(t('report_copied'),false); }); } else { document.execCommand('copy'); toast(t('report_copied'),false); } };
+  const send=document.createElement('button'); send.className='discord-btn'; send.textContent=t('report_discord');
+  send.onclick=()=>{ const content=ta.value; send.textContent='⏳ 發送中...'; send.disabled=true; fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({content:content})}).then(res=>{ send.textContent=t('report_discord'); send.disabled=false; if(res.ok){ toast(t('report_discord_sent'),false); }else{ toast(t('report_discord_fail')+' (HTTP '+res.status+')',true); } }).catch(()=>{ send.textContent=t('report_discord'); send.disabled=false; toast(t('report_discord_fail'),true); }); };
+  const close=document.createElement('button'); close.className='close-btn'; close.textContent=t('report_close'); close.onclick=()=>document.body.removeChild(ov);
+  ov.onclick=e=>{ if(e.target===ov)document.body.removeChild(ov); };
+  bd.appendChild(copy); bd.appendChild(send); bd.appendChild(close);
+  cd.appendChild(title); cd.appendChild(ta); cd.appendChild(bd);
+  ov.appendChild(cd); document.body.appendChild(ov);
+  setTimeout(()=>{ ta.select(); ta.setSelectionRange(0,99999); },100);
+}
+
+// ============================================================
+//  ☁️ Firebase 登入 & 存檔
+// ============================================================
+window.googleLogin=async()=>{
+  try{ const r=await auth.signInWithPopup(provider); currentUser=r.user; await loadCloud(); renderSettings(); toast(t('toast_login_success',{name:currentUser.displayName}),false); }
+  catch(e){ toast(t('toast_login_fail')+': '+e.message,true); }
+};
+window.googleLogout=async()=>{
+  await auth.signOut(); currentUser=null; renderSettings(); loadGame(); toast(t('toast_logout'),false);
+};
+auth.onAuthStateChanged(u=>{ currentUser=u; renderSettings(); });
+
+function saveGame(){
+  const state={lv:G.lv,exp:G.exp,baseAtk:G.baseAtk,baseHp:G.baseHp,hp:G.hp,maxHp:G.maxHp,atk:G.atk,restUsed:G.restUsed,difficulty:G.difficulty,equipment:G.equipment,deathStreak:G.deathStreak,lastDmg:G.lastDmg,totalKills:G.totalKills,maxDamage:G.maxDamage,maxLevel:G.maxLevel,gold:G.gold,rebirthLevel:G.rebirthLevel,guild:G.guild,achievements:G.achievements,stats:G.stats,seasonData:loadSeasonData(),lastUpdated:new Date().toISOString()};
+  localStorage.setItem('gameSave',JSON.stringify(state));
+  if(currentUser){ db.collection('players').doc(currentUser.uid).set(state).catch(e=>{ toast(t('toast_cloud_fail'),true); }); }
+}
+function loadGame(){
+  const raw=localStorage.getItem('gameSave');
+  if(raw){
+    try{
+      const s=JSON.parse(raw);
+      G.lv=s.lv??1; G.exp=s.exp??0; G.baseAtk=s.baseAtk??10; G.baseHp=s.baseHp??100;
+      G.hp=s.hp??100; G.maxHp=s.maxHp??100; G.atk=s.atk??10; G.restUsed=s.restUsed??false;
+      G.difficulty=s.difficulty??'normal'; G.equipment=s.equipment??[];
+      G.deathStreak=s.deathStreak??0; G.lastDmg=s.lastDmg??0;
+      G.totalKills=s.totalKills??0; G.maxDamage=s.maxDamage??0; G.maxLevel=s.maxLevel??1;
+      G.gold=s.gold??0; G.rebirthLevel=s.rebirthLevel??0;
+      if(s.guild)G.guild=s.guild;
+      if(s.achievements)G.achievements=s.achievements;
+      if(s.stats)G.stats=s.stats;
+      if(s.seasonData)localStorage.setItem('seasonData',JSON.stringify(s.seasonData));
+    }catch(e){}
+  }
+  applyEq(); refreshMonster(); updateUI(); renderAchievements();
+}
+async function loadCloud(){
+  if(!currentUser)return;
+  try{
+    const doc=await db.collection('players').doc(currentUser.uid).get();
+    if(doc.exists){
+      const s=doc.data();
+      G.lv=s.lv??1; G.exp=s.exp??0; G.baseAtk=s.baseAtk??10; G.baseHp=s.baseHp??100;
+      G.hp=s.hp??100; G.maxHp=s.maxHp??100; G.atk=s.atk??10; G.restUsed=s.restUsed??false;
+      G.difficulty=s.difficulty??'normal'; G.equipment=s.equipment??[];
+      G.deathStreak=s.deathStreak??0; G.lastDmg=s.lastDmg??0;
+      G.totalKills=s.totalKills??0; G.maxDamage=s.maxDamage??0; G.maxLevel=s.maxLevel??1;
+      G.gold=s.gold??0; G.rebirthLevel=s.rebirthLevel??0;
+      if(s.guild)G.guild=s.guild;
+      if(s.achievements)G.achievements=s.achievements;
+      if(s.stats)G.stats=s.stats;
+      if(s.seasonData)localStorage.setItem('seasonData',JSON.stringify(s.seasonData));
+      applyEq(); refreshMonster(); updateUI(); renderAchievements();
+      toast(t('toast_cloud_sync'),false);
+    }
+  }catch(e){ toast(t('toast_cloud_fail'),true); }
+}
+
+// ============================================================
+//  📄 頁面切換
+// ============================================================
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id)?.classList.add('active');
+  if(autoTimer){ clearInterval(autoTimer); autoTimer=null; }
+  if(id==='settingsPage')renderSettings();
+  if(id==='shopPage'){ renderShop(); updateGold(); checkDailyUI(); loadSignin(); document.getElementById('claimDailyBtn').onclick=()=>{ claimDaily(); checkDailyUI(); }; document.getElementById('signinBtn').onclick=()=>{ doSignin(); loadSignin(); }; }
+  if(id==='guildPage')renderGuildUI();
+  if(id==='pvpPage')renderPvPUI();
+  if(id==='seasonPage')renderSeasonUI();
+  if(id==='achievementPage')renderAchievements();
+  if(id==='gamePage'){ if(musicOn&&!musicTimer)playMusic(); }
+}
+function loadSignin(){
+  const last=localStorage.getItem('lastSignin'), today=new Date().toDateString();
+  signinStreak=(last===today)?parseInt(localStorage.getItem('signinStreak')||'0'):0;
+  document.getElementById('signinStreak').textContent=signinStreak;
+}
+
+// ============================================================
+//  🚀 初始化
+// ============================================================
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('musicToggleBtn')?.addEventListener('click',toggleMusic);
+  document.getElementById('reportBtn')?.addEventListener('click',openReport);
+  document.getElementById('attackBtn').onclick=attack;
+  document.getElementById('skillBtn').onclick=showSkill;
+  document.getElementById('restBtn').onclick=rest;
+  document.getElementById('inventoryBtn').onclick=showBag;
+  document.getElementById('saveBtn').onclick=saveGame;
+  document.getElementById('rebirthBtn').onclick=doRebirth;
+  document.getElementById('autoBattleBtn').onclick=toggleAuto;
+  document.getElementById('toGameBtn').onclick=()=>showPage('gamePage');
+  document.getElementById('toSettingsBtn').onclick=()=>showPage('settingsPage');
+  document.getElementById('shopBtn').onclick=()=>showPage('shopPage');
+  document.getElementById('guildBtn').onclick=()=>showPage('guildPage');
+  document.getElementById('pvpBtn').onclick=()=>showPage('pvpPage');
+  document.getElementById('seasonBtn').onclick=()=>showPage('seasonPage');
+  document.getElementById('achievementBtn').onclick=()=>showPage('achievementPage');
+  document.getElementById('helpBtn').onclick=()=>showPage('helpPage');
+  document.querySelectorAll('.back-btn').forEach(btn=>{ btn.onclick=()=>showPage('mainPage'); });
+  document.getElementById('backFromGuild').onclick=()=>showPage('mainPage');
+  document.getElementById('backFromPvp').onclick=()=>showPage('mainPage');
+  document.getElementById('backFromSeason').onclick=()=>showPage('mainPage');
+
+  applyLanguage();
+  initAchievements();
+  loadGame();
+  loadSignin();
+  calcOffline();
+  renderAchievements();
+
+  if(!localStorage.getItem('guideShown')){
+    document.getElementById('guideOverlay').style.display='flex';
+    document.getElementById('closeGuideBtn').onclick=()=>{
+      document.getElementById('guideOverlay').style.display='none';
+      localStorage.setItem('guideShown','true');
+    };
+  }
+  setInterval(()=>{ if(document.getElementById('gamePage').classList.contains('active'))G.stats.playTime++; },1000);
+  setTimeout(()=>{ if(musicOn&&!musicTimer){ getCtx(); playMusic(); } },500);
+});
+</script>
 </body>
 </html>
